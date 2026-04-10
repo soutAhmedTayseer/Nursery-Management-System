@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
-
 import '../../../dashboard/presentation/screens/overview_screen.dart';
+import '../../../finance/presentation/screens/finance_screen.dart';
 import '../../../registration/presentation/screens/registration_screen.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 import '../../../sessions/presentation/screens/sessions_screen.dart';
@@ -23,10 +23,11 @@ class AdminMainLayoutScreen extends StatelessWidget {
       const RegistrationScreen(),
       const SessionsScreen(),
       const SubscribedChildrenScreen(),
-      const Center(child: Text('Finance Screen')),
+      const FinanceScreen(),
       const Center(child: Text('Profiles Screen')),
       const Center(child: Text('Settings Screen')),
     ];
+
 
     return MultiBlocProvider(
       providers: [
