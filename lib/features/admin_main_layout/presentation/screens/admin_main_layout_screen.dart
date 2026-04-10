@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../overview/presentation/screens/overview_screen.dart';
+import '../../../dashboard/presentation/screens/overview_screen.dart';
+import '../../../registration/presentation/screens/registration_screen.dart';
 import '../cubit/admin_main_layout_cubit.dart';
 import '../cubit/admin_main_layout_state.dart';
 import '../widgets/admin_app_bar.dart';
@@ -15,12 +16,13 @@ class AdminMainLayoutScreen extends StatelessWidget {
     // 1. Placeholder Screens (هنستبدلها بالشاشات الحقيقية لما نبنيها)
     final List<Widget> screens = [
       const OverviewScreen(),
-      const Center(child: Text('Registration Screen')),
+      const RegistrationScreen(),
       const Center(child: Text('Sessions Screen')),
       const Center(child: Text('Finance Screen')),
       const Center(child: Text('Profiles Screen')),
       const Center(child: Text('Settings Screen')),
     ];
+
 
     return BlocProvider(
       create: (context) => AdminMainLayoutCubit(),
