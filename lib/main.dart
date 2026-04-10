@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'features/admin_main_layout/presentation/screens/admin_main_layout_screen.dart';
+import 'core/routes/app_router.dart';
+import 'core/routes/app_routes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(1024, 768), // Tablet size design reference
+      designSize: const Size(1440, 900), // Laptop/Desktop design reference
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2D5A27)),
             useMaterial3: true,
           ),
-          home: const AdminMainLayoutScreen(),
+          onGenerateRoute: AppRouter.onGenerateRoute,
+          initialRoute: AppRoutes.adminSplash,
         );
       },
     );
