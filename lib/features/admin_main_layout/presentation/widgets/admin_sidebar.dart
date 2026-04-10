@@ -17,6 +17,7 @@ class AdminSidebar extends StatelessWidget {
       {'icon': Icons.dashboard_outlined, 'title': 'Dashboard'},
       {'icon': Icons.how_to_reg_outlined, 'title': 'Registration'},
       {'icon': Icons.calendar_month_outlined, 'title': 'Sessions'},
+      {'icon': Icons.card_membership, 'title': 'Subscriptions'},
       {'icon': Icons.account_balance_wallet_outlined, 'title': 'Finance'},
       {'icon': Icons.people_outline, 'title': 'Profiles'},
       {'icon': Icons.settings_outlined, 'title': 'Settings'},
