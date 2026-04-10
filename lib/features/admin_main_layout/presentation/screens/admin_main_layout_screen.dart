@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../overview/presentation/screens/overview_screen.dart';
 import '../cubit/admin_main_layout_cubit.dart';
 import '../cubit/admin_main_layout_state.dart';
 import '../widgets/admin_app_bar.dart';
@@ -13,7 +14,7 @@ class AdminMainLayoutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // 1. Placeholder Screens (هنستبدلها بالشاشات الحقيقية لما نبنيها)
     final List<Widget> screens = [
-      const Center(child: Text('Dashboard Screen (Overview)')),
+      const OverviewScreen(),
       const Center(child: Text('Registration Screen')),
       const Center(child: Text('Sessions Screen')),
       const Center(child: Text('Finance Screen')),

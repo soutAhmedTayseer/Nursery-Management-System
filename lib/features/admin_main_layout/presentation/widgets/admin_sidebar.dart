@@ -67,17 +67,7 @@ class AdminSidebar extends StatelessWidget {
             ),
           ),
 
-          // Bottom Actions (Quick Check-in, Support, Logout)
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6B9B64),
-              minimumSize: Size(double.infinity, 48.h),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-              elevation: 0,
-            ),
-            child: Text('Quick Check-in', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.white)),
-          ),
+          // Bottom Actions (Support, Logout)
           SizedBox(height: 16.h),
           _buildBottomAction(Icons.help_outline, 'Support'),
           SizedBox(height: 12.h),
