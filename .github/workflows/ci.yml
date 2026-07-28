@@ -8,9 +8,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: Nursery-Management-System
+      # TODO: once the root "Nursery Full App" repo (which owns packages/nursery_shared)
+      # has a real GitHub remote, replace OWNER/Nursery-Full-App below with its actual
+      # owner/repo-name so this checkout resolves. Until then this CI will fail at
+      # `flutter pub get` with an unresolved path dependency — that's expected and
+      # matches the fact that this repo has no remote yet either.
+      - uses: actions/checkout@v4
+        with:
+          repository: OWNER/Nursery-Full-App
+          path: root-checkout
+          sparse-checkout: |
+            packages
+          sparse-checkout-cone-mode: false
+      - run: mkdir -p packages && mv root-checkout/packages/nursery_shared packages/nursery_shared
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-      - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter test
+      - run: cd Nursery-Management-System && flutter pub get
+      - run: cd Nursery-Management-System && flutter analyze
+      - run: cd Nursery-Management-System && flutter test
