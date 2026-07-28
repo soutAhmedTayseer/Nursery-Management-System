@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../features/admin_splash/presentation/view/splash_screen.dart';
 import '../../features/admin_login/presentation/screens/admin_login_screen.dart';
@@ -16,7 +17,7 @@ class AppRouter {
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
-            body: Center(child: Text('No route defined for ${settings.name}')),
+            body: Center(child: Text('route_not_found'.tr(namedArgs: {'name': '${settings.name}'}))),
           ),
         );
     }

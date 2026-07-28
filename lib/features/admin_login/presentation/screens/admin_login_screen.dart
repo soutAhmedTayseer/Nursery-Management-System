@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -45,11 +46,11 @@ class AdminLoginScreen extends StatelessWidget {
                       Icon(Icons.park, color: AppColors.darkGreen, size: 70.w),
                       SizedBox(height: 16.h),
                       Text(
-                        'Wildwood Nursery',
+                        'login_logo_title'.tr(),
                         style: TextStyle(fontSize: 32.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen, letterSpacing: 1.5),
                       ),
                       Text(
-                        'ADMINISTRATION PORTAL',
+                        'login_portal_subtitle'.tr(),
                         style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade500, fontWeight: FontWeight.w600, letterSpacing: 6),
                       ),
                       SizedBox(height: 50.h),
@@ -73,26 +74,26 @@ class AdminLoginScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                                'Welcome Back',
+                                'login_welcome_back'.tr(),
                                 style: TextStyle(fontSize: 42.sp, fontWeight: FontWeight.w900, color: AppColors.textPrimary)
                             ),
                             SizedBox(height: 16.h),
                             Text(
-                                'Please enter your administrator credentials to manage the nursery ecosystem.',
+                                'login_instructions'.tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(fontSize: 18.sp, color: Colors.grey.shade500, height: 1.6)
                             ),
                             SizedBox(height: 64.h),
 
                             // Form Fields
-                            const AdminTextField(
-                              label: 'Email or Phone Number',
+                            AdminTextField(
+                              label: 'login_email_hint'.tr(),
                               hint: 'admin@wildwood.com',
                               suffixIcon: Icons.person_outline,
                             ),
                             SizedBox(height: 32.h),
-                            const AdminTextField(
-                              label: 'Password',
+                            AdminTextField(
+                              label: 'login_password_hint'.tr(),
                               hint: '•••• ••••',
                               suffixIcon: Icons.lock_outline,
                               isPassword: true,
@@ -115,7 +116,7 @@ class AdminLoginScreen extends StatelessWidget {
                                     ),
                                     child: isLoading
                                         ? SizedBox(width: 28.w, height: 28.w, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-                                        : Text('ACCESS PORTAL', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 2.5)),
+                                        : Text('login_submit_button'.tr(), style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 2.5)),
                                   ),
                                 );
                               },
@@ -125,7 +126,7 @@ class AdminLoginScreen extends StatelessWidget {
                             TextButton(
                               onPressed: () {},
                               child: Text(
-                                'Forgot Password?',
+                                'login_forgot_password'.tr(),
                                 style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: const Color(0xFF6D4C41)),
                               ),
                             ),
@@ -135,7 +136,7 @@ class AdminLoginScreen extends StatelessWidget {
 
                       SizedBox(height: 64.h),
                       Text(
-                        'SECURE SERVER ACCESS. © 2026 WILDWOOD NURSERY MANAGEMENT.',
+                        'login_footer'.tr(),
                         style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400, fontWeight: FontWeight.w500, letterSpacing: 1.5),
                       ),
                     ],

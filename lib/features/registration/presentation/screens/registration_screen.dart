@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,12 +25,12 @@ class RegistrationScreen extends StatelessWidget {
             children: [
               // 1. Header Section
               Text(
-                'Complete Registration Form', 
+                'registration_header_title'.tr(),
                 style: TextStyle(fontSize: 38.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2D2D2D), letterSpacing: -0.5)
               ),
               SizedBox(height: 8.h),
               Text(
-                'Enter the comprehensive details for the new enrollment. Please ensure all\ncontact information is accurate for emergency protocols.', 
+                'registration_header_subtitle'.tr(),
                 style: TextStyle(fontSize: 16.sp, color: Colors.grey.shade500, height: 1.5)
               ),
               SizedBox(height: 48.h),
@@ -41,47 +42,47 @@ class RegistrationScreen extends StatelessWidget {
                   // --- Column 1: Child & Enrollment ---
                   Expanded(
                     child: RegistrationFormSection(
-                      title: 'Child &\nEnrollment',
+                      title: 'registration_section_child'.tr(),
                       icon: Icons.face_retouching_natural,
                       accentColor: const Color(0xFF4A7A3A), // Green
                       children: [
-                        const RegistrationInputField(label: 'Child\'s Name in Full', hint: 'Full legal name'),
+                        RegistrationInputField(label: 'registration_label_child_name'.tr(), hint: 'registration_hint_child_name'.tr()),
                         SizedBox(height: 24.h),
                         Row(
                           children: [
-                            const Expanded(child: RegistrationInputField(label: 'Date of Birth', hint: 'mm/dd/yyyy')),
+                            Expanded(child: RegistrationInputField(label: 'registration_label_dob'.tr(), hint: 'registration_hint_date'.tr())),
                             SizedBox(width: 16.w),
-                            const Expanded(child: RegistrationInputField(label: 'Date of Enrol', hint: 'mm/dd/yyyy')),
+                            Expanded(child: RegistrationInputField(label: 'registration_label_enrol_date'.tr(), hint: 'registration_hint_date'.tr())),
                           ],
                         ),
                         SizedBox(height: 24.h),
                         Row(
                           children: [
-                            const Expanded(child: RegistrationInputField(label: 'Timing From', hint: '--:--')),
+                            Expanded(child: RegistrationInputField(label: 'registration_label_timing_from'.tr(), hint: 'registration_hint_time'.tr())),
                             SizedBox(width: 16.w),
-                            const Expanded(child: RegistrationInputField(label: 'Timing To', hint: '--:--')),
+                            Expanded(child: RegistrationInputField(label: 'registration_label_timing_to'.tr(), hint: 'registration_hint_time'.tr())),
                           ],
                         ),
                         SizedBox(height: 24.h),
                         Row(
                           children: [
-                            const Expanded(child: RegistrationInputField(label: 'Fees (£)', hint: '0.00')),
+                            Expanded(child: RegistrationInputField(label: 'registration_label_fees'.tr(), hint: 'registration_hint_fees'.tr())),
                             SizedBox(width: 16.w),
-                            const Expanded(child: RegistrationInputField(label: 'Number of Hours', hint: 'Weekly')),
+                            Expanded(child: RegistrationInputField(label: 'registration_label_hours'.tr(), hint: 'registration_hint_weekly'.tr())),
                           ],
                         ),
                         SizedBox(height: 24.h),
-                        const RegistrationInputField(label: 'Allergies / Special Req.', hint: 'List any medical requirements...', maxLines: 3),
+                        RegistrationInputField(label: 'registration_label_allergies'.tr(), hint: 'registration_hint_allergies'.tr(), maxLines: 3),
                         SizedBox(height: 24.h),
                         Row(
                           children: [
-                            const Expanded(child: RegistrationInputField(label: 'Nationality', hint: 'Nationality')),
+                            Expanded(child: RegistrationInputField(label: 'registration_label_nationality'.tr(), hint: 'registration_hint_nationality'.tr())),
                             SizedBox(width: 16.w),
-                            const Expanded(child: RegistrationInputField(label: 'Religion', hint: 'Religion')),
+                            Expanded(child: RegistrationInputField(label: 'registration_label_religion'.tr(), hint: 'registration_hint_religion'.tr())),
                           ],
                         ),
                         SizedBox(height: 24.h),
-                        const RegistrationInputField(label: 'Home Address', hint: 'Full residential address'),
+                        RegistrationInputField(label: 'registration_label_home_address'.tr(), hint: 'registration_hint_home_address'.tr()),
                       ],
                     ),
                   ),
@@ -90,27 +91,27 @@ class RegistrationScreen extends StatelessWidget {
                   // --- Column 2: Mother's Details ---
                   Expanded(
                     child: RegistrationFormSection(
-                      title: 'Mother\'s\nDetails',
+                      title: 'registration_section_mother'.tr(),
                       icon: Icons.female_rounded,
                       accentColor: const Color(0xFF986847), // Brown
                       children: [
-                        const RegistrationInputField(label: 'Mothers Contact Phone', hint: '+XX XXXXX XXXXX'),
+                        RegistrationInputField(label: 'registration_label_mother_phone'.tr(), hint: 'registration_hint_phone'.tr()),
                         SizedBox(height: 24.h),
-                        const RegistrationInputField(label: 'Contact Email', hint: 'email@example.com'),
+                        RegistrationInputField(label: 'registration_label_contact_email'.tr(), hint: 'registration_hint_email'.tr()),
                         SizedBox(height: 24.h),
                         Row(
                           children: [
-                            const Expanded(child: RegistrationInputField(label: 'Occupation', hint: 'Occupation')),
+                            Expanded(child: RegistrationInputField(label: 'registration_label_occupation'.tr(), hint: 'registration_hint_occupation'.tr())),
                             SizedBox(width: 16.w),
-                            const Expanded(child: RegistrationInputField(label: 'Job Title', hint: 'Job Title')),
+                            Expanded(child: RegistrationInputField(label: 'registration_label_job_title'.tr(), hint: 'registration_hint_job_title'.tr())),
                           ],
                         ),
                         SizedBox(height: 24.h),
-                        const RegistrationInputField(label: 'Company Name', hint: 'Company Name'),
+                        RegistrationInputField(label: 'registration_label_company_name'.tr(), hint: 'registration_hint_company_name'.tr()),
                         SizedBox(height: 24.h),
-                        const RegistrationInputField(label: 'Work Phone', hint: 'Work Phone'),
+                        RegistrationInputField(label: 'registration_label_work_phone'.tr(), hint: 'registration_hint_work_phone'.tr()),
                         SizedBox(height: 24.h),
-                        const RegistrationInputField(label: 'Address', hint: 'Workplace or alternate address', maxLines: 3),
+                        RegistrationInputField(label: 'registration_label_address_alt'.tr(), hint: 'registration_hint_workplace_alt'.tr(), maxLines: 3),
                       ],
                     ),
                   ),
@@ -121,41 +122,41 @@ class RegistrationScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         RegistrationFormSection(
-                          title: 'Father\'s\nDetails',
+                          title: 'registration_section_father'.tr(),
                           icon: Icons.male_rounded,
                           accentColor: const Color(0xFF5D5D5D), // Dark grey
                           children: [
-                            const RegistrationInputField(label: 'Fathers Contact Phone', hint: '+XX XXXXX XXXXX'),
+                            RegistrationInputField(label: 'registration_label_father_phone'.tr(), hint: 'registration_hint_phone'.tr()),
                             SizedBox(height: 24.h),
                             Row(
                               children: [
-                                const Expanded(child: RegistrationInputField(label: 'Occupation', hint: 'Occupation')),
+                                Expanded(child: RegistrationInputField(label: 'registration_label_occupation'.tr(), hint: 'registration_hint_occupation'.tr())),
                                 SizedBox(width: 16.w),
-                                const Expanded(child: RegistrationInputField(label: 'Job Title', hint: 'Job Title')),
+                                Expanded(child: RegistrationInputField(label: 'registration_label_job_title'.tr(), hint: 'registration_hint_job_title'.tr())),
                               ],
                             ),
                             SizedBox(height: 24.h),
-                            const RegistrationInputField(label: 'Contact Email', hint: 'email@example.com'),
+                            RegistrationInputField(label: 'registration_label_contact_email'.tr(), hint: 'registration_hint_email'.tr()),
                             SizedBox(height: 24.h),
                             Row(
                               children: [
-                                const Expanded(child: RegistrationInputField(label: 'Company', hint: 'Company')),
+                                Expanded(child: RegistrationInputField(label: 'registration_label_company'.tr(), hint: 'registration_hint_company'.tr())),
                                 SizedBox(width: 16.w),
-                                const Expanded(child: RegistrationInputField(label: 'Work Phone', hint: 'Work Phone')),
+                                Expanded(child: RegistrationInputField(label: 'registration_label_work_phone'.tr(), hint: 'registration_hint_work_phone'.tr())),
                               ],
                             ),
                             SizedBox(height: 24.h),
-                            const RegistrationInputField(label: 'Address', hint: 'Workplace address'),
+                            RegistrationInputField(label: 'registration_label_address_alt'.tr(), hint: 'registration_hint_workplace'.tr()),
                           ],
                         ),
                         SizedBox(height: 24.h),
-                        
+
                         // Emergency Section
                         EmergencyContactSection(
                           children: [
-                            const RegistrationInputField(label: 'Name Relationship', hint: 'e.g. Grandparent / Neighbor Name', maxLines: 2),
+                            RegistrationInputField(label: 'registration_label_name_relationship'.tr(), hint: 'registration_hint_name_relationship'.tr(), maxLines: 2),
                             SizedBox(height: 24.h),
-                            const RegistrationInputField(label: 'Contact Number', hint: 'Immediate priority number', maxLines: 2),
+                            RegistrationInputField(label: 'registration_label_contact_number'.tr(), hint: 'registration_hint_contact_number'.tr(), maxLines: 2),
                           ],
                         ),
                       ],
@@ -172,7 +173,7 @@ class RegistrationScreen extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: () {},
-                    child: Text('CANCEL', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1.5)),
+                    child: Text('registration_cancel'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1.5)),
                   ),
                   SizedBox(width: 32.w),
                   
@@ -190,7 +191,7 @@ class RegistrationScreen extends StatelessWidget {
                         ),
                         child: isLoading 
                           ? SizedBox(width: 24.w, height: 24.w, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : Text('Save & Register Child', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+                          : Text('registration_save_button'.tr(), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)),
                       );
                     },
                   ),

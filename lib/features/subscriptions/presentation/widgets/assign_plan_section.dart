@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../sessions/data/models/child_session_model.dart';
@@ -18,7 +19,7 @@ class AssignPlanSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Assign Plan', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+          Text('assign_plan_title'.tr(), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
           SizedBox(height: 20.h),
           
           // Child Info Tile
@@ -39,21 +40,21 @@ class AssignPlanSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(child.name, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                      Text('Parent: Sarah ${child.name.split(' ').last}', style: TextStyle(fontSize: 11.sp, color: Colors.grey)),
+                      Text('assign_plan_parent_label'.tr(namedArgs: {'lastName': child.name.split(' ').last}), style: TextStyle(fontSize: 11.sp, color: Colors.grey)),
                     ],
                   ),
                 ),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(color: Colors.green.shade100, borderRadius: BorderRadius.circular(8.r)),
-                  child: Text('ACTIVE', style: TextStyle(fontSize: 9.sp, color: Colors.green.shade800, fontWeight: FontWeight.bold)),
+                  child: Text('subscription_active_badge'.tr(), style: TextStyle(fontSize: 9.sp, color: Colors.green.shade800, fontWeight: FontWeight.bold)),
                 )
               ],
             ),
           ),
           SizedBox(height: 24.h),
           
-          Text('CURRENT ACTIVE PLAN', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1)),
+          Text('assign_plan_current_plan_label'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1)),
           SizedBox(height: 8.h),
           Container(
             padding: EdgeInsets.all(16.w),
@@ -68,7 +69,7 @@ class AssignPlanSection extends StatelessWidget {
           ),
           
           SizedBox(height: 24.h),
-          Text('CHANGE PLAN', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1)),
+          Text('assign_plan_change_plan_label'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1)),
           SizedBox(height: 8.h),
           // Dropdown Mockup
           Container(
@@ -77,7 +78,7 @@ class AssignPlanSection extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Select new plan...', style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600)),
+                Text('assign_plan_select_new'.tr(), style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600)),
                 Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade600),
               ],
             ),
@@ -89,7 +90,7 @@ class AssignPlanSection extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.swap_horiz, color: Colors.white),
-              label: Text('Update Plan & Notify Parent', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+              label: Text('assign_plan_update_button'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.white)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF80B674),
                 padding: EdgeInsets.symmetric(vertical: 16.h),

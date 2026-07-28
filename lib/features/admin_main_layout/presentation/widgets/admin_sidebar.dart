@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,13 +15,13 @@ class AdminSidebar extends StatelessWidget {
 
     // قائمة الشاشات عشان نولد الأزرار بديناميكية
     final List<Map<String, dynamic>> menuItems = [
-      {'icon': Icons.dashboard_outlined, 'title': 'Dashboard'},
-      {'icon': Icons.how_to_reg_outlined, 'title': 'Registration'},
-      {'icon': Icons.calendar_month_outlined, 'title': 'Sessions'},
-      {'icon': Icons.card_membership, 'title': 'Subscriptions'},
-      {'icon': Icons.account_balance_wallet_outlined, 'title': 'Finance'},
-      {'icon': Icons.people_outline, 'title': 'Profiles'},
-      {'icon': Icons.settings_outlined, 'title': 'Settings'},
+      {'icon': Icons.dashboard_outlined, 'title': 'sidebar_menu_dashboard'.tr()},
+      {'icon': Icons.how_to_reg_outlined, 'title': 'sidebar_menu_registration'.tr()},
+      {'icon': Icons.calendar_month_outlined, 'title': 'sidebar_menu_sessions'.tr()},
+      {'icon': Icons.card_membership, 'title': 'sidebar_menu_subscriptions'.tr()},
+      {'icon': Icons.account_balance_wallet_outlined, 'title': 'sidebar_menu_finance'.tr()},
+      {'icon': Icons.people_outline, 'title': 'sidebar_menu_profiles'.tr()},
+      {'icon': Icons.settings_outlined, 'title': 'sidebar_menu_settings'.tr()},
     ];
 
     return Container(
@@ -42,8 +43,8 @@ class AdminSidebar extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Wildwood', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
-                  Text('Nursery Admin', style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600)),
+                  Text('sidebar_brand_name'.tr(), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
+                  Text('sidebar_brand_subtitle'.tr(), style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600)),
                 ],
               ),
             ],
@@ -70,9 +71,9 @@ class AdminSidebar extends StatelessWidget {
 
           // Bottom Actions (Support, Logout)
           SizedBox(height: 16.h),
-          _buildBottomAction(Icons.help_outline, 'Support'),
+          _buildBottomAction(Icons.help_outline, 'sidebar_support'.tr()),
           SizedBox(height: 12.h),
-          _buildBottomAction(Icons.logout, 'Logout'),
+          _buildBottomAction(Icons.logout, 'sidebar_logout'.tr()),
         ],
       ),
     );

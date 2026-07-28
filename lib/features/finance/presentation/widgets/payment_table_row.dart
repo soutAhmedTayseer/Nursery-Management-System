@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../data/models/finance_model.dart';
@@ -85,7 +86,7 @@ class PaymentTableRow extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          'Export Invoice', 
+          'finance_export_invoice'.tr(),
           style: TextStyle(
             fontSize: 10.sp, 
             color: Colors.grey, 

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -51,7 +52,7 @@ class ChildSubscriptionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
-                    'ACTIVE',
+                    'subscription_active_badge'.tr(),
                     style: TextStyle(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w900,
@@ -78,7 +79,7 @@ class ChildSubscriptionCard extends StatelessWidget {
 
             // Parent Name (Contextual Info)
             Text(
-              'Parent: Sarah ${child.name.split(' ').last}',
+              'assign_plan_parent_label'.tr(namedArgs: {'lastName': child.name.split(' ').last}),
               style: TextStyle(
                 fontSize: 13.sp,
                 color: Colors.grey.shade500,
@@ -102,7 +103,7 @@ class ChildSubscriptionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'PLAN',
+                        'subscription_card_plan_label'.tr(),
                         style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold, color: Colors.grey),
                       ),
                       Text(

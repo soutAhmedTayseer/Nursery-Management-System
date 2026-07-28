@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -42,7 +43,7 @@ class EmergencyContactSection extends StatelessWidget {
                         SizedBox(width: 16.w),
                         Expanded(
                           child: Text(
-                            'EMERGENCY\nCONTACT',
+                            'emergency_contact_title'.tr(),
                             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: const Color(0xFFC72424), letterSpacing: 1.2, height: 1.2),
                           ),
                         ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -32,7 +33,7 @@ class SessionsScreen extends StatelessWidget {
                   
                   if (state is SessionsLoaded) {
                     if (state.displayedKids.isEmpty) {
-                       return Center(child: Text('No sessions found.', style: TextStyle(fontSize: 18.sp, color: Colors.grey)));
+                       return Center(child: Text('sessions_none_found'.tr(), style: TextStyle(fontSize: 18.sp, color: Colors.grey)));
                     }
                     return GridView.builder(
                       physics: const BouncingScrollPhysics(),
@@ -74,16 +75,16 @@ class SessionsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Active Sessions', style: TextStyle(fontSize: 34.sp, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-              Text('Monitoring current child presence and scheduled plans.', style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade500)),
+              Text('sessions_title'.tr(), style: TextStyle(fontSize: 34.sp, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+              Text('sessions_subtitle'.tr(), style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade500)),
             ],
           ),
         ),
         Row(
           children: [
-            _buildSummarySmallCard('CURRENT COUNT', '24 Children', Icons.face_rounded),
+            _buildSummarySmallCard('sessions_current_count_label'.tr(), 'sessions_current_count_value'.tr(), Icons.face_rounded),
             SizedBox(width: 16.w),
-            _buildSummarySmallCard('SESSION BLOCK', '08:00 - 13:00', Icons.schedule),
+            _buildSummarySmallCard('sessions_block_label'.tr(), '08:00 - 13:00', Icons.schedule),
           ],
         )
       ],
@@ -125,7 +126,11 @@ class SessionsScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Showing $startItem to $endItem of ${state.totalCount} active registrations', 
+            'sessions_pagination_showing'.tr(namedArgs: {
+              'start': '$startItem',
+              'end': '$endItem',
+              'total': '${state.totalCount}',
+            }),
             style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade500, fontWeight: FontWeight.w600)
           ),
           Row(

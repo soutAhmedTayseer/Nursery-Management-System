@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,11 +24,11 @@ class SubscribedChildrenScreen extends StatelessWidget {
           children: [
             // Header
             Text(
-                'Subscribed Children',
+                'subscribed_children_title'.tr(),
                 style: TextStyle(fontSize: 34.sp, fontWeight: FontWeight.w900, letterSpacing: -0.5)
             ),
             Text(
-                'Manage financial plans, billing cycles, and subscription tiers.',
+                'subscribed_children_subtitle'.tr(),
                 style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade500)
             ),
             SizedBox(height: 32.h),

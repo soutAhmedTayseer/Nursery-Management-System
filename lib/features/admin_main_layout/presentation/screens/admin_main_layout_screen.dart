@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -24,8 +25,8 @@ class AdminMainLayoutScreen extends StatelessWidget {
       const SessionsScreen(),
       const SubscribedChildrenScreen(),
       const FinanceScreen(),
-      const Center(child: Text('Profiles Screen')),
-      const Center(child: Text('Settings Screen')),
+      Center(child: Text('layout_profiles_screen'.tr())),
+      Center(child: Text('layout_settings_screen'.tr())),
     ];
 
 

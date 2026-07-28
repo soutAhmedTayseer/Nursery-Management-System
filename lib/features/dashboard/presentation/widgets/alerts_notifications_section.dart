@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -14,8 +15,8 @@ class AlertsNotificationsSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Alerts & Notifications', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-            Text('Mark all read', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
+            Text('alerts_header_title'.tr(), style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Text('alerts_mark_all_read'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
           ],
         ),
         SizedBox(height: 20.h),
@@ -23,15 +24,15 @@ class AlertsNotificationsSection extends StatelessWidget {
         // Alert Items
         _buildAlertCard(
           isUrgent: true,
-          title: 'Overtime: Leo Maxwell',
-          description: 'Currently at 5.5h. Exceeded subscribed 4h session. Notify parents or adjust billing.',
+          title: 'alerts_overtime_leo'.tr(),
+          description: 'alerts_overtime_leo_desc'.tr(),
           borderColor: const Color(0xFF8D6E63),
           icon: Icons.warning_amber_rounded,
           actions: Row(
             children: [
-              _buildActionButton('Call Parent', isPrimary: true),
+              _buildActionButton('alerts_call_parent'.tr(), isPrimary: true),
               SizedBox(width: 12.w),
-              _buildActionButton('Extend Session', isPrimary: false),
+              _buildActionButton('alerts_extend_session'.tr(), isPrimary: false),
             ],
           ),
         ),
@@ -39,8 +40,8 @@ class AlertsNotificationsSection extends StatelessWidget {
 
         _buildAlertCard(
           isUrgent: true,
-          title: 'Overtime: Amira K.',
-          description: 'Exceeded session by 45 mins. Late pickup fee applied automatically.',
+          title: 'alerts_overtime_amira'.tr(),
+          description: 'alerts_overtime_amira_desc'.tr(),
           borderColor: const Color(0xFF8D6E63),
           icon: Icons.warning_amber_rounded,
         ),
@@ -48,11 +49,11 @@ class AlertsNotificationsSection extends StatelessWidget {
 
         _buildAlertCard(
           isUrgent: false,
-          title: 'Finance Sync Complete',
-          description: 'All 142 invoices for March have been reconciled with the bank portal.',
+          title: 'alerts_finance_sync_title'.tr(),
+          description: 'alerts_finance_sync_desc'.tr(),
           borderColor: AppColors.darkGreen,
           icon: Icons.check_circle_outline,
-          time: '2 HOURS AGO',
+          time: 'alerts_time_2h_ago'.tr(),
         ),
       ],
     );
@@ -92,7 +93,7 @@ class AlertsNotificationsSection extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(title, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                              if (isUrgent) Text('URGENT', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: const Color(0xFF8D6E63), letterSpacing: 1)),
+                              if (isUrgent) Text('alerts_urgent_badge'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: const Color(0xFF8D6E63), letterSpacing: 1)),
                             ],
                           ),
                           SizedBox(height: 8.h),

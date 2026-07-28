@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -40,7 +41,7 @@ class ChildSessionCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           Text(
-            'Subscribed: ${child.subscription}', 
+            'session_subscribed_label'.tr(namedArgs: {'plan': child.subscription}),
             style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500, fontWeight: FontWeight.w500),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -48,9 +49,9 @@ class ChildSessionCard extends StatelessWidget {
           const Spacer(),
           Row(
             children: [
-              _buildActionButton(Icons.login, 'Clock-In', child.isCheckedIn ? Colors.grey.shade200 : const Color(0xFFC8F6C2), !child.isCheckedIn),
+              _buildActionButton(Icons.login, 'session_clock_in'.tr(), child.isCheckedIn ? Colors.grey.shade200 : const Color(0xFFC8F6C2), !child.isCheckedIn),
               SizedBox(width: 8.w),
-              _buildActionButton(Icons.logout, 'Clock-Out', !child.isCheckedIn ? Colors.grey.shade200 : const Color(0xFFFFDBCF), child.isCheckedIn),
+              _buildActionButton(Icons.logout, 'session_clock_out'.tr(), !child.isCheckedIn ? Colors.grey.shade200 : const Color(0xFFFFDBCF), child.isCheckedIn),
             ],
           )
         ],
@@ -65,7 +66,7 @@ class ChildSessionCard extends StatelessWidget {
       decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12.r)),
       child: Column(
         children: [
-          Text(child.isCheckedIn ? 'CHECKED-IN' : 'CHECKED-OUT', style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
+          Text(child.isCheckedIn ? 'session_checked_in'.tr() : 'session_checked_out'.tr(), style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
           if (child.isCheckedIn) ...[
             SizedBox(height: 4.h),
             Row(children: [Icon(Icons.timer_outlined, size: 10.w, color: color), SizedBox(width: 4.w), Text(child.duration ?? '', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: color))]),

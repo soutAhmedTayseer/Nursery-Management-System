@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,7 +32,7 @@ class AdminAppBar extends StatelessWidget {
                   context.read<SessionsCubit>().search(value);
                 },
                 decoration: InputDecoration(
-                  hintText: 'Search entries, kids or sessions...',
+                  hintText: 'appbar_search_hint'.tr(),
                   hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
                   prefixIcon: Icon(Icons.search, color: Colors.grey.shade500, size: 20.w),
                   border: InputBorder.none,
@@ -54,7 +55,7 @@ class AdminAppBar extends StatelessWidget {
             ),
             icon: Icon(Icons.qr_code_scanner, color: Colors.orange.shade800, size: 20.w),
             label: Text(
-              'Scan QR',
+              'appbar_scan_qr'.tr(),
               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.orange.shade800),
             ),
           ),

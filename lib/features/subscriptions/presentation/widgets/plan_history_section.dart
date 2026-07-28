@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -20,23 +21,23 @@ class PlanHistorySection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Plan History: $childName', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+              Text('plan_history_title'.tr(namedArgs: {'childName': childName}), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
               TextButton.icon(
-                onPressed: () {}, 
-                icon: const Icon(Icons.download, color: Colors.green, size: 16), 
-                label: Text('Export Report', style: TextStyle(color: Colors.green, fontSize: 12.sp, fontWeight: FontWeight.bold))
+                onPressed: () {},
+                icon: const Icon(Icons.download, color: Colors.green, size: 16),
+                label: Text('plan_history_export_report'.tr(), style: TextStyle(color: Colors.green, fontSize: 12.sp, fontWeight: FontWeight.bold))
               )
             ],
           ),
           SizedBox(height: 32.h),
-          
+
           // Table Header
           Row(
             children: [
-              Expanded(flex: 2, child: Text('DATE', style: _headerStyle())),
-              Expanded(flex: 2, child: Text('OLD PLAN', style: _headerStyle())),
-              Expanded(flex: 2, child: Text('NEW PLAN', style: _headerStyle())),
-              Expanded(flex: 2, child: Text('CHANGED BY', style: _headerStyle())),
+              Expanded(flex: 2, child: Text('plan_history_col_date'.tr(), style: _headerStyle())),
+              Expanded(flex: 2, child: Text('plan_history_col_old_plan'.tr(), style: _headerStyle())),
+              Expanded(flex: 2, child: Text('plan_history_col_new_plan'.tr(), style: _headerStyle())),
+              Expanded(flex: 2, child: Text('plan_history_col_changed_by'.tr(), style: _headerStyle())),
             ],
           ),
           Divider(height: 32.h, color: Colors.grey.shade200),

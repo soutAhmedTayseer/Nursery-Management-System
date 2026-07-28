@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -52,7 +53,7 @@ class FinanceStatCard extends StatelessWidget {
               ),
               SizedBox(width: 4.w),
               Text(
-                'AED', 
+                'finance_currency_aed'.tr(),
                 style: TextStyle(fontSize: 12.sp, color: Colors.white70)
               ),
             ],

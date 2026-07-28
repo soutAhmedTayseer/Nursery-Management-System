@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,9 +24,9 @@ class OverviewScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Page Header
-              Text('Overview Dashboard', style: TextStyle(fontSize: 34.sp, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: -0.5)),
+              Text('overview_title'.tr(), style: TextStyle(fontSize: 34.sp, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: -0.5)),
               SizedBox(height: 8.h),
-              Text('Real-time nursery monitoring & attendance analytics.', style: TextStyle(fontSize: 16.sp, color: Colors.grey.shade500)),
+              Text('overview_subtitle'.tr(), style: TextStyle(fontSize: 16.sp, color: Colors.grey.shade500)),
               SizedBox(height: 40.h),
 
               // 2. Top Stats Row (3 Cards)
@@ -33,9 +34,9 @@ class OverviewScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: DashboardStatCard(
-                      title: 'CAPACITY',
+                      title: 'overview_capacity_title'.tr(),
                       value: '24',
-                      subtitle: 'Total Kids Present',
+                      subtitle: 'overview_capacity_subtitle'.tr(),
                       icon: Icons.tag_faces_rounded,
                       themeColor: const Color(0xFF4CAF50), // Green
                       bottomWidget: _buildProgressBar(0.7, const Color(0xFF4CAF50)),
@@ -44,16 +45,16 @@ class OverviewScreen extends StatelessWidget {
                   SizedBox(width: 24.w),
                   Expanded(
                     child: DashboardStatCard(
-                      title: 'OPERATIONS',
+                      title: 'overview_operations_title'.tr(),
                       value: '56h',
-                      subtitle: 'Total Running Hours',
+                      subtitle: 'overview_operations_subtitle'.tr(),
                       icon: Icons.schedule,
                       themeColor: const Color(0xFFB08D5B), // Brown/Gold
                       bottomWidget: Row(
                         children: [
                           Icon(Icons.trending_up, color: const Color(0xFFB08D5B), size: 18.w),
                           SizedBox(width: 8.w),
-                          Text('12% from last week', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: const Color(0xFFB08D5B))),
+                          Text('overview_trend_last_week'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: const Color(0xFFB08D5B))),
                         ],
                       ),
                     ),
@@ -61,15 +62,15 @@ class OverviewScreen extends StatelessWidget {
                   SizedBox(width: 24.w),
                   Expanded(
                     child: DashboardStatCard(
-                      title: 'ACCOUNTS',
+                      title: 'overview_accounts_title'.tr(),
                       value: '1,200',
-                      unit: 'AED',
-                      subtitle: 'Pending Dues',
+                      unit: 'finance_currency_aed'.tr(),
+                      subtitle: 'overview_accounts_subtitle'.tr(),
                       icon: Icons.account_balance_wallet,
                       themeColor: const Color(0xFFD32F2F), // Red
                       bottomWidget: InkWell(
                         onTap: () {},
-                        child: Text('View Ledger', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
+                        child: Text('overview_view_ledger'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
                       ),
                     ),
                   ),

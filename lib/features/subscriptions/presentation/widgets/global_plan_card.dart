@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -48,7 +49,7 @@ class GlobalPlanCard extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(price, style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w900, color: isSolid ? Colors.white : Colors.black87)),
-              Text(' /mo', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: isSolid ? Colors.white70 : Colors.grey.shade500)),
+              Text('global_plan_per_month_suffix'.tr(), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: isSolid ? Colors.white70 : Colors.grey.shade500)),
             ],
           ),
         ],

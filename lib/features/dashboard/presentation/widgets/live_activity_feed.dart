@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -14,12 +15,12 @@ class LiveActivityFeed extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Live Activity Feed', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Text('feed_title'.tr(), style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             Row(
               children: [
                 CircleAvatar(radius: 4.r, backgroundColor: Colors.green),
                 SizedBox(width: 8.w),
-                Text('LIVE NOW', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.green, letterSpacing: 1)),
+                Text('feed_live_now'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.green, letterSpacing: 1)),
               ],
             ),
           ],
@@ -51,12 +52,12 @@ class LiveActivityFeed extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('UPCOMING ACTIVITY', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: const Color(0xFFB08D5B), letterSpacing: 1.2)),
+                    Text('feed_upcoming_activity'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: const Color(0xFFB08D5B), letterSpacing: 1.2)),
                     SizedBox(height: 8.h),
-                    Text('11:00 AM - Arts & Crafts', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                    Text('feed_upcoming_time_title'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                     SizedBox(height: 8.h),
                     Text(
-                      'Focusing on watercolor basics and leaf patterns. Facilitated by Ms. Sarah.',
+                      'feed_upcoming_desc'.tr(),
                       style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade500, height: 1.5),
                     ),
                     SizedBox(height: 16.h),
@@ -91,9 +92,9 @@ class LiveActivityFeed extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('9:30 AM - Morning Yoga', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  Text('feed_past_activity_title'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                   SizedBox(height: 4.h),
-                  Text('Completed successfully • 18 kids participated', style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade600)),
+                  Text('feed_past_activity_desc'.tr(), style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade600)),
                 ],
               )
             ],

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -54,17 +55,17 @@ class FinanceScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           Expanded(child: FinanceStatCard(
-                            title: 'Total Outstanding', 
-                            value: '42,850', 
-                            subtitle: 'Total fees expected but not yet collected this month.', 
+                            title: 'finance_total_outstanding_title'.tr(),
+                            value: '42,850',
+                            subtitle: 'finance_total_outstanding_subtitle'.tr(),
                             color: const Color(0xFF386A41),
                             trendWidget: _buildTrendBadge(),
                           )),
                           SizedBox(height: 16.h),
                           Expanded(child: FinanceStatCard(
-                            title: 'Penalty Revenue', 
-                            value: '3,125', 
-                            subtitle: 'Total generated from overtime and late collection fees.', 
+                            title: 'finance_penalty_revenue_title'.tr(),
+                            value: '3,125',
+                            subtitle: 'finance_penalty_revenue_subtitle'.tr(),
                             color: const Color(0xFFFFDBCF).withOpacity(0.8), // Adjusting for visibility
                           )),
                         ],
@@ -115,7 +116,7 @@ class FinanceScreen extends StatelessWidget {
           Icon(Icons.trending_up, color: Colors.white, size: 12.w),
           SizedBox(width: 4.w),
           Text(
-            '12% vs last month', 
+            'finance_trend_vs_last_month'.tr(),
             style: TextStyle(
               color: Colors.white, 
               fontSize: 10.sp, 
@@ -135,11 +136,11 @@ class FinanceScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Pending Payments & Overtime Penalty', 
+              'finance_pending_title'.tr(),
               style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w900)
             ),
             Text(
-              'Detailed list of accounts with pending balances and penalty assessments', 
+              'finance_pending_subtitle'.tr(),
               style: TextStyle(fontSize: 13.sp, color: Colors.grey)
             ),
           ],
@@ -147,16 +148,16 @@ class FinanceScreen extends StatelessWidget {
         Row(
           children: [
             _buildActionBtn(
-              Icons.filter_list, 
-              'Filter', 
-              Colors.grey.shade200, 
+              Icons.filter_list,
+              'finance_filter'.tr(),
+              Colors.grey.shade200,
               Colors.black
             ),
             SizedBox(width: 12.w),
             _buildActionBtn(
-              Icons.file_download_outlined, 
-              'Batch Export', 
-              const Color(0xFF386A41), 
+              Icons.file_download_outlined,
+              'finance_batch_export'.tr(),
+              const Color(0xFF386A41),
               Colors.white
             ),
           ],
@@ -204,13 +205,13 @@ class FinanceScreen extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Row(
         children: [
-          _buildHeaderCell(2, 'PARENT NAME'),
-          _buildHeaderCell(1.5, 'CHILD NAME'),
-          _buildHeaderCell(1.5, 'BASE PLAN FEE'),
-          _buildHeaderCell(1.5, 'OVERTIME HOURS'),
-          _buildHeaderCell(1.5, 'PENALTY AMOUNT'),
-          _buildHeaderCell(1.5, 'TOTAL DUE'),
-          _buildHeaderCell(1, 'ACTION'),
+          _buildHeaderCell(2, 'finance_header_parent_name'.tr()),
+          _buildHeaderCell(1.5, 'finance_header_child_name'.tr()),
+          _buildHeaderCell(1.5, 'finance_header_base_fee'.tr()),
+          _buildHeaderCell(1.5, 'finance_header_overtime_hours'.tr()),
+          _buildHeaderCell(1.5, 'finance_header_penalty_amount'.tr()),
+          _buildHeaderCell(1.5, 'finance_header_total_due'.tr()),
+          _buildHeaderCell(1, 'finance_header_action'.tr()),
         ],
       ),
     );
@@ -234,15 +235,15 @@ class FinanceScreen extends StatelessWidget {
        crossAxisAlignment: CrossAxisAlignment.start,
        children: [
          Text(
-           'Monthly Revenue Breakdown', 
+           'finance_revenue_title'.tr(),
            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)
          ),
          Text(
-           'Performance analytics for current billing cycle', 
+           'finance_revenue_subtitle'.tr(),
            style: TextStyle(fontSize: 12.sp, color: Colors.grey)
          ),
          const Spacer(),
-         const Center(child: Text("Chart Placeholder")),
+         Center(child: Text('finance_chart_placeholder'.tr())),
          const Spacer(),
        ],
      );
