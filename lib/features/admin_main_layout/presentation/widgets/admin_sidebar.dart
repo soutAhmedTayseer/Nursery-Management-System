@@ -2,7 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/confirmation_dialog.dart';
+import '../../../auth/data/repositories/auth_repository.dart';
 import '../cubit/admin_main_layout_cubit.dart';
 import 'sidebar_item.dart';
 
@@ -73,15 +77,19 @@ class AdminSidebar extends StatelessWidget {
           SizedBox(height: 16.h),
           _buildBottomAction(Icons.help_outline, 'sidebar_support'.tr()),
           SizedBox(height: 12.h),
-          _buildBottomAction(Icons.logout, 'sidebar_logout'.tr()),
+          _buildBottomAction(
+            Icons.logout,
+            'sidebar_logout'.tr(),
+            onTap: () => _handleLogout(context),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomAction(IconData icon, String title) {
+  Widget _buildBottomAction(IconData icon, String title, {VoidCallback? onTap}) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap ?? () {},
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         child: Row(
@@ -92,6 +100,24 @@ class AdminSidebar extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+Future<void> _handleLogout(BuildContext context) async {
+  final confirmed = await ConfirmationDialog.show(
+    context,
+    title: 'sidebar_logout_confirm_title'.tr(),
+    message: 'sidebar_logout_confirm_message'.tr(),
+    confirmLabel: 'sidebar_logout'.tr(),
+  );
+  if (!confirmed) return;
+  await sl<AuthRepository>().logout();
+  if (context.mounted) {
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.adminLogin,
+      (route) => false,
     );
   }
 }

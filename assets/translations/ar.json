@@ -28,6 +28,8 @@
   "sidebar_menu_settings": "الإعدادات",
   "sidebar_support": "الدعم الفني",
   "sidebar_logout": "تسجيل الخروج",
+  "sidebar_logout_confirm_title": "تسجيل الخروج؟",
+  "sidebar_logout_confirm_message": "ستحتاج لتسجيل الدخول مرة أخرى للمتابعة.",
 
   "overview_title": "نظرة عامة على لوحة التحكم",
   "overview_subtitle": "مراقبة الحضانة وتحليلات الحضور لحظة بلحظة.",

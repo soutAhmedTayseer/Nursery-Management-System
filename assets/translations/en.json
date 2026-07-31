@@ -28,6 +28,8 @@
   "sidebar_menu_settings": "Settings",
   "sidebar_support": "Support",
   "sidebar_logout": "Logout",
+  "sidebar_logout_confirm_title": "Log out?",
+  "sidebar_logout_confirm_message": "You'll need to sign in again to continue.",
 
   "overview_title": "Overview Dashboard",
   "overview_subtitle": "Real-time nursery monitoring & attendance analytics.",

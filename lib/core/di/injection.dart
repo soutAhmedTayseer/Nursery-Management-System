@@ -1,6 +1,10 @@
 import 'package:get_it/get_it.dart';
 import 'package:nursery_shared/nursery_shared.dart';
 
+import '../../features/admin_login/presentation/cubit/admin_login_cubit.dart';
+import '../../features/admin_splash/presentation/cubit/splash_cubit.dart';
+import '../../features/auth/data/repositories/auth_repository.dart';
+import '../../features/auth/data/repositories/fake_auth_repository.dart';
 import '../../features/sessions/data/repositories/fake_sessions_repository.dart';
 import '../../features/sessions/data/repositories/sessions_repository.dart';
 import '../../features/sessions/presentation/cubit/sessions_cubit.dart';
@@ -27,6 +31,16 @@ Future<void> setupLocator({required String baseUrl}) async {
     () => FakeSessionsRepository(failureSwitch: sl<FakeFailureSwitch>()),
   );
 
+  // --- Auth ---
+  sl.registerLazySingleton<AuthRepository>(
+    () => FakeAuthRepository(
+      tokenStorage: sl<TokenStorage>(),
+      failureSwitch: sl<FakeFailureSwitch>(),
+    ),
+  );
+
   // --- Cubits ---
   sl.registerFactory<SessionsCubit>(() => SessionsCubit(sl()));
+  sl.registerFactory<AdminLoginCubit>(() => AdminLoginCubit(sl()));
+  sl.registerFactory<SplashCubit>(() => SplashCubit(sl()));
 }
