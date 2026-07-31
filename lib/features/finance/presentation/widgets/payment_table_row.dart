@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../data/models/finance_model.dart';
 
 class PaymentTableRow extends StatelessWidget {
@@ -15,7 +16,7 @@ class PaymentTableRow extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 24.w),
       decoration: BoxDecoration(
-        color: hasPenalty ? const Color(0xFFFDF2E9) : Colors.white,
+        color: hasPenalty ? AppColors.creamTint : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
         border: hasPenalty ? Border(left: BorderSide(color: Colors.orange, width: 4.w)) : null,
       ),
@@ -63,7 +64,7 @@ class PaymentTableRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14.sp, 
               fontWeight: FontWeight.w900, 
-              color: hasPenalty ? Colors.black : const Color(0xFF386A41)
+              color: hasPenalty ? Colors.black : AppColors.forestGreen
             )
           )),
           _buildCell(1, _buildExportBtn()),

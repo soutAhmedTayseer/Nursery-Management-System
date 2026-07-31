@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../sessions/data/models/child_session_model.dart';
 
 class AssignPlanSection extends StatelessWidget {
@@ -13,7 +14,7 @@ class AssignPlanSection extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F2EC),
+        color: AppColors.surfaceSand,
         borderRadius: BorderRadius.circular(32.r),
       ),
       child: Column(
@@ -31,7 +32,7 @@ class AssignPlanSection extends StatelessWidget {
                 CircleAvatar(
                   radius: 24.r, 
                   backgroundImage: AssetImage(child.image),
-                  onBackgroundImageError: (_, __) {},
+                  onBackgroundImageError: (_, _) {},
                   child: child.image.isEmpty ? const Icon(Icons.person) : null,
                 ),
                 SizedBox(width: 12.w),
@@ -92,7 +93,7 @@ class AssignPlanSection extends StatelessWidget {
               icon: const Icon(Icons.swap_horiz, color: Colors.white),
               label: Text('assign_plan_update_button'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.white)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF80B674),
+                backgroundColor: AppColors.leafGreen,
                 padding: EdgeInsets.symmetric(vertical: 16.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                 elevation: 0,

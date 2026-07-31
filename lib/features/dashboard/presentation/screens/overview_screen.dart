@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../cubit/overview_cubit.dart';
-import '../cubit/overview_state.dart';
 import '../widgets/alerts_notifications_section.dart';
 import '../widgets/dashboard_stat_card.dart';
 import '../widgets/live_activity_feed.dart';
@@ -17,7 +16,7 @@ class OverviewScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => OverviewCubit()..fetchDashboardData(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7F6F2), // درجة الأوف وايت الفاتحة جداً للديزاين
+        backgroundColor: AppColors.surfaceCream, // درجة الأوف وايت الفاتحة جداً للديزاين
         body: SingleChildScrollView(
           padding: EdgeInsets.all(32.w), // Padding محترم مناسب للتابلت
           child: Column(
@@ -38,8 +37,8 @@ class OverviewScreen extends StatelessWidget {
                       value: '24',
                       subtitle: 'overview_capacity_subtitle'.tr(),
                       icon: Icons.tag_faces_rounded,
-                      themeColor: const Color(0xFF4CAF50), // Green
-                      bottomWidget: _buildProgressBar(0.7, const Color(0xFF4CAF50)),
+                      themeColor: AppColors.successGreen, // Green
+                      bottomWidget: _buildProgressBar(0.7, AppColors.successGreen),
                     ),
                   ),
                   SizedBox(width: 24.w),
@@ -49,12 +48,12 @@ class OverviewScreen extends StatelessWidget {
                       value: '56h',
                       subtitle: 'overview_operations_subtitle'.tr(),
                       icon: Icons.schedule,
-                      themeColor: const Color(0xFFB08D5B), // Brown/Gold
+                      themeColor: AppColors.gold, // Brown/Gold
                       bottomWidget: Row(
                         children: [
-                          Icon(Icons.trending_up, color: const Color(0xFFB08D5B), size: 18.w),
+                          Icon(Icons.trending_up, color: AppColors.gold, size: 18.w),
                           SizedBox(width: 8.w),
-                          Text('overview_trend_last_week'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: const Color(0xFFB08D5B))),
+                          Text('overview_trend_last_week'.tr(), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.gold)),
                         ],
                       ),
                     ),
@@ -67,7 +66,7 @@ class OverviewScreen extends StatelessWidget {
                       unit: 'finance_currency_aed'.tr(),
                       subtitle: 'overview_accounts_subtitle'.tr(),
                       icon: Icons.account_balance_wallet,
-                      themeColor: const Color(0xFFD32F2F), // Red
+                      themeColor: AppColors.errorRed, // Red
                       bottomWidget: InkWell(
                         onTap: () {},
                         child: Text('overview_view_ledger'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),

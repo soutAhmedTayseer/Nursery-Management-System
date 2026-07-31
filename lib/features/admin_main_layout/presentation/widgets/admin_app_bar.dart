@@ -48,7 +48,7 @@ class AdminAppBar extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFE0B2), // لون برتقالي فاتح
+              backgroundColor: AppColors.amberTint, // لون برتقالي فاتح
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
               elevation: 0,

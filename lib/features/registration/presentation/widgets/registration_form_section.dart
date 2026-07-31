@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class RegistrationFormSection extends StatelessWidget {
   final String title;
@@ -16,7 +17,7 @@ class RegistrationFormSection extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F2EC), // Off-white/beige color for cards
+        color: AppColors.surfaceSand, // Off-white/beige color for cards
         borderRadius: BorderRadius.circular(32.r),
       ),
       child: Column(
@@ -26,7 +27,7 @@ class RegistrationFormSection extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 18.r,
-                backgroundColor: accentColor.withOpacity(0.1),
+                backgroundColor: accentColor.withValues(alpha: 0.1),
                 child: Icon(icon, color: accentColor, size: 18.w),
               ),
               SizedBox(width: 16.w),

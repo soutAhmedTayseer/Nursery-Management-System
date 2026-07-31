@@ -33,7 +33,7 @@ class LiveActivityFeed extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(32.r),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 8))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 15, offset: const Offset(0, 8))],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +52,7 @@ class LiveActivityFeed extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('feed_upcoming_activity'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: const Color(0xFFB08D5B), letterSpacing: 1.2)),
+                    Text('feed_upcoming_activity'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColors.gold, letterSpacing: 1.2)),
                     SizedBox(height: 8.h),
                     Text('feed_upcoming_time_title'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                     SizedBox(height: 8.h),
@@ -84,7 +84,7 @@ class LiveActivityFeed extends StatelessWidget {
         // Past Activity Tile
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-          decoration: BoxDecoration(color: const Color(0xFFF2F2F2), borderRadius: BorderRadius.circular(24.r)),
+          decoration: BoxDecoration(color: AppColors.surfaceSmoke, borderRadius: BorderRadius.circular(24.r)),
           child: Row(
             children: [
               Icon(Icons.history, color: Colors.grey.shade600, size: 20.w),
@@ -109,7 +109,7 @@ class LiveActivityFeed extends StatelessWidget {
       offset: Offset(offset.w, 0),
       child: Container(
         decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-        child: CircleAvatar(radius: 14.r, backgroundColor: Colors.green.shade50, backgroundImage: AssetImage(imagePath), onBackgroundImageError: (_,__) {}),
+        child: CircleAvatar(radius: 14.r, backgroundColor: Colors.green.shade50, backgroundImage: AssetImage(imagePath), onBackgroundImageError: (_, _) {}),
       ),
     );
   }

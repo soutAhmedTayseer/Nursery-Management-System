@@ -15,7 +15,7 @@ class ChildSessionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28.r),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 8))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 15, offset: const Offset(0, 8))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,7 +27,7 @@ class ChildSessionCard extends StatelessWidget {
               CircleAvatar(
                 radius: 32.r, 
                 backgroundImage: AssetImage(child.image),
-                onBackgroundImageError: (_, __) {},
+                onBackgroundImageError: (_, _) {},
                 child: child.image.isEmpty ? const Icon(Icons.person) : null,
               ),
               _buildStatusBadge(),
@@ -49,9 +49,9 @@ class ChildSessionCard extends StatelessWidget {
           const Spacer(),
           Row(
             children: [
-              _buildActionButton(Icons.login, 'session_clock_in'.tr(), child.isCheckedIn ? Colors.grey.shade200 : const Color(0xFFC8F6C2), !child.isCheckedIn),
+              _buildActionButton(Icons.login, 'session_clock_in'.tr(), child.isCheckedIn ? Colors.grey.shade200 : AppColors.mintTint, !child.isCheckedIn),
               SizedBox(width: 8.w),
-              _buildActionButton(Icons.logout, 'session_clock_out'.tr(), !child.isCheckedIn ? Colors.grey.shade200 : const Color(0xFFFFDBCF), child.isCheckedIn),
+              _buildActionButton(Icons.logout, 'session_clock_out'.tr(), !child.isCheckedIn ? Colors.grey.shade200 : AppColors.peachTint, child.isCheckedIn),
             ],
           )
         ],
@@ -60,10 +60,10 @@ class ChildSessionCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadge() {
-    final color = child.isCheckedIn ? const Color(0xFF4A7A3A) : Colors.grey.shade400;
+    final color = child.isCheckedIn ? AppColors.accentGreen : Colors.grey.shade400;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12.r)),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12.r)),
       child: Column(
         children: [
           Text(child.isCheckedIn ? 'session_checked_in'.tr() : 'session_checked_out'.tr(), style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),

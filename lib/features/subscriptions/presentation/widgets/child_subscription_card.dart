@@ -26,7 +26,7 @@ class ChildSubscriptionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(32.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 20,
               offset: const Offset(0, 10),
             )
@@ -48,7 +48,7 @@ class ChildSubscriptionCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8F5E9),
+                    color: AppColors.successTint,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
@@ -56,7 +56,7 @@ class ChildSubscriptionCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w900,
-                      color: const Color(0xFF2E7D32),
+                      color: AppColors.successDark,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -93,7 +93,7 @@ class ChildSubscriptionCard extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
               decoration: BoxDecoration(
-                color: const Color(0xFFF9F9F7),
+                color: AppColors.surfaceMist,
                 borderRadius: BorderRadius.circular(16.r),
               ),
               child: Row(

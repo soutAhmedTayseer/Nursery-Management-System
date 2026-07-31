@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../sessions/data/models/child_session_model.dart';
 import '../widgets/assign_plan_section.dart';
 import '../widgets/global_plan_card.dart';
@@ -14,7 +15,7 @@ class ManageSubscriptionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9F6),
+      backgroundColor: AppColors.surfaceIvory,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -70,7 +71,7 @@ class ManageSubscriptionScreen extends StatelessWidget {
                       SizedBox(width: 16.w),
                       GlobalPlanCard(title: 'subscriptions_plan_hourly'.tr(), duration: 'subscriptions_plan_hourly_duration'.tr(), price: '\$18', icon: Icons.access_time, themeColor: Colors.orange),
                       SizedBox(width: 16.w),
-                      GlobalPlanCard(title: 'subscriptions_plan_winter_camp'.tr(), duration: 'subscriptions_plan_winter_duration'.tr(), price: '\$1,200', icon: Icons.holiday_village, themeColor: const Color(0xFF386A41), isSolid: true),
+                      GlobalPlanCard(title: 'subscriptions_plan_winter_camp'.tr(), duration: 'subscriptions_plan_winter_duration'.tr(), price: '\$1,200', icon: Icons.holiday_village, themeColor: AppColors.forestGreen, isSolid: true),
                     ],
                   ),
                 ),

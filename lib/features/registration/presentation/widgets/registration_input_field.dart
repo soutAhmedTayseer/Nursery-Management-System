@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class RegistrationInputField extends StatelessWidget {
   final String label;
@@ -20,7 +21,7 @@ class RegistrationInputField extends StatelessWidget {
           style: TextStyle(
             fontSize: 10.sp, 
             fontWeight: FontWeight.w800, 
-            color: const Color(0xFF8A8A8A), // Dark grey for Label
+            color: AppColors.textTertiary, // Dark grey for Label
             letterSpacing: 1.1
           ),
         ),
@@ -44,7 +45,7 @@ class RegistrationInputField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: const BorderSide(color: Color(0xFF4A7A3A), width: 1.5),
+              borderSide: const BorderSide(color: AppColors.accentGreen, width: 1.5),
             ),
           ),
         ),

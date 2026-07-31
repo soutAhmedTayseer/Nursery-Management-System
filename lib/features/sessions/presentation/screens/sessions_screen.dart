@@ -15,7 +15,7 @@ class SessionsScreen extends StatelessWidget {
     final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F6F2),
+      backgroundColor: AppColors.surfaceCream,
       body: Padding(
         padding: EdgeInsets.all(32.w),
         child: Column(
@@ -97,7 +97,7 @@ class SessionsScreen extends StatelessWidget {
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
       child: Row(
         children: [
-          CircleAvatar(radius: 18.r, backgroundColor: const Color(0xFFF0F4EF), child: Icon(icon, color: const Color(0xFF4A7A3A), size: 18.w)),
+          CircleAvatar(radius: 18.r, backgroundColor: AppColors.surfaceSage, child: Icon(icon, color: AppColors.accentGreen, size: 18.w)),
           SizedBox(width: 12.w),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +174,7 @@ class SessionsScreen extends StatelessWidget {
       child: Container(
         width: 36.w, height: 36.w,
         margin: EdgeInsets.symmetric(horizontal: 4.w),
-        decoration: BoxDecoration(color: isActive ? const Color(0xFF4A7A3A) : Colors.grey.shade200, shape: BoxShape.circle),
+        decoration: BoxDecoration(color: isActive ? AppColors.accentGreen : Colors.grey.shade200, shape: BoxShape.circle),
         child: Center(child: Text(n, style: TextStyle(color: isActive ? Colors.white : Colors.black, fontWeight: FontWeight.bold))),
       ),
     );

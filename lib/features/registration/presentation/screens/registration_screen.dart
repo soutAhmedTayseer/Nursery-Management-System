@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../cubit/registration_cubit.dart';
 import '../cubit/registration_state.dart';
 import '../widgets/emergency_contact_section.dart';
@@ -17,7 +18,7 @@ class RegistrationScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => RegistrationCubit(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFFCFBF8), // Very light background color
+        backgroundColor: AppColors.surfaceLinen, // Very light background color
         body: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 32.h),
           child: Column(
@@ -26,7 +27,7 @@ class RegistrationScreen extends StatelessWidget {
               // 1. Header Section
               Text(
                 'registration_header_title'.tr(),
-                style: TextStyle(fontSize: 38.sp, fontWeight: FontWeight.w900, color: const Color(0xFF2D2D2D), letterSpacing: -0.5)
+                style: TextStyle(fontSize: 38.sp, fontWeight: FontWeight.w900, color: AppColors.textHeading, letterSpacing: -0.5)
               ),
               SizedBox(height: 8.h),
               Text(
@@ -44,7 +45,7 @@ class RegistrationScreen extends StatelessWidget {
                     child: RegistrationFormSection(
                       title: 'registration_section_child'.tr(),
                       icon: Icons.face_retouching_natural,
-                      accentColor: const Color(0xFF4A7A3A), // Green
+                      accentColor: AppColors.accentGreen, // Green
                       children: [
                         RegistrationInputField(label: 'registration_label_child_name'.tr(), hint: 'registration_hint_child_name'.tr()),
                         SizedBox(height: 24.h),
@@ -93,7 +94,7 @@ class RegistrationScreen extends StatelessWidget {
                     child: RegistrationFormSection(
                       title: 'registration_section_mother'.tr(),
                       icon: Icons.female_rounded,
-                      accentColor: const Color(0xFF986847), // Brown
+                      accentColor: AppColors.bronze, // Brown
                       children: [
                         RegistrationInputField(label: 'registration_label_mother_phone'.tr(), hint: 'registration_hint_phone'.tr()),
                         SizedBox(height: 24.h),
@@ -124,7 +125,7 @@ class RegistrationScreen extends StatelessWidget {
                         RegistrationFormSection(
                           title: 'registration_section_father'.tr(),
                           icon: Icons.male_rounded,
-                          accentColor: const Color(0xFF5D5D5D), // Dark grey
+                          accentColor: AppColors.textSecondary, // Dark grey
                           children: [
                             RegistrationInputField(label: 'registration_label_father_phone'.tr(), hint: 'registration_hint_phone'.tr()),
                             SizedBox(height: 24.h),
@@ -184,7 +185,7 @@ class RegistrationScreen extends StatelessWidget {
                       return ElevatedButton(
                         onPressed: isLoading ? null : () => context.read<RegistrationCubit>().registerChild(),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF80B674), // Bright green button
+                          backgroundColor: AppColors.leafGreen, // Bright green button
                           padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 24.h),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.r)),
                           elevation: 0,

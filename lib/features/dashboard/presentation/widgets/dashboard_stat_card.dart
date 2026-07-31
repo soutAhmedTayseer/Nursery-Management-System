@@ -30,7 +30,7 @@ class DashboardStatCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(32.r),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20, offset: const Offset(0, 10))
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 20, offset: const Offset(0, 10))
         ],
       ),
       child: Column(

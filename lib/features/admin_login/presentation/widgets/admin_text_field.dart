@@ -26,7 +26,7 @@ class AdminTextField extends StatelessWidget {
           style: TextStyle(
             fontSize: 14.sp, // تم تكبير الخط (كان 10)
             fontWeight: FontWeight.w700,
-            color: const Color(0xFFB08D5B),
+            color: AppColors.gold,
             letterSpacing: 1.5, // إضافة مسافة بين الحروف
           ),
         ),
@@ -42,7 +42,7 @@ class AdminTextField extends StatelessWidget {
               child: Icon(suffixIcon, color: Colors.grey.shade400, size: 26.w), // الأيقونة (كانت 20)
             ),
             filled: true,
-            fillColor: const Color(0xFFFBFBFB),
+            fillColor: AppColors.surfaceWhite,
             contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h), // تم تكبير الـ Padding الداخلي (كان 16)
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),

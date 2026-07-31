@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 // استيراد المكون الجديد
 import '../widgets/child_subscription_card.dart';
@@ -16,7 +17,7 @@ class SubscribedChildrenScreen extends StatelessWidget {
     final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F6F2),
+      backgroundColor: AppColors.surfaceCream,
       body: Padding(
         padding: EdgeInsets.all(32.w),
         child: Column(

@@ -26,7 +26,7 @@ class AlertsNotificationsSection extends StatelessWidget {
           isUrgent: true,
           title: 'alerts_overtime_leo'.tr(),
           description: 'alerts_overtime_leo_desc'.tr(),
-          borderColor: const Color(0xFF8D6E63),
+          borderColor: AppColors.brownLight,
           icon: Icons.warning_amber_rounded,
           actions: Row(
             children: [
@@ -42,7 +42,7 @@ class AlertsNotificationsSection extends StatelessWidget {
           isUrgent: true,
           title: 'alerts_overtime_amira'.tr(),
           description: 'alerts_overtime_amira_desc'.tr(),
-          borderColor: const Color(0xFF8D6E63),
+          borderColor: AppColors.brownLight,
           icon: Icons.warning_amber_rounded,
         ),
         SizedBox(height: 16.h),
@@ -64,7 +64,7 @@ class AlertsNotificationsSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 5))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 5))],
       ),
       child: IntrinsicHeight( // بيخلي الخط الجانبي ياخد نفس طول الكارت
         child: Row(
@@ -93,7 +93,7 @@ class AlertsNotificationsSection extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(title, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                              if (isUrgent) Text('alerts_urgent_badge'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: const Color(0xFF8D6E63), letterSpacing: 1)),
+                              if (isUrgent) Text('alerts_urgent_badge'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColors.brownLight, letterSpacing: 1)),
                             ],
                           ),
                           SizedBox(height: 8.h),
@@ -124,15 +124,15 @@ class AlertsNotificationsSection extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {},
       style: ElevatedButton.styleFrom(
-        backgroundColor: isPrimary ? const Color(0xFF795548) : Colors.transparent, // بني أو شفاف
+        backgroundColor: isPrimary ? AppColors.brown : Colors.transparent, // بني أو شفاف
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.r),
-          side: isPrimary ? BorderSide.none : const BorderSide(color: Color(0xFF795548), width: 1),
+          side: isPrimary ? BorderSide.none : const BorderSide(color: AppColors.brown, width: 1),
         ),
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
       ),
-      child: Text(text, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: isPrimary ? Colors.white : const Color(0xFF795548))),
+      child: Text(text, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: isPrimary ? Colors.white : AppColors.brown)),
     );
   }
 }

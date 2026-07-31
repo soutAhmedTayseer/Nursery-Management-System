@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../data/models/finance_model.dart';
 import '../cubit/finance_cubit.dart';
 import '../cubit/finance_state.dart';
@@ -16,11 +17,11 @@ class FinanceScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => FinanceCubit(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAF9F6),
+        backgroundColor: AppColors.surfaceIvory,
         floatingActionButton: BlocBuilder<FinanceCubit, FinanceState>(
           builder: (context, state) {
             return FloatingActionButton(
-              backgroundColor: const Color(0xFF386A41),
+              backgroundColor: AppColors.forestGreen,
               onPressed: () => _showAddPaymentDialog(context),
               child: const Icon(Icons.add, color: Colors.white),
             );
@@ -58,7 +59,7 @@ class FinanceScreen extends StatelessWidget {
                             title: 'finance_total_outstanding_title'.tr(),
                             value: '42,850',
                             subtitle: 'finance_total_outstanding_subtitle'.tr(),
-                            color: const Color(0xFF386A41),
+                            color: AppColors.forestGreen,
                             trendWidget: _buildTrendBadge(),
                           )),
                           SizedBox(height: 16.h),
@@ -66,7 +67,7 @@ class FinanceScreen extends StatelessWidget {
                             title: 'finance_penalty_revenue_title'.tr(),
                             value: '3,125',
                             subtitle: 'finance_penalty_revenue_subtitle'.tr(),
-                            color: const Color(0xFFFFDBCF).withOpacity(0.8), // Adjusting for visibility
+                            color: AppColors.peachTint.withValues(alpha: 0.8), // Adjusting for visibility
                           )),
                         ],
                       ),
@@ -157,7 +158,7 @@ class FinanceScreen extends StatelessWidget {
             _buildActionBtn(
               Icons.file_download_outlined,
               'finance_batch_export'.tr(),
-              const Color(0xFF386A41),
+              AppColors.forestGreen,
               Colors.white
             ),
           ],

@@ -31,7 +31,7 @@ class AdminLoginScreen extends StatelessWidget {
           }
         },
         child: Scaffold(
-          backgroundColor: const Color(0xFFFAF8F5),
+          backgroundColor: AppColors.surfaceBone,
           body: Stack(
             children: [
               const LoginBackgroundDecor(),
@@ -64,7 +64,7 @@ class AdminLoginScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(40.r),
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withOpacity(0.06),
+                                color: Colors.black.withValues(alpha: 0.06),
                                 blurRadius: 50,
                                 offset: const Offset(0, 20)
                             )
@@ -127,7 +127,7 @@ class AdminLoginScreen extends StatelessWidget {
                               onPressed: () {},
                               child: Text(
                                 'login_forgot_password'.tr(),
-                                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: const Color(0xFF6D4C41)),
+                                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.brownDark),
                               ),
                             ),
                           ],

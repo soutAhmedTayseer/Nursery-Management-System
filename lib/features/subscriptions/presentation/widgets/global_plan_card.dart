@@ -24,7 +24,7 @@ class GlobalPlanCard extends StatelessWidget {
         color: isSolid ? themeColor : Colors.white,
         borderRadius: BorderRadius.circular(24.r),
         border: isSolid ? null : Border(bottom: BorderSide(color: themeColor, width: 8.h)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 5))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 5))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +34,7 @@ class GlobalPlanCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 16.r,
-                backgroundColor: isSolid ? Colors.white.withOpacity(0.2) : themeColor.withOpacity(0.1),
+                backgroundColor: isSolid ? Colors.white.withValues(alpha: 0.2) : themeColor.withValues(alpha: 0.1),
                 child: Icon(icon, color: isSolid ? Colors.white : themeColor, size: 16.w),
               ),
               Icon(Icons.edit_outlined, color: isSolid ? Colors.white70 : Colors.grey.shade400, size: 14.w),
