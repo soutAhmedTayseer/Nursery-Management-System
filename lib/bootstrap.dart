@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/routes/app_router.dart';
 import 'core/routes/app_routes.dart';
+import 'core/theme/app_theme.dart';
 
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,10 +34,7 @@ class MyApp extends StatelessWidget {
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
           locale: context.locale,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2D5A27)),
-            useMaterial3: true,
-          ),
+          theme: AppTheme.light(),
           onGenerateRoute: AppRouter.onGenerateRoute,
           initialRoute: AppRoutes.adminSplash,
         );
