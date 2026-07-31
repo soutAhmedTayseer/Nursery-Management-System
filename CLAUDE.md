@@ -28,8 +28,9 @@ networking or data-model code here directly.
 - **Every Cubit gets a `bloc_test` test file** (§3).
 - **No raw `Dio` in feature code** — go through `nursery_shared`'s
   `ApiClient` (§7).
-- **`AppColors` / screenutil only** — never a hardcoded `Color(0xFF...)` or
-  bare pixel value in a widget (§6).
+- **`AppColors` for colour, `.sp` for text, `AppSpacing.of(context)` for
+  layout** — never a hardcoded `Color(0xFF...)` or a bare pixel value in a
+  widget (§6).
 - **No AI co-author trailer on commits** (§10).
 - **Plan first** for any non-trivial feature — save to
   `../docs/superpowers/plans/YYYY-MM-DD-<name>.md` before writing code (§9).
