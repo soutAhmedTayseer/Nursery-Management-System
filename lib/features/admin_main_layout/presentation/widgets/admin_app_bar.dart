@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,8 +7,28 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 
-class AdminAppBar extends StatelessWidget {
+class AdminAppBar extends StatefulWidget {
   const AdminAppBar({super.key});
+
+  @override
+  State<AdminAppBar> createState() => _AdminAppBarState();
+}
+
+class _AdminAppBarState extends State<AdminAppBar> {
+  Timer? _debounce;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      context.read<SessionsCubit>().search(value);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +49,7 @@ class AdminAppBar extends StatelessWidget {
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 5))],
               ),
               child: TextField(
-                onChanged: (value) {
-                  // Connect search to SessionsCubit
-                  context.read<SessionsCubit>().search(value);
-                },
+                onChanged: _onSearchChanged,
                 decoration: InputDecoration(
                   hintText: 'appbar_search_hint'.tr(),
                   hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),

@@ -28,7 +28,7 @@ class SessionsScreen extends StatelessWidget {
                 builder: (context, state) {
                   final isLoaded = state is SessionsLoaded;
                   return AsyncStateView(
-                    isLoading: state is SessionsLoading,
+                    isLoading: state is SessionsLoading || state is SessionsInitial,
                     error: state is SessionsError ? state.exception : null,
                     isEmpty: isLoaded && state.items.isEmpty,
                     onRetry: () => context.read<SessionsCubit>().loadSessions(),

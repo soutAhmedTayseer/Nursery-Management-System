@@ -13,6 +13,8 @@ final GetIt sl = GetIt.instance;
 /// Integration day: change each `Fake<X>Repository()` below to
 /// `Api<X>Repository(sl<ApiClient>())`. No screen, cubit or test changes.
 Future<void> setupLocator({required String baseUrl}) async {
+  if (sl.isRegistered<ApiClient>()) return;
+
   // --- Infrastructure ---
   sl.registerLazySingleton<TokenStorage>(() => SecureTokenStorage());
   sl.registerLazySingleton<ApiClient>(

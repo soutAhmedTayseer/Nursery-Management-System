@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/async_state_view.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 // استيراد المكون الجديد
 import '../widgets/child_subscription_card.dart';
@@ -38,33 +39,40 @@ class SubscribedChildrenScreen extends StatelessWidget {
             Expanded(
               child: BlocBuilder<SessionsCubit, SessionsState>(
                 builder: (context, state) {
-                  if (state is SessionsLoaded) {
-                    return GridView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: isPortrait ? 3 : 4, // 3 في الرأسي و4 في الأفقي
-                        mainAxisSpacing: 24.w,
-                        crossAxisSpacing: 24.w,
-                        childAspectRatio: isPortrait ? 0.75 : 0.88, // نسبة متغيرة لمنع الـ Overflow
-                      ),
-                      itemCount: state.items.length,
-                      itemBuilder: (context, index) {
-                        final child = state.items[index];
-                        return ChildSubscriptionCard(
-                          child: child,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ManageSubscriptionScreen(childData: child),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    );
-                  }
-                  return const Center(child: CircularProgressIndicator());
+                  return AsyncStateView(
+                    isLoading: state is SessionsLoading || state is SessionsInitial,
+                    error: state is SessionsError ? state.exception : null,
+                    isEmpty: state is SessionsLoaded && state.items.isEmpty,
+                    onRetry: () => context.read<SessionsCubit>().loadSessions(),
+                    emptyMessage: 'sessions_none_found'.tr(),
+                    builder: (context) {
+                      final loaded = state as SessionsLoaded;
+                      return GridView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: isPortrait ? 3 : 4, // 3 في الرأسي و4 في الأفقي
+                          mainAxisSpacing: 24.w,
+                          crossAxisSpacing: 24.w,
+                          childAspectRatio: isPortrait ? 0.75 : 0.88, // نسبة متغيرة لمنع الـ Overflow
+                        ),
+                        itemCount: loaded.items.length,
+                        itemBuilder: (context, index) {
+                          final child = loaded.items[index];
+                          return ChildSubscriptionCard(
+                            child: child,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ManageSubscriptionScreen(childData: child),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
                 },
               ),
             ),

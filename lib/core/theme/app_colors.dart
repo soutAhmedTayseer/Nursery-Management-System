@@ -38,7 +38,6 @@ class AppColors {
 
   // --- Surfaces ---
   static const Color background = Color(0xFFF8F9FA);
-  static const Color decorGrey = Color(0xFFF8F9FA);
   static const Color lightGrey = Color(0xFFFDFDFD);
   static const Color surfaceWhite = Color(0xFFFBFBFB);
   static const Color surfaceIvory = Color(0xFFFAF9F6);

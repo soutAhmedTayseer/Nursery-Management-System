@@ -47,7 +47,7 @@ class FakeSessionsRepository implements SessionsRepository {
     );
   }
 
-  static final DateTime _now = DateTime(2026, 8, 1, 12);
+  static DateTime get _now => DateTime.now();
 
   static KidSession _entry(
     String id,

@@ -17,6 +17,7 @@ class SessionsCubit extends Cubit<SessionsState> {
 
   String _query = '';
   int _page = 1;
+  int _requestId = 0;
 
   Future<void> loadSessions() => _fetch();
 
@@ -32,6 +33,7 @@ class SessionsCubit extends Cubit<SessionsState> {
   }
 
   Future<void> _fetch() async {
+    final requestId = ++_requestId;
     emit(SessionsLoading());
     try {
       final result = await _repository.fetchKidSessions(
@@ -39,6 +41,7 @@ class SessionsCubit extends Cubit<SessionsState> {
         pageSize: _pageSize,
         query: _query,
       );
+      if (requestId != _requestId) return; // a newer request superseded this one
       emit(SessionsLoaded(
         items: result.items,
         totalCount: result.total,
@@ -47,6 +50,7 @@ class SessionsCubit extends Cubit<SessionsState> {
         searchQuery: _query,
       ));
     } on ApiException catch (exception) {
+      if (requestId != _requestId) return; // a newer request superseded this one
       emit(SessionsError(exception));
     }
   }

@@ -115,6 +115,43 @@ void main() {
   );
 
   blocTest<SessionsCubit, SessionsState>(
+    'a slower first search response does not overwrite a faster later one',
+    setUp: () {
+      var call = 0;
+      when(() => repository.fetchKidSessions(
+            page: any(named: 'page'),
+            pageSize: any(named: 'pageSize'),
+            query: any(named: 'query'),
+          )).thenAnswer((invocation) async {
+        call += 1;
+        final query = invocation.namedArguments[#query] as String;
+        if (call == 1) {
+          // First call ("leo") resolves after the second ("noah").
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+        }
+        return PaginatedResult<KidSession>(
+          items: [_kidSession(query, query)],
+          total: 1,
+          page: 1,
+          pageSize: 8,
+        );
+      });
+    },
+    build: build,
+    act: (cubit) async {
+      final first = cubit.search('leo');
+      final second = cubit.search('noah');
+      await Future.wait([first, second]);
+    },
+    expect: () => [
+      isA<SessionsLoading>(),
+      isA<SessionsLoading>(),
+      isA<SessionsLoaded>()
+          .having((s) => s.searchQuery, 'searchQuery', 'noah'),
+    ],
+  );
+
+  blocTest<SessionsCubit, SessionsState>(
     'emits an empty Loaded state when nothing matches',
     setUp: () {
       when(() => repository.fetchKidSessions(

@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nursery_management_system/core/widgets/confirmation_dialog.dart';
 
-Future<bool?> _showFrom(WidgetTester tester) async {
+/// Opens the dialog and returns a closure that reads the resolved outcome.
+/// The closure must be called only after the confirming/dismissing gesture
+/// has been pumped, so the `await ConfirmationDialog.show(...)` inside
+/// `onPressed` has had a chance to complete and assign [outcome].
+Future<bool? Function()> _showFrom(WidgetTester tester) async {
   bool? outcome;
   await tester.pumpWidget(MaterialApp(
     localizationsDelegates: const [
@@ -27,7 +31,7 @@ Future<bool?> _showFrom(WidgetTester tester) async {
   ));
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
-  return outcome;
+  return () => outcome;
 }
 
 void main() {
@@ -38,17 +42,19 @@ void main() {
   });
 
   testWidgets('returns true when confirmed', (tester) async {
-    await _showFrom(tester);
+    final readOutcome = await _showFrom(tester);
     await tester.tap(find.text('Revoke'));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
+    expect(readOutcome(), isTrue);
   });
 
   testWidgets('dismissing without confirming does not resolve true',
       (tester) async {
-    await _showFrom(tester);
+    final readOutcome = await _showFrom(tester);
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
+    expect(readOutcome(), isFalse);
   });
 }
