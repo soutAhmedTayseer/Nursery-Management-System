@@ -2,14 +2,31 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/l10n/api_error_messages.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../cubit/admin_login_cubit.dart';
 import '../widgets/admin_text_field.dart';
 import '../widgets/login_background_decor.dart';
 
-class AdminLoginScreen extends StatelessWidget {
+class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
+
+  @override
+  State<AdminLoginScreen> createState() => _AdminLoginScreenState();
+}
+
+class _AdminLoginScreenState extends State<AdminLoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +40,15 @@ class AdminLoginScreen extends StatelessWidget {
         .clamp(550.0, 850.0);
 
     return BlocProvider(
-      create: (context) => AdminLoginCubit(),
+      create: (_) => sl<AdminLoginCubit>(),
       child: BlocListener<AdminLoginCubit, AdminLoginState>(
         listener: (context, state) {
           if (state is AdminLoginSuccess) {
             Navigator.pushReplacementNamed(context, AppRoutes.adminMainLayout);
+          } else if (state is AdminLoginError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(apiErrorMessage(state.exception))),
+            );
           }
         },
         child: Scaffold(
@@ -90,6 +111,7 @@ class AdminLoginScreen extends StatelessWidget {
                               label: 'login_email_hint'.tr(),
                               hint: 'admin@wildwood.com',
                               suffixIcon: Icons.person_outline,
+                              controller: _emailController,
                             ),
                             SizedBox(height: 32.h),
                             AdminTextField(
@@ -97,6 +119,7 @@ class AdminLoginScreen extends StatelessWidget {
                               hint: '•••• ••••',
                               suffixIcon: Icons.lock_outline,
                               isPassword: true,
+                              controller: _passwordController,
                             ),
                             SizedBox(height: 64.h),
 
@@ -108,7 +131,19 @@ class AdminLoginScreen extends StatelessWidget {
                                   width: double.infinity,
                                   height: 70.h,
                                   child: ElevatedButton(
-                                    onPressed: isLoading ? null : () => context.read<AdminLoginCubit>().login(),
+                                    onPressed: isLoading
+                                        ? null
+                                        : () {
+                                            final email = _emailController.text.trim();
+                                            final password = _passwordController.text;
+                                            if (email.isEmpty || password.isEmpty) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('login_error_empty_fields'.tr())),
+                                              );
+                                              return;
+                                            }
+                                            context.read<AdminLoginCubit>().login(email, password);
+                                          },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.darkGreen,
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),

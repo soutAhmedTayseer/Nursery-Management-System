@@ -1,17 +1,33 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nursery_shared/nursery_shared.dart';
+
+import '../../../auth/data/repositories/auth_repository.dart';
 
 abstract class AdminLoginState {}
+
 class AdminLoginInitial extends AdminLoginState {}
+
 class AdminLoginLoading extends AdminLoginState {}
+
 class AdminLoginSuccess extends AdminLoginState {}
 
-class AdminLoginCubit extends Cubit<AdminLoginState> {
-  AdminLoginCubit() : super(AdminLoginInitial());
+class AdminLoginError extends AdminLoginState {
+  AdminLoginError(this.exception);
+  final ApiException exception;
+}
 
-  void login() async {
+class AdminLoginCubit extends Cubit<AdminLoginState> {
+  AdminLoginCubit(this._repository) : super(AdminLoginInitial());
+
+  final AuthRepository _repository;
+
+  Future<void> login(String email, String password) async {
     emit(AdminLoginLoading());
-    // Simulate API Call
-    await Future.delayed(const Duration(seconds: 2));
-    emit(AdminLoginSuccess());
+    try {
+      await _repository.login(email: email, password: password);
+      emit(AdminLoginSuccess());
+    } on ApiException catch (exception) {
+      emit(AdminLoginError(exception));
+    }
   }
 }

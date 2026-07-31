@@ -10,6 +10,7 @@
   "login_welcome_back": "مرحباً بعودتك",
   "login_instructions": "الرجاء إدخال بيانات اعتماد المدير لإدارة نظام الحضانة.",
   "login_forgot_password": "نسيت كلمة المرور؟",
+  "login_error_empty_fields": "أدخل البريد الإلكتروني وكلمة المرور.",
   "login_footer": "دخول آمن للخادم. © 2026 إدارة حضانة وايلدوود.",
 
   "layout_profiles_screen": "شاشة الملفات الشخصية",
