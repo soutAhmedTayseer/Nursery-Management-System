@@ -7,6 +7,7 @@ class AdminTextField extends StatelessWidget {
   final String hint;
   final IconData suffixIcon;
   final bool isPassword;
+  final TextEditingController? controller;
 
   const AdminTextField({
     super.key,
@@ -14,6 +15,7 @@ class AdminTextField extends StatelessWidget {
     required this.hint,
     required this.suffixIcon,
     this.isPassword = false,
+    this.controller,
   });
 
   @override
@@ -32,6 +34,7 @@ class AdminTextField extends StatelessWidget {
         ),
         SizedBox(height: 12.h), // تم تكبير المسافة
         TextField(
+          controller: controller,
           obscureText: isPassword,
           style: TextStyle(fontSize: 18.sp, color: AppColors.textPrimary), // خط الكتابة (كان 14)
           decoration: InputDecoration(
