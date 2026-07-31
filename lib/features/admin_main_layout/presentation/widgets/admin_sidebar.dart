@@ -89,7 +89,7 @@ class AdminSidebar extends StatelessWidget {
 
   Widget _buildBottomAction(IconData icon, String title, {VoidCallback? onTap}) {
     return InkWell(
-      onTap: onTap ?? () {},
+      onTap: onTap,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         child: Row(
@@ -112,7 +112,11 @@ Future<void> _handleLogout(BuildContext context) async {
     confirmLabel: 'sidebar_logout'.tr(),
   );
   if (!confirmed) return;
-  await sl<AuthRepository>().logout();
+  try {
+    await sl<AuthRepository>().logout();
+  } catch (_) {
+    // Fail closed: force re-login rather than leave a stale token behind.
+  }
   if (context.mounted) {
     Navigator.pushNamedAndRemoveUntil(
       context,

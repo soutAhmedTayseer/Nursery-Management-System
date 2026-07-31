@@ -27,4 +27,12 @@ void main() {
     act: (cubit) => cubit.checkSession(),
     expect: () => [isA<SplashNavigateToLogin>()],
   );
+
+  blocTest<SplashCubit, SplashState>(
+    'navigates to login when the session check throws',
+    setUp: () => when(() => repository.hasSession()).thenThrow(Exception('storage error')),
+    build: () => SplashCubit(repository),
+    act: (cubit) => cubit.checkSession(),
+    expect: () => [isA<SplashNavigateToLogin>()],
+  );
 }

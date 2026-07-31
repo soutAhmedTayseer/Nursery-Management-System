@@ -44,4 +44,18 @@ void main() {
       isA<AdminLoginError>().having((s) => s.exception.code, 'code', 'INVALID_CREDENTIALS'),
     ],
   );
+
+  blocTest<AdminLoginCubit, AdminLoginState>(
+    'emits Loading then Error on an unexpected non-ApiException error',
+    setUp: () => when(() => repository.login(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        )).thenThrow(Exception('storage error')),
+    build: () => AdminLoginCubit(repository),
+    act: (cubit) => cubit.login('admin@wildwood.com', 'secret'),
+    expect: () => [
+      isA<AdminLoginLoading>(),
+      isA<AdminLoginError>(),
+    ],
+  );
 }

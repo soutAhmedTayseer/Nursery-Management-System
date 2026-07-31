@@ -12,7 +12,13 @@ class SplashCubit extends Cubit<SplashState> {
     // A brief pause keeps the splash animation from flashing off-screen —
     // not a fixed timer gating navigation, the session check itself decides.
     await Future<void>.delayed(const Duration(milliseconds: 800));
-    final hasSession = await _repository.hasSession();
-    emit(hasSession ? SplashNavigateToLayout() : SplashNavigateToLogin());
+    try {
+      final hasSession = await _repository.hasSession();
+      emit(hasSession ? SplashNavigateToLayout() : SplashNavigateToLogin());
+    } catch (_) {
+      // Fail closed: a corrupt/locked secure-storage read must not hang the
+      // splash screen forever — send the user to login instead.
+      emit(SplashNavigateToLogin());
+    }
   }
 }

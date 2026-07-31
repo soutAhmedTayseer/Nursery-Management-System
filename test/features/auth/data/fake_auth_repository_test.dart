@@ -47,7 +47,7 @@ void main() {
 
   test('login throws ApiException when the failure switch is on', () async {
     failureSwitch.enabled = true;
-    expect(
+    await expectLater(
       () => repository.login(email: 'admin@wildwood.com', password: 'secret'),
       throwsA(isA<ApiException>()),
     );

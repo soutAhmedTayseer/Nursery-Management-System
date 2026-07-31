@@ -28,6 +28,8 @@ class AdminLoginCubit extends Cubit<AdminLoginState> {
       emit(AdminLoginSuccess());
     } on ApiException catch (exception) {
       emit(AdminLoginError(exception));
+    } catch (_) {
+      emit(AdminLoginError(const ApiException(code: '', message: 'Unexpected error', statusCode: null)));
     }
   }
 }
