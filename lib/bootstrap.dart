@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:nursery_shared/nursery_shared.dart';
+import 'core/di/injection.dart';
 import 'core/routes/app_router.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
@@ -8,6 +10,7 @@ import 'core/theme/app_theme.dart';
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  await setupLocator(baseUrl: AppEnv.apiBaseUrl);
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('ar')],

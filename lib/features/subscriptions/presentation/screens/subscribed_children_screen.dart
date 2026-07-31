@@ -47,9 +47,9 @@ class SubscribedChildrenScreen extends StatelessWidget {
                         crossAxisSpacing: 24.w,
                         childAspectRatio: isPortrait ? 0.75 : 0.88, // نسبة متغيرة لمنع الـ Overflow
                       ),
-                      itemCount: state.displayedKids.length,
+                      itemCount: state.items.length,
                       itemBuilder: (context, index) {
-                        final child = state.displayedKids[index];
+                        final child = state.items[index];
                         return ChildSubscriptionCard(
                           child: child,
                           onTap: () {

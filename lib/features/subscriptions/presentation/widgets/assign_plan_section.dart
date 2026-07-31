@@ -2,10 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../sessions/data/models/child_session_model.dart';
+import '../../../sessions/data/models/kid_session.dart';
 
 class AssignPlanSection extends StatelessWidget {
-  final ChildSessionModel child;
+  final KidSession child;
 
   const AssignPlanSection({super.key, required this.child});
 
@@ -30,18 +30,18 @@ class AssignPlanSection extends StatelessWidget {
             child: Row(
               children: [
                 CircleAvatar(
-                  radius: 24.r, 
-                  backgroundImage: AssetImage(child.image),
+                  radius: 24.r,
+                  backgroundImage: child.kid.photoUrl.isEmpty ? null : NetworkImage(child.kid.photoUrl),
                   onBackgroundImageError: (_, _) {},
-                  child: child.image.isEmpty ? const Icon(Icons.person) : null,
+                  child: child.kid.photoUrl.isEmpty ? const Icon(Icons.person) : null,
                 ),
                 SizedBox(width: 12.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(child.name, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                      Text('assign_plan_parent_label'.tr(namedArgs: {'lastName': child.name.split(' ').last}), style: TextStyle(fontSize: 11.sp, color: Colors.grey)),
+                      Text(child.kid.fullName, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                      Text('assign_plan_parent_label'.tr(namedArgs: {'lastName': child.kid.fullName.split(' ').last}), style: TextStyle(fontSize: 11.sp, color: Colors.grey)),
                     ],
                   ),
                 ),
@@ -63,7 +63,7 @@ class AssignPlanSection extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(child.subscription, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                Text(child.planLabel, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
                 Text('\$240', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.green.shade700)),
               ],
             ),

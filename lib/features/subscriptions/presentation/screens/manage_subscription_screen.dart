@@ -2,13 +2,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../sessions/data/models/child_session_model.dart';
+import '../../../sessions/data/models/kid_session.dart';
 import '../widgets/assign_plan_section.dart';
 import '../widgets/global_plan_card.dart';
 import '../widgets/plan_history_section.dart';
 
 class ManageSubscriptionScreen extends StatelessWidget {
-  final ChildSessionModel childData;
+  final KidSession childData;
 
   const ManageSubscriptionScreen({super.key, required this.childData});
 
@@ -81,14 +81,14 @@ class ManageSubscriptionScreen extends StatelessWidget {
                 if (isPortrait) ...[
                   AssignPlanSection(child: childData),
                   SizedBox(height: 32.h),
-                  PlanHistorySection(childName: childData.name),
+                  PlanHistorySection(childName: childData.kid.fullName),
                 ] else ...[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(flex: 2, child: AssignPlanSection(child: childData)),
                       SizedBox(width: 32.w),
-                      Expanded(flex: 4, child: PlanHistorySection(childName: childData.name)),
+                      Expanded(flex: 4, child: PlanHistorySection(childName: childData.kid.fullName)),
                     ],
                   ),
                 ],

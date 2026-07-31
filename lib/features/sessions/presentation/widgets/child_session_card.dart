@@ -2,16 +2,23 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../data/models/child_session_model.dart';
+import '../../data/models/kid_session.dart';
 
 class ChildSessionCard extends StatelessWidget {
-  final ChildSessionModel child;
-  const ChildSessionCard({super.key, required this.child});
+  final KidSession entry;
+  const ChildSessionCard({super.key, required this.entry});
+
+  String _formatElapsed(Duration duration) {
+    final hours = duration.inHours.toString().padLeft(2, '0');
+    final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
+    return '${hours}h ${minutes}m';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final photoUrl = entry.kid.photoUrl;
     return Container(
-      padding: EdgeInsets.all(20.w), // Slightly reduced padding
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28.r),
@@ -25,23 +32,22 @@ class ChildSessionCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
-                radius: 32.r, 
-                backgroundImage: AssetImage(child.image),
-                onBackgroundImageError: (_, _) {},
-                child: child.image.isEmpty ? const Icon(Icons.person) : null,
+                radius: 32.r,
+                backgroundImage: photoUrl.isEmpty ? null : NetworkImage(photoUrl),
+                child: photoUrl.isEmpty ? const Icon(Icons.person) : null,
               ),
               _buildStatusBadge(),
             ],
           ),
           SizedBox(height: 16.h),
           Text(
-            child.name, 
+            entry.kid.fullName,
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-            maxLines: 1, 
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           Text(
-            'session_subscribed_label'.tr(namedArgs: {'plan': child.subscription}),
+            'session_subscribed_label'.tr(namedArgs: {'plan': entry.planLabel}),
             style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500, fontWeight: FontWeight.w500),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -49,9 +55,9 @@ class ChildSessionCard extends StatelessWidget {
           const Spacer(),
           Row(
             children: [
-              _buildActionButton(Icons.login, 'session_clock_in'.tr(), child.isCheckedIn ? Colors.grey.shade200 : AppColors.mintTint, !child.isCheckedIn),
+              _buildActionButton(Icons.login, 'session_clock_in'.tr(), entry.isCheckedIn ? Colors.grey.shade200 : AppColors.mintTint, !entry.isCheckedIn),
               SizedBox(width: 8.w),
-              _buildActionButton(Icons.logout, 'session_clock_out'.tr(), !child.isCheckedIn ? Colors.grey.shade200 : AppColors.peachTint, child.isCheckedIn),
+              _buildActionButton(Icons.logout, 'session_clock_out'.tr(), !entry.isCheckedIn ? Colors.grey.shade200 : AppColors.peachTint, entry.isCheckedIn),
             ],
           )
         ],
@@ -60,16 +66,17 @@ class ChildSessionCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadge() {
-    final color = child.isCheckedIn ? AppColors.accentGreen : Colors.grey.shade400;
+    final color = entry.isCheckedIn ? AppColors.accentGreen : Colors.grey.shade400;
+    final elapsed = entry.elapsed;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12.r)),
       child: Column(
         children: [
-          Text(child.isCheckedIn ? 'session_checked_in'.tr() : 'session_checked_out'.tr(), style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
-          if (child.isCheckedIn) ...[
+          Text(entry.isCheckedIn ? 'session_checked_in'.tr() : 'session_checked_out'.tr(), style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
+          if (entry.isCheckedIn && elapsed != null) ...[
             SizedBox(height: 4.h),
-            Row(children: [Icon(Icons.timer_outlined, size: 10.w, color: color), SizedBox(width: 4.w), Text(child.duration ?? '', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: color))]),
+            Row(children: [Icon(Icons.timer_outlined, size: 10.w, color: color), SizedBox(width: 4.w), Text(_formatElapsed(elapsed), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: color))]),
           ]
         ],
       ),
@@ -88,7 +95,7 @@ class ChildSessionCard extends StatelessWidget {
             SizedBox(width: 4.w),
             Flexible(
               child: Text(
-                label, 
+                label,
                 style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: isActive ? Colors.black87 : Colors.grey.shade500),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

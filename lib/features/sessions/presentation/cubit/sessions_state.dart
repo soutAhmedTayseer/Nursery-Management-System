@@ -7,22 +7,23 @@ class SessionsInitial extends SessionsState {}
 class SessionsLoading extends SessionsState {}
 
 class SessionsLoaded extends SessionsState {
-  final List<ChildSessionModel> displayedKids;
+  SessionsLoaded({
+    required this.items,
+    required this.totalCount,
+    required this.currentPage,
+    required this.totalPages,
+    this.searchQuery = '',
+  });
+
+  final List<KidSession> items;
   final int totalCount;
   final String searchQuery;
   final int currentPage;
   final int totalPages;
-
-  SessionsLoaded({
-    required this.displayedKids,
-    required this.totalCount,
-    required this.currentPage,
-    required this.totalPages,
-    this.searchQuery = "",
-  });
 }
 
 class SessionsError extends SessionsState {
-  final String message;
-  SessionsError(this.message);
+  SessionsError(this.exception);
+
+  final ApiException exception;
 }

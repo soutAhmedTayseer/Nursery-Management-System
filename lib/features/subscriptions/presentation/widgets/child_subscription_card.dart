@@ -2,10 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../sessions/data/models/child_session_model.dart';
+import '../../../sessions/data/models/kid_session.dart';
 
 class ChildSubscriptionCard extends StatelessWidget {
-  final ChildSessionModel child;
+  final KidSession child;
   final VoidCallback onTap;
 
   const ChildSubscriptionCard({
@@ -42,8 +42,8 @@ class ChildSubscriptionCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 38.r,
                   backgroundColor: AppColors.background,
-                  backgroundImage: child.image.isNotEmpty ? AssetImage(child.image) : null,
-                  child: child.image.isEmpty ? Icon(Icons.person, size: 30.w, color: Colors.grey) : null,
+                  backgroundImage: child.kid.photoUrl.isNotEmpty ? NetworkImage(child.kid.photoUrl) : null,
+                  child: child.kid.photoUrl.isEmpty ? Icon(Icons.person, size: 30.w, color: Colors.grey) : null,
                 ),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
@@ -67,7 +67,7 @@ class ChildSubscriptionCard extends StatelessWidget {
 
             // Child Name
             Text(
-              child.name,
+              child.kid.fullName,
               style: TextStyle(
                 fontSize: 22.sp,
                 fontWeight: FontWeight.bold,
@@ -79,7 +79,7 @@ class ChildSubscriptionCard extends StatelessWidget {
 
             // Parent Name (Contextual Info)
             Text(
-              'assign_plan_parent_label'.tr(namedArgs: {'lastName': child.name.split(' ').last}),
+              'assign_plan_parent_label'.tr(namedArgs: {'lastName': child.kid.fullName.split(' ').last}),
               style: TextStyle(
                 fontSize: 13.sp,
                 color: Colors.grey.shade500,
@@ -107,7 +107,7 @@ class ChildSubscriptionCard extends StatelessWidget {
                         style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold, color: Colors.grey),
                       ),
                       Text(
-                        child.subscription,
+                        child.planLabel,
                         style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen),
                       ),
                     ],

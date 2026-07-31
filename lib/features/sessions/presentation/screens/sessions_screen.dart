@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/async_state_view.dart';
 import '../cubit/sessions_cubit.dart';
 import '../widgets/child_session_card.dart';
 
@@ -11,9 +12,8 @@ class SessionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Identify orientation for dynamic grid adjustments
     final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
-    
+
     return Scaffold(
       backgroundColor: AppColors.surfaceCream,
       body: Padding(
@@ -21,38 +21,37 @@ class SessionsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 2. Header
             _buildHeader(),
             SizedBox(height: 32.h),
-
-            // 3. Dynamic Grid
             Expanded(
               child: BlocBuilder<SessionsCubit, SessionsState>(
                 builder: (context, state) {
-                  if (state is SessionsLoading) return const Center(child: CircularProgressIndicator());
-                  
-                  if (state is SessionsLoaded) {
-                    if (state.displayedKids.isEmpty) {
-                       return Center(child: Text('sessions_none_found'.tr(), style: TextStyle(fontSize: 18.sp, color: Colors.grey)));
-                    }
-                    return GridView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: isPortrait ? 3 : 4,
-                        mainAxisSpacing: 24.w,
-                        crossAxisSpacing: 24.w,
-                        childAspectRatio: isPortrait ? 0.72 : 0.85, 
-                      ),
-                      itemCount: state.displayedKids.length,
-                      itemBuilder: (context, index) => ChildSessionCard(child: state.displayedKids[index]),
-                    );
-                  }
-                  return const SizedBox();
+                  final isLoaded = state is SessionsLoaded;
+                  return AsyncStateView(
+                    isLoading: state is SessionsLoading,
+                    error: state is SessionsError ? state.exception : null,
+                    isEmpty: isLoaded && state.items.isEmpty,
+                    onRetry: () => context.read<SessionsCubit>().loadSessions(),
+                    emptyMessage: 'sessions_none_found'.tr(),
+                    builder: (context) {
+                      final loaded = state as SessionsLoaded;
+                      return GridView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: isPortrait ? 3 : 4,
+                          mainAxisSpacing: 24.w,
+                          crossAxisSpacing: 24.w,
+                          childAspectRatio: isPortrait ? 0.72 : 0.85,
+                        ),
+                        itemCount: loaded.items.length,
+                        itemBuilder: (context, index) =>
+                            ChildSessionCard(entry: loaded.items[index]),
+                      );
+                    },
+                  );
                 },
               ),
             ),
-
-            // 4. Dynamic Pagination Footer
             BlocBuilder<SessionsCubit, SessionsState>(
               builder: (context, state) {
                 if (state is SessionsLoaded) {
@@ -113,11 +112,12 @@ class SessionsScreen extends StatelessWidget {
 
   Widget _buildDynamicPaginationFooter(BuildContext context, SessionsLoaded state) {
     final cubit = context.read<SessionsCubit>();
-    
-    int startItem = (state.currentPage - 1) * cubit.itemsPerPage + 1;
-    int endItem = startItem + state.displayedKids.length - 1;
+
+    int startItem = (state.currentPage - 1) * cubit.pageSize + 1;
+    int endItem = startItem + state.items.length - 1;
     if (state.totalCount == 0) {
-      startItem = 0; endItem = 0;
+      startItem = 0;
+      endItem = 0;
     }
 
     return Padding(
@@ -136,26 +136,24 @@ class SessionsScreen extends StatelessWidget {
           Row(
             children: [
               _buildPageArrowBtn(
-                Icons.chevron_left, 
+                Icons.chevron_left,
                 isActive: state.currentPage > 1,
                 onTap: () {
                   if (state.currentPage > 1) cubit.changePage(state.currentPage - 1);
                 }
               ),
               SizedBox(width: 8.w),
-              
               ...List.generate(state.totalPages, (index) {
                 int pageNum = index + 1;
                 return _buildPageNumber(
-                  pageNum.toString(), 
+                  pageNum.toString(),
                   isActive: pageNum == state.currentPage,
                   onTap: () => cubit.changePage(pageNum),
                 );
               }),
-              
               SizedBox(width: 8.w),
               _buildPageArrowBtn(
-                Icons.chevron_right, 
+                Icons.chevron_right,
                 isActive: state.currentPage < state.totalPages,
                 onTap: () {
                   if (state.currentPage < state.totalPages) cubit.changePage(state.currentPage + 1);
