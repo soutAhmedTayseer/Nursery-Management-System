@@ -179,5 +179,17 @@
   "plan_history_col_date": "DATE",
   "plan_history_col_old_plan": "OLD PLAN",
   "plan_history_col_new_plan": "NEW PLAN",
-  "plan_history_col_changed_by": "CHANGED BY"
+  "plan_history_col_changed_by": "CHANGED BY",
+
+  "error_generic": "Something went wrong. Please try again.",
+  "error_network_error": "No connection. Check your network and try again.",
+  "error_unauthorized": "Your session expired. Please sign in again.",
+  "error_forbidden": "You do not have permission to do that.",
+  "error_invalid_credentials": "Wrong email or password.",
+  "error_kid_not_found": "That child's record could not be found.",
+  "error_validation_error": "Please check the highlighted fields.",
+  "state_empty_title": "Nothing here yet",
+  "state_error_retry": "Try again",
+  "action_cancel": "Cancel",
+  "action_confirm": "Confirm"
 }

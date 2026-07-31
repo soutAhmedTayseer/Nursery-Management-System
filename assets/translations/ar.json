@@ -179,5 +179,17 @@
   "plan_history_col_date": "التاريخ",
   "plan_history_col_old_plan": "الخطة القديمة",
   "plan_history_col_new_plan": "الخطة الجديدة",
-  "plan_history_col_changed_by": "تم التغيير بواسطة"
+  "plan_history_col_changed_by": "تم التغيير بواسطة",
+
+  "error_generic": "حدث خطأ ما. حاول مرة أخرى.",
+  "error_network_error": "لا يوجد اتصال. تحقق من الشبكة وحاول مرة أخرى.",
+  "error_unauthorized": "انتهت جلستك. الرجاء تسجيل الدخول مرة أخرى.",
+  "error_forbidden": "ليس لديك صلاحية للقيام بذلك.",
+  "error_invalid_credentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+  "error_kid_not_found": "تعذر العثور على سجل هذا الطفل.",
+  "error_validation_error": "الرجاء مراجعة الحقول المحددة.",
+  "state_empty_title": "لا يوجد شيء هنا بعد",
+  "state_error_retry": "حاول مرة أخرى",
+  "action_cancel": "إلغاء",
+  "action_confirm": "تأكيد"
 }
