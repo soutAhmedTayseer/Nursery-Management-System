@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class EmergencyContactSection extends StatelessWidget {
@@ -10,6 +11,7 @@ class EmergencyContactSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = context.uiScale;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceSand,
@@ -37,15 +39,15 @@ class EmergencyContactSection extends StatelessWidget {
                     Row(
                       children: [
                         CircleAvatar(
-                          radius: 18.r,
+                          radius: (18 * scale).r,
                           backgroundColor: AppColors.dangerRed.withValues(alpha: 0.1),
-                          child: Icon(Icons.medical_services_rounded, color: AppColors.dangerRed, size: 18.w),
+                          child: Icon(Icons.medical_services_rounded, color: AppColors.dangerRed, size: (18 * scale).w),
                         ),
                         SizedBox(width: 16.w),
                         Expanded(
                           child: Text(
                             'emergency_contact_title'.tr(),
-                            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: AppColors.dangerRed, letterSpacing: 1.2, height: 1.2),
+                            style: TextStyle(fontSize: (16 * scale).sp, fontWeight: FontWeight.w900, color: AppColors.dangerRed, letterSpacing: 1.2, height: 1.2),
                           ),
                         ),
                       ],

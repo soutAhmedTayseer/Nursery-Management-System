@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class RegistrationFormSection extends StatelessWidget {
@@ -14,6 +15,7 @@ class RegistrationFormSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = context.uiScale;
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
@@ -26,19 +28,19 @@ class RegistrationFormSection extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                radius: 18.r,
+                radius: (18 * scale).r,
                 backgroundColor: accentColor.withValues(alpha: 0.1),
-                child: Icon(icon, color: accentColor, size: 18.w),
+                child: Icon(icon, color: accentColor, size: (18 * scale).w),
               ),
               SizedBox(width: 16.w),
               Expanded(
                 child: Text(
                   title.toUpperCase(),
                   style: TextStyle(
-                    fontSize: 16.sp, 
-                    fontWeight: FontWeight.w900, 
-                    color: accentColor, 
-                    letterSpacing: 1.2
+                    fontSize: (16 * scale).sp,
+                    fontWeight: FontWeight.w900,
+                    color: accentColor,
+                    letterSpacing: 1.2,
                   ),
                 ),
               ),
