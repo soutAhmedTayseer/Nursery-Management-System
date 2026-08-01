@@ -21,23 +21,28 @@ class ManageSubscriptionScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+        leading: Padding(
+          padding: EdgeInsets.all(8.w),
+          child: InkWell(
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(16.r),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))],
+              ),
+              child: Icon(Icons.arrow_back_rounded, color: AppColors.accentGreen, size: 20.w),
+            ),
+          ),
         ),
-        title: Text('subscriptions_admin_appbar_title'.tr(), style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(32.w),
+        padding: EdgeInsets.fromLTRB(32.w, 0, 32.w, 32.w),
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-                // 1. Header
-                Text('subscriptions_manage_title'.tr(), style: TextStyle(fontSize: 34.sp, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-                Text('subscriptions_manage_subtitle'.tr(), style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600)),
-                SizedBox(height: 48.h),
-
                 // 2. Global Plans (Horizontal Scroll)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
