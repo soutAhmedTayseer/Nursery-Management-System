@@ -191,9 +191,11 @@
 
   "subscribed_children_title": "Subscribed Children",
   "subscribed_children_subtitle": "Manage financial plans, billing cycles, and subscription tiers.",
+  "subscribed_children_coming_soon": "This screen is being redesigned. Check back soon.",
 
   "assign_plan_title": "Assign Plan",
   "assign_plan_parent_label": "Parent: Sarah {lastName}",
+  "assign_plan_parent_name_label": "Parent: {name}",
   "subscription_active_badge": "ACTIVE",
   "assign_plan_current_plan_label": "CURRENT ACTIVE PLAN",
   "assign_plan_change_plan_label": "CHANGE PLAN",
@@ -209,6 +211,13 @@
   "plan_history_col_old_plan": "OLD PLAN",
   "plan_history_col_new_plan": "NEW PLAN",
   "plan_history_col_changed_by": "CHANGED BY",
+  "plan_history_no_entries": "No plan changes yet.",
+  "plan_history_send_whatsapp": "Send via WhatsApp",
+  "plan_history_export_started": "Report saved.",
+  "plan_history_no_phone": "No parent phone number on file for this child.",
+  "plan_history_whatsapp_none": "No changes yet.",
+  "plan_history_whatsapp_message": "Subscription summary for {child}\nParent: {parent}\nCurrent plan: {plan} ({price})\nStart date: {startDate}\n\nPlan history:\n{history}",
+  "assign_plan_updated_snackbar": "Plan updated to {plan}.",
 
   "error_generic": "Something went wrong. Please try again.",
   "error_network_error": "No connection. Check your network and try again.",

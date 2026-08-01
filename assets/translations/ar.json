@@ -191,9 +191,11 @@
 
   "subscribed_children_title": "الأطفال المشتركون",
   "subscribed_children_subtitle": "إدارة الخطط المالية ودورات الفوترة وفئات الاشتراك.",
+  "subscribed_children_coming_soon": "يتم إعادة تصميم هذه الشاشة. تابعونا قريباً.",
 
   "assign_plan_title": "تعيين خطة",
   "assign_plan_parent_label": "ولي الأمر: سارة {lastName}",
+  "assign_plan_parent_name_label": "ولي الأمر: {name}",
   "subscription_active_badge": "نشط",
   "assign_plan_current_plan_label": "الخطة النشطة الحالية",
   "assign_plan_change_plan_label": "تغيير الخطة",
@@ -209,6 +211,13 @@
   "plan_history_col_old_plan": "الخطة القديمة",
   "plan_history_col_new_plan": "الخطة الجديدة",
   "plan_history_col_changed_by": "تم التغيير بواسطة",
+  "plan_history_no_entries": "لا يوجد تغييرات خطط بعد.",
+  "plan_history_send_whatsapp": "إرسال عبر واتساب",
+  "plan_history_export_started": "تم حفظ التقرير.",
+  "plan_history_no_phone": "لا يوجد رقم هاتف لولي الأمر لهذا الطفل.",
+  "plan_history_whatsapp_none": "لا يوجد تغييرات بعد.",
+  "plan_history_whatsapp_message": "ملخص الاشتراك لـ {child}\nولي الأمر: {parent}\nالخطة الحالية: {plan} ({price})\nتاريخ البدء: {startDate}\n\nسجل الخطط:\n{history}",
+  "assign_plan_updated_snackbar": "تم تحديث الخطة إلى {plan}.",
 
   "error_generic": "حدث خطأ ما. حاول مرة أخرى.",
   "error_network_error": "لا يوجد اتصال. تحقق من الشبكة وحاول مرة أخرى.",
