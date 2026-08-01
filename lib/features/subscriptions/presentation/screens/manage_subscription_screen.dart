@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/mouse_wheel_horizontal_scroll.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../widgets/assign_plan_section.dart';
 import '../widgets/global_plan_card.dart';
@@ -57,9 +58,7 @@ class ManageSubscriptionScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 20.h),
                 
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
+                MouseWheelHorizontalScroll(
                   child: Row(
                     children: [
                       GlobalPlanCard(title: 'subscriptions_plan_monthly'.tr(), duration: 'subscriptions_plan_monthly_duration'.tr(), price: '\$240', icon: Icons.calendar_month, themeColor: Colors.green),
