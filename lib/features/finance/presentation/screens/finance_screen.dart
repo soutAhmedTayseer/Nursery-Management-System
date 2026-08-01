@@ -2,7 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/adaptive_collection.dart';
 import '../../data/models/finance_model.dart';
 import '../cubit/finance_cubit.dart';
 import '../cubit/finance_state.dart';
@@ -14,6 +17,34 @@ class FinanceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final spacing = AppSpacing.of(context);
+    final statsColumn = Column(
+      children: [
+        FinanceStatCard(
+          title: 'finance_total_outstanding_title'.tr(),
+          value: '42,850',
+          subtitle: 'finance_total_outstanding_subtitle'.tr(),
+          color: AppColors.forestGreen,
+          trendWidget: _buildTrendBadge(),
+        ),
+        SizedBox(height: spacing.md),
+        FinanceStatCard(
+          title: 'finance_penalty_revenue_title'.tr(),
+          value: '3,125',
+          subtitle: 'finance_penalty_revenue_subtitle'.tr(),
+          color: AppColors.peachTint.withValues(alpha: 0.8),
+        ),
+      ],
+    );
+    final chartCard = Container(
+      padding: EdgeInsets.all(spacing.xl),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32.r),
+      ),
+      child: _buildRevenueHeader(),
+    );
+
     return BlocProvider(
       create: (context) => FinanceCubit(),
       child: Scaffold(
@@ -28,72 +59,51 @@ class FinanceScreen extends StatelessWidget {
           },
         ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.all(32.w),
+          padding: EdgeInsets.all(spacing.pagePadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Top Section: Charts and Stats
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+              // 1. Top Section: Charts and Stats - stacks at compact
+              if (context.isCompact)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Revenue Breakdown Chart Card
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        padding: EdgeInsets.all(32.w),
-                        decoration: BoxDecoration(
-                          color: Colors.white, 
-                          borderRadius: BorderRadius.circular(32.r)
-                        ),
-                        child: _buildRevenueHeader(),
-                      ),
-                    ),
-                    SizedBox(width: 24.w),
-                    // Stats Column
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          Expanded(child: FinanceStatCard(
-                            title: 'finance_total_outstanding_title'.tr(),
-                            value: '42,850',
-                            subtitle: 'finance_total_outstanding_subtitle'.tr(),
-                            color: AppColors.forestGreen,
-                            trendWidget: _buildTrendBadge(),
-                          )),
-                          SizedBox(height: 16.h),
-                          Expanded(child: FinanceStatCard(
-                            title: 'finance_penalty_revenue_title'.tr(),
-                            value: '3,125',
-                            subtitle: 'finance_penalty_revenue_subtitle'.tr(),
-                            color: AppColors.peachTint.withValues(alpha: 0.8), // Adjusting for visibility
-                          )),
-                        ],
-                      ),
-                    ),
+                    chartCard,
+                    SizedBox(height: spacing.md),
+                    statsColumn,
                   ],
+                )
+              else
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(flex: 2, child: chartCard),
+                      SizedBox(width: spacing.lg),
+                      Expanded(flex: 1, child: statsColumn),
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 48.h),
+              SizedBox(height: spacing.xxl),
 
               // 2. Table Header and Actions
               _buildTableActions(),
-              SizedBox(height: 24.h),
+              SizedBox(height: spacing.md),
 
-              // 3. Payments Table
-              _buildTableHeaderLabels(),
-              SizedBox(height: 16.h),
-              
+              // 3. Payments - table on desktop, cards below
               BlocBuilder<FinanceCubit, FinanceState>(
                 builder: (context, state) {
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: state.filteredPayments.length,
-                    itemBuilder: (context, index) => PaymentTableRow(
-                      record: state.filteredPayments[index]
-                    ),
+                  return AdaptiveCollection<PaymentRecord>(
+                    items: state.filteredPayments,
+                    columns: [
+                      AdaptiveColumn(label: 'finance_header_parent_name'.tr(), cell: (r) => Text(r.parentName, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold))),
+                      AdaptiveColumn(label: 'finance_header_child_name'.tr(), cell: (r) => Text(r.childName, style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600))),
+                      AdaptiveColumn(label: 'finance_header_base_fee'.tr(), cell: (r) => Text('${r.baseFee.toInt()} AED', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold))),
+                      AdaptiveColumn(label: 'finance_header_overtime_hours'.tr(), cell: (r) => Text('${r.overtimeHours} hrs', style: TextStyle(fontSize: 13.sp))),
+                      AdaptiveColumn(label: 'finance_header_penalty_amount'.tr(), cell: (r) => Text('${r.penaltyAmount.toInt()} AED', style: TextStyle(fontSize: 13.sp))),
+                      AdaptiveColumn(label: 'finance_header_total_due'.tr(), cell: (r) => Text('${r.totalDue.toInt()} AED', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900))),
+                    ],
+                    cardBuilder: (context, record) => PaymentTableRow(record: record),
                   );
                 },
               ),
@@ -201,36 +211,6 @@ class FinanceScreen extends StatelessWidget {
     ));
   }
 
-  Widget _buildTableHeaderLabels() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: Row(
-        children: [
-          _buildHeaderCell(2, 'finance_header_parent_name'.tr()),
-          _buildHeaderCell(1.5, 'finance_header_child_name'.tr()),
-          _buildHeaderCell(1.5, 'finance_header_base_fee'.tr()),
-          _buildHeaderCell(1.5, 'finance_header_overtime_hours'.tr()),
-          _buildHeaderCell(1.5, 'finance_header_penalty_amount'.tr()),
-          _buildHeaderCell(1.5, 'finance_header_total_due'.tr()),
-          _buildHeaderCell(1, 'finance_header_action'.tr()),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeaderCell(double flex, String text) => Expanded(
-    flex: (flex * 100).toInt(), 
-    child: Text(
-      text, 
-      style: TextStyle(
-        fontSize: 10.sp, 
-        fontWeight: FontWeight.bold, 
-        color: Colors.grey.shade400, 
-        letterSpacing: 1
-      )
-    )
-  );
-  
   Widget _buildRevenueHeader() {
      return Column(
        crossAxisAlignment: CrossAxisAlignment.start,
