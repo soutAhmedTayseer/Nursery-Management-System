@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_fonts.dart';
 import 'app_spacing.dart';
 
 class AppTheme {
@@ -19,6 +20,11 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.background,
+      // Figma's "kids-nursery" file uses Manrope for body text and
+      // Plus Jakarta Sans for headings — Manrope as the theme default
+      // covers body text app-wide; headings opt into Jakarta explicitly
+      // (see headlineLarge below, and AppFonts.jakarta elsewhere).
+      fontFamily: AppFonts.manrope,
       cardTheme: const CardThemeData(
         color: Colors.white,
         elevation: 0,
@@ -61,6 +67,7 @@ class AppTheme {
       ),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
+          fontFamily: AppFonts.jakarta,
           fontWeight: FontWeight.w900,
           color: AppColors.textPrimary,
           letterSpacing: -0.5,

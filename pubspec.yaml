@@ -34,6 +34,7 @@ dependencies:
   flutter_bloc: ^9.1.0
   flutter_screenutil: ^5.9.3
   lottie: ^3.3.2
+  flutter_svg: ^2.2.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -77,6 +78,15 @@ flutter:
     - assets/images/
     - assets/animations/
     - assets/translations/
+    - assets/icons/subscriptions/
+
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope.ttf
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
