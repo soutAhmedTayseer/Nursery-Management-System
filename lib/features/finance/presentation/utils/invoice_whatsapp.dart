@@ -6,7 +6,8 @@ import '../../data/models/finance_model.dart';
 
 /// Opens WhatsApp with the invoice summary pre-filled for [record]'s parent.
 Future<void> sendInvoiceViaWhatsapp(BuildContext context, PaymentRecord record) async {
-  if (record.parentPhone.isEmpty) {
+  final digitsOnly = record.parentPhone.replaceAll(RegExp(r'[^0-9]'), '');
+  if (digitsOnly.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('finance_invoice_no_phone'.tr())),
     );
@@ -22,7 +23,7 @@ Future<void> sendInvoiceViaWhatsapp(BuildContext context, PaymentRecord record) 
     'total': record.totalDue.toInt().toString(),
   });
 
-  final uri = Uri.https('wa.me', '/${record.parentPhone}', {'text': message});
+  final uri = Uri.https('wa.me', '/$digitsOnly', {'text': message});
   final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
 
   if (!launched && context.mounted) {
