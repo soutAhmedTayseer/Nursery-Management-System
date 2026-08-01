@@ -2,6 +2,21 @@
   "app_title": "Nursery Management System",
   "route_not_found": "No route defined for {name}",
 
+  "child_profile_age_label": "{age} years",
+  "child_profile_allergies_label": "Allergies",
+  "child_profile_emergency_contact_label": "Emergency Contact",
+  "child_profile_emergency_relation": "Guardian",
+  "child_profile_primary_number": "Primary Number",
+  "child_profile_export": "Export Profile",
+  "child_profile_export_started": "Profile saved.",
+  "child_profile_tab_attendance": "Attendance Log",
+  "child_profile_tab_financial": "Financial Dues",
+  "child_profile_attendance_subtitle": "Total attendance: {days} days ({hours}h total)",
+  "child_profile_average_stay_title": "Average Daily Stay",
+  "child_profile_average_stay_subtitle": "Based on this month's active days",
+  "child_profile_today_label": "Today",
+  "child_profile_absent_marker": "—",
+
   "login_email_hint": "Email or Phone Number",
   "login_password_hint": "Password",
   "login_submit_button": "ACCESS PORTAL",
@@ -204,8 +219,11 @@
   "subscription_card_plan_label": "PLAN",
 
   "global_plan_per_month_suffix": " /mo",
+  "global_plan_per_hour_suffix": " /hr",
+  "global_plan_per_package_suffix": " /pkg",
 
   "plan_history_title": "Plan History: {childName}",
+  "plan_history_title_generic": "Plan History",
   "plan_history_export_report": "Export Report",
   "plan_history_col_date": "DATE",
   "plan_history_col_old_plan": "OLD PLAN",

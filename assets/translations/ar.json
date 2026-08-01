@@ -2,6 +2,21 @@
   "app_title": "نظام إدارة الحضانة",
   "route_not_found": "لا يوجد مسار محدد لـ {name}",
 
+  "child_profile_age_label": "{age} سنوات",
+  "child_profile_allergies_label": "الحساسية",
+  "child_profile_emergency_contact_label": "جهة اتصال الطوارئ",
+  "child_profile_emergency_relation": "ولي الأمر",
+  "child_profile_primary_number": "الرقم الأساسي",
+  "child_profile_export": "تصدير الملف",
+  "child_profile_export_started": "تم حفظ الملف.",
+  "child_profile_tab_attendance": "سجل الحضور",
+  "child_profile_tab_financial": "المستحقات المالية",
+  "child_profile_attendance_subtitle": "إجمالي الحضور: {days} يوم ({hours} ساعة)",
+  "child_profile_average_stay_title": "متوسط مدة البقاء اليومي",
+  "child_profile_average_stay_subtitle": "بناءً على أيام النشاط هذا الشهر",
+  "child_profile_today_label": "اليوم",
+  "child_profile_absent_marker": "—",
+
   "login_email_hint": "البريد الإلكتروني أو رقم الهاتف",
   "login_password_hint": "كلمة المرور",
   "login_submit_button": "دخول",
@@ -204,8 +219,11 @@
   "subscription_card_plan_label": "الخطة",
 
   "global_plan_per_month_suffix": " / شهرياً",
+  "global_plan_per_hour_suffix": " / ساعة",
+  "global_plan_per_package_suffix": " / باقة",
 
   "plan_history_title": "سجل الخطط: {childName}",
+  "plan_history_title_generic": "سجل الخطط",
   "plan_history_export_report": "تصدير التقرير",
   "plan_history_col_date": "التاريخ",
   "plan_history_col_old_plan": "الخطة القديمة",
