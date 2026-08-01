@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class DashboardStatCard extends StatelessWidget {
@@ -24,6 +25,7 @@ class DashboardStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = context.uiScale;
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
@@ -42,12 +44,12 @@ class DashboardStatCard extends StatelessWidget {
             children: [
               Text(
                 title.toUpperCase(),
-                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: themeColor, letterSpacing: 1.5),
+                style: TextStyle(fontSize: (12 * scale).sp, fontWeight: FontWeight.w800, color: themeColor, letterSpacing: 1.5),
               ),
               CircleAvatar(
-                radius: 18.r,
+                radius: (18 * scale).r,
                 backgroundColor: themeColor,
-                child: Icon(icon, color: Colors.white, size: 18.w),
+                child: Icon(icon, color: Colors.white, size: (18 * scale).w),
               ),
             ],
           ),
@@ -58,15 +60,15 @@ class DashboardStatCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(value, style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w900, color: AppColors.textPrimary, height: 1)),
+              Text(value, style: TextStyle(fontSize: (48 * scale).sp, fontWeight: FontWeight.w900, color: AppColors.textPrimary, height: 1)),
               if (unit != null) ...[
                 SizedBox(width: 8.w),
-                Text(unit!, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade500)),
+                Text(unit!, style: TextStyle(fontSize: (16 * scale).sp, fontWeight: FontWeight.bold, color: Colors.grey.shade500)),
               ]
             ],
           ),
           SizedBox(height: 8.h),
-          Text(subtitle, style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade500)),
+          Text(subtitle, style: TextStyle(fontSize: (14 * scale).sp, color: Colors.grey.shade500)),
 
           SizedBox(height: 24.h),
           // Dynamic Bottom Section
