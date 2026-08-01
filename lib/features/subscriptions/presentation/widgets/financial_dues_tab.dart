@@ -1,0 +1,177 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../../../core/responsive/breakpoints.dart';
+import '../../../../core/responsive/responsive_value.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../sessions/data/models/kid_session.dart';
+import '../../data/models/subscription_plan.dart';
+import 'assign_plan_section.dart';
+import 'global_plan_card.dart';
+import 'plan_history_section.dart';
+
+/// Body content of subscription management — global plans, assign-plan
+/// form, and plan history/export. Extracted from ManageSubscriptionScreen
+/// so it can be embedded as the Financial Dues tab of
+/// ChildProfileDetailsScreen (no Scaffold/AppBar of its own) as well as
+/// used standalone.
+class FinancialDuesTab extends StatefulWidget {
+  const FinancialDuesTab({super.key, required this.childData, this.onPlanChanged, this.showChildIdentity = true});
+
+  final KidSession childData;
+
+  /// Fired with the current plan (title, price) on load and after every
+  /// update, so an ancestor (e.g. a profile-export button) can include it
+  /// without duplicating the plan state.
+  final void Function(String title, String price)? onPlanChanged;
+
+  /// Set false when embedded where the child's name/photo are already
+  /// shown elsewhere (e.g. ChildProfileDetailsScreen's header). Standalone
+  /// usage (ManageSubscriptionScreen) has nowhere else to show identity, so
+  /// it stays true there.
+  final bool showChildIdentity;
+
+  @override
+  State<FinancialDuesTab> createState() => _FinancialDuesTabState();
+}
+
+class _FinancialDuesTabState extends State<FinancialDuesTab> {
+  // No backend endpoint for plan assignment yet — plan + history live only
+  // in this widget's state and reset if the admin navigates away.
+  late String _currentPlanTitle = widget.childData.planLabel;
+  String _currentPlanPrice = '—';
+  final List<PlanChangeEntry> _history = [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onPlanChanged?.call(_currentPlanTitle, _currentPlanPrice);
+    });
+  }
+
+  void _applyPlan(SubscriptionPlan plan) {
+    final newTitle = plan.titleKey.tr();
+    setState(() {
+      _history.insert(0, PlanChangeEntry(
+        date: DateTime.now(),
+        oldPlanLabel: _currentPlanTitle,
+        newPlanLabel: newTitle,
+        changedBy: 'Admin',
+      ));
+      _currentPlanTitle = newTitle;
+      _currentPlanPrice = plan.price;
+    });
+    widget.onPlanChanged?.call(_currentPlanTitle, _currentPlanPrice);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final kid = widget.childData.kid;
+    final parentName = kid.emergencyContactName.isNotEmpty ? kid.emergencyContactName : kid.fullName;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 1. Global Plans (Bento Grid — matches Figma "Manage Subscriptions", node 4:1111)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                SvgPicture.asset('assets/icons/subscriptions/plans_heading.svg', width: 20.w, height: 20.w),
+                SizedBox(width: 8.w),
+                Text('subscriptions_global_plans_title'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+              ],
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+              decoration: BoxDecoration(color: AppColors.activePlansBadgeBg, borderRadius: BorderRadius.circular(999)),
+              child: Text('subscriptions_active_plans_badge'.tr(), style: TextStyle(fontSize: 12.sp, color: AppColors.amberLabel, fontWeight: FontWeight.w500)),
+            )
+          ],
+        ),
+        SizedBox(height: 20.h),
+
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: const ResponsiveValue<int>(compact: 2, medium: 2, expanded: 4).resolve(context),
+            mainAxisSpacing: 24.w,
+            crossAxisSpacing: 24.w,
+            mainAxisExtent: 220.h,
+          ),
+          itemCount: kSubscriptionPlans.length,
+          itemBuilder: (context, index) {
+            final plan = kSubscriptionPlans[index];
+            return GlobalPlanCard(
+              title: plan.titleKey.tr(),
+              duration: plan.durationKey.tr(),
+              price: plan.price,
+              icon: plan.icon,
+              themeColor: plan.themeColor,
+              isSolid: plan.isSolid,
+              priceSuffixKey: plan.priceSuffixKey,
+              iconAsset: plan.iconAsset,
+            );
+          },
+        ),
+        SizedBox(height: 48.h),
+
+        // 2. Split Layout (Assign Plan & History)
+        if (!context.isExpanded) ...[
+          AssignPlanSection(
+            child: widget.childData,
+            currentPlanTitle: _currentPlanTitle,
+            currentPlanPrice: _currentPlanPrice,
+            onPlanUpdated: _applyPlan,
+            showChildTile: widget.showChildIdentity,
+          ),
+          SizedBox(height: 32.h),
+          PlanHistorySection(
+            childName: kid.fullName,
+            parentName: parentName,
+            parentPhone: kid.emergencyContactPhone,
+            currentPlanTitle: _currentPlanTitle,
+            currentPlanPrice: _currentPlanPrice,
+            startDate: kid.createdAt,
+            history: _history,
+            showChildName: widget.showChildIdentity,
+          ),
+        ] else ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 2,
+                child: AssignPlanSection(
+                  child: widget.childData,
+                  currentPlanTitle: _currentPlanTitle,
+                  currentPlanPrice: _currentPlanPrice,
+                  onPlanUpdated: _applyPlan,
+                  showChildTile: widget.showChildIdentity,
+                ),
+              ),
+              SizedBox(width: 32.w),
+              Expanded(
+                flex: 4,
+                child: PlanHistorySection(
+                  childName: kid.fullName,
+                  parentName: parentName,
+                  parentPhone: kid.emergencyContactPhone,
+                  currentPlanTitle: _currentPlanTitle,
+                  currentPlanPrice: _currentPlanPrice,
+                  startDate: kid.createdAt,
+                  history: _history,
+                  showChildName: widget.showChildIdentity,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}

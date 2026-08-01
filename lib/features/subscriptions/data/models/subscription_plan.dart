@@ -14,6 +14,8 @@ class SubscriptionPlan {
     required this.icon,
     required this.themeColor,
     this.isSolid = false,
+    this.priceSuffixKey = 'global_plan_per_month_suffix',
+    this.iconAsset,
   });
 
   final String id;
@@ -23,6 +25,13 @@ class SubscriptionPlan {
   final IconData icon;
   final Color themeColor;
   final bool isSolid;
+  final String priceSuffixKey;
+
+  /// Figma-exported SVG badge (bg + glyph baked together) for the
+  /// GlobalPlanCard icon. Null falls back to [icon] on a themeColor-tinted
+  /// container — used for the solid Winter Camp card, whose translucent
+  /// white badge doesn't survive standalone SVG export.
+  final String? iconAsset;
 }
 
 const List<SubscriptionPlan> kSubscriptionPlans = [
@@ -32,7 +41,8 @@ const List<SubscriptionPlan> kSubscriptionPlans = [
     durationKey: 'subscriptions_plan_monthly_duration',
     price: '\$240',
     icon: Icons.calendar_month,
-    themeColor: Colors.green,
+    themeColor: AppColors.darkGreen,
+    iconAsset: 'assets/icons/subscriptions/plan_monthly.svg',
   ),
   SubscriptionPlan(
     id: 'weekly',
@@ -40,7 +50,8 @@ const List<SubscriptionPlan> kSubscriptionPlans = [
     durationKey: 'subscriptions_plan_weekly_duration',
     price: '\$450',
     icon: Icons.calendar_today,
-    themeColor: Colors.brown,
+    themeColor: AppColors.subscriptionBrown,
+    iconAsset: 'assets/icons/subscriptions/plan_weekly.svg',
   ),
   SubscriptionPlan(
     id: 'hourly',
@@ -48,7 +59,9 @@ const List<SubscriptionPlan> kSubscriptionPlans = [
     durationKey: 'subscriptions_plan_hourly_duration',
     price: '\$18',
     icon: Icons.access_time,
-    themeColor: Colors.orange,
+    themeColor: AppColors.amberLabel,
+    priceSuffixKey: 'global_plan_per_hour_suffix',
+    iconAsset: 'assets/icons/subscriptions/plan_hourly.svg',
   ),
   SubscriptionPlan(
     id: 'winter_camp',
@@ -58,6 +71,7 @@ const List<SubscriptionPlan> kSubscriptionPlans = [
     icon: Icons.holiday_village,
     themeColor: AppColors.forestGreen,
     isSolid: true,
+    priceSuffixKey: 'global_plan_per_package_suffix',
   ),
 ];
 
