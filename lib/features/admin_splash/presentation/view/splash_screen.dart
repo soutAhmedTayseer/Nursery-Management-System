@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import '../../../../core/di/injection.dart';
-import '../../../../core/responsive/responsive_value.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../cubit/splash_cubit.dart';
@@ -18,12 +17,12 @@ class AdminSplashScreen extends StatefulWidget {
 class _AdminSplashScreenState extends State<AdminSplashScreen> with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 700),
+    duration: const Duration(milliseconds: 900),
   )..forward();
 
   late final Animation<double> _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-  late final Animation<double> _scale = Tween<double>(begin: 0.85, end: 1.0).animate(
-    CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+  late final Animation<double> _scale = Tween<double>(begin: 0.9, end: 1.0).animate(
+    CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
   );
 
   @override
@@ -34,7 +33,11 @@ class _AdminSplashScreenState extends State<AdminSplashScreen> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    final logoSize = const ResponsiveValue<double>(compact: 220, medium: 320, expanded: 420).resolve(context);
+    // Scale off the actual screen instead of fixed per-breakpoint tiers — a
+    // portrait tablet is still `compact` (width-based breakpoint) despite
+    // having plenty of screen height, so a fixed 220px tier read as tiny.
+    final shortestSide = MediaQuery.sizeOf(context).shortestSide;
+    final logoSize = (shortestSide * 0.5).clamp(200.0, 420.0);
 
     return BlocProvider(
       create: (_) => sl<SplashCubit>()..checkSession(),
