@@ -17,7 +17,7 @@ class AdminSidebar extends StatelessWidget {
 
   final bool forceFull;
 
-  static const double _fullWidth = 250;
+  static const double _fullWidth = 280;
   static const double _railWidth = 72;
 
   @override
@@ -54,12 +54,14 @@ class AdminSidebar extends StatelessWidget {
                       child: Icon(Icons.eco, color: Colors.white, size: 20.w),
                     ),
                     SizedBox(width: 12.w),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('sidebar_brand_name'.tr(), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
-                        Text('sidebar_brand_subtitle'.tr(), style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600)),
-                      ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('sidebar_brand_name'.tr(), overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
+                          Text('sidebar_brand_subtitle'.tr(), overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600)),
+                        ],
+                      ),
                     ),
                   ],
                 )
@@ -117,7 +119,9 @@ class AdminSidebar extends StatelessWidget {
                 children: [
                   iconWidget,
                   SizedBox(width: 12.w),
-                  Text(title, style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
+                  Expanded(
+                    child: Text(title, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
+                  ),
                 ],
               ),
       ),

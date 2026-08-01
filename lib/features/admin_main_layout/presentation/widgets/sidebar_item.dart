@@ -41,12 +41,15 @@ class SidebarItem extends StatelessWidget {
                 children: [
                   iconWidget,
                   SizedBox(width: 16.w),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                      color: isSelected ? AppColors.darkGreen : Colors.grey.shade600,
+                  Expanded(
+                    child: Text(
+                      title,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                        color: isSelected ? AppColors.darkGreen : Colors.grey.shade600,
+                      ),
                     ),
                   ),
                 ],

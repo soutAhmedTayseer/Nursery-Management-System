@@ -12,7 +12,6 @@ import '../../../sessions/presentation/screens/sessions_screen.dart';
 import '../../../subscriptions/presentation/screens/subscribed_children_screen.dart';
 import '../cubit/admin_main_layout_cubit.dart';
 import '../cubit/admin_main_layout_state.dart';
-import '../widgets/admin_app_bar.dart';
 import '../widgets/admin_sidebar.dart';
 
 class AdminMainLayoutScreen extends StatelessWidget {
@@ -53,16 +52,28 @@ class AdminMainLayoutScreen extends StatelessWidget {
 
                   // 3. Main content
                   Expanded(
-                    child: Column(
+                    child: Stack(
                       children: [
-                        const AdminAppBar(),
-                        
-                        Expanded(
-                          child: IndexedStack(
-                            index: cubit.currentIndex,
-                            children: screens,
-                          ),
+                        IndexedStack(
+                          index: cubit.currentIndex,
+                          children: screens,
                         ),
+                        if (isCompact)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Builder(
+                              builder: (context) => Material(
+                                color: Colors.white,
+                                shape: const CircleBorder(),
+                                elevation: 2,
+                                child: IconButton(
+                                  icon: const Icon(Icons.menu),
+                                  onPressed: () => Scaffold.of(context).openDrawer(),
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
