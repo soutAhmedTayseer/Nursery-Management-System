@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/async_state_view.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../../../core/widgets/search_field.dart';
+import '../../../subscriptions/presentation/screens/manage_subscription_screen.dart';
 import '../cubit/sessions_cubit.dart';
 import '../widgets/child_session_card.dart';
 
@@ -62,8 +63,15 @@ class SessionsScreen extends StatelessWidget {
                                 : const ResponsiveValue<double>(compact: 0.82, medium: 0.78, expanded: 0.85).resolve(context),
                           ),
                           itemCount: loaded.items.length,
-                          itemBuilder: (context, index) =>
-                              ChildSessionCard(entry: loaded.items[index]),
+                          itemBuilder: (context, index) => ChildSessionCard(
+                            entry: loaded.items[index],
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ManageSubscriptionScreen(childData: loaded.items[index]),
+                              ),
+                            ),
+                          ),
                         ),
                       );
                     },
