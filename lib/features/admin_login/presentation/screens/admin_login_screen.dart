@@ -4,8 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/l10n/api_error_messages.dart';
+import '../../../../core/responsive/responsive_value.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../cubit/admin_login_cubit.dart';
 import '../widgets/admin_text_field.dart';
 import '../widgets/login_background_decor.dart';
@@ -30,14 +32,14 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. حسابات العرض بدقة للتابلت
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final bool isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
-
-    // جعل الكارت يشغل مساحة معتبرة (70% في الأفقي و 85% في الرأسي)
-    // واستخدام clamp لضمان أن العرض يترواح بين 550 و 800 بكسل دائماً
-    final double finalCardWidth = (isPortrait ? screenWidth * 0.85 : screenWidth * 0.7)
-        .clamp(550.0, 850.0);
+    final spacing = AppSpacing.of(context);
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final cardWidthFraction = const ResponsiveValue<double>(
+      compact: 0.9,
+      medium: 0.75,
+      expanded: 0.6,
+    ).resolve(context);
+    final finalCardWidth = (screenWidth * cardWidthFraction).clamp(420.0, 850.0);
 
     return BlocProvider(
       create: (_) => sl<AdminLoginCubit>(),
@@ -59,7 +61,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
               Center(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
+                  padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.xl),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -79,7 +81,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       // 2. Login Card (تم حل مشكلة الـ Constraints)
                       Container(
                         width: finalCardWidth, // تحديد العرض المباشر يمنع الـ Non-normalized Error
-                        padding: EdgeInsets.symmetric(horizontal: 64.w, vertical: 72.h), // Padding ضخم للفخامة
+                        padding: EdgeInsets.symmetric(horizontal: spacing.xxl, vertical: spacing.xxl),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(40.r),
