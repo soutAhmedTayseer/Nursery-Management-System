@@ -7,6 +7,7 @@ class SidebarItem extends StatelessWidget {
   final String title;
   final bool isSelected;
   final VoidCallback onTap;
+  final bool iconOnly;
 
   const SidebarItem({
     super.key,
@@ -14,10 +15,17 @@ class SidebarItem extends StatelessWidget {
     required this.title,
     required this.isSelected,
     required this.onTap,
+    this.iconOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final iconWidget = Icon(
+      icon,
+      color: isSelected ? AppColors.darkGreen : Colors.grey.shade600,
+      size: 22.w
+    );
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12.r),
@@ -27,24 +35,22 @@ class SidebarItem extends StatelessWidget {
           color: isSelected ? Colors.green.shade50 : Colors.transparent, // لون الخلفية عند الاختيار
           borderRadius: BorderRadius.circular(12.r),
         ),
-        child: Row(
-          children: [
-            Icon(
-              icon, 
-              color: isSelected ? AppColors.darkGreen : Colors.grey.shade600, 
-              size: 22.w
-            ),
-            SizedBox(width: 16.w),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: isSelected ? AppColors.darkGreen : Colors.grey.shade600,
+        child: iconOnly
+            ? Center(child: Tooltip(message: title, child: iconWidget))
+            : Row(
+                children: [
+                  iconWidget,
+                  SizedBox(width: 16.w),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                      color: isSelected ? AppColors.darkGreen : Colors.grey.shade600,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

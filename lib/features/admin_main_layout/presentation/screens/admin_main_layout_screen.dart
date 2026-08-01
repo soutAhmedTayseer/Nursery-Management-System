@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../dashboard/presentation/screens/overview_screen.dart';
 import '../../../finance/presentation/screens/finance_screen.dart';
@@ -39,15 +40,17 @@ class AdminMainLayoutScreen extends StatelessWidget {
       child: BlocBuilder<AdminMainLayoutCubit, AdminMainLayoutState>(
         builder: (context, state) {
           final cubit = context.read<AdminMainLayoutCubit>();
+          final isCompact = context.isCompact;
 
           return Scaffold(
             backgroundColor: AppColors.background,
+            drawer: isCompact ? Drawer(child: SafeArea(child: AdminSidebar(forceFull: true))) : null,
             body: SafeArea(
               child: Row(
                 children: [
                   // 2. Sidebar
-                  const AdminSidebar(),
-                  
+                  if (!isCompact) const AdminSidebar(),
+
                   // 3. Main content
                   Expanded(
                     child: Column(

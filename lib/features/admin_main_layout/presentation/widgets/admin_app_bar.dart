@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 
@@ -38,6 +39,13 @@ class _AdminAppBarState extends State<AdminAppBar> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          if (context.isCompact) ...[
+            IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+            SizedBox(width: 8.w),
+          ],
           // Search Bar
           Expanded(
             flex: 2, // عشان ياخد مساحة أكبر لكن ميفردش للأخر
