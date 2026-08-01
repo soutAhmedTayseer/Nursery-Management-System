@@ -48,7 +48,25 @@ class AdminMainLayoutScreen extends StatelessWidget {
               child: Row(
                 children: [
                   // 2. Sidebar
-                  if (!isCompact) const AdminSidebar(),
+                  // Kept mounted across the breakpoint flip (Align widthFactor, not `if`):
+                  // yanking a whole InkWell-laden subtree out of the tree while the OS cursor
+                  // still sits over it desyncs Flutter's MouseTracker mid-frame (assertion
+                  // '!_debugDuringDeviceUpdate' in mouse_tracker.dart) and can blank the frame.
+                  // `Visibility(maintainState: true)` was tried first but it wraps in `Offstage`,
+                  // which still reserves the sidebar's full width even while hidden — in
+                  // portrait that squeezed the real content down to nothing. `Align` with
+                  // `widthFactor: 0` collapses the reported width to zero while still laying
+                  // the child out normally, so it doesn't steal space.
+                  ClipRect(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: isCompact ? 0 : 1,
+                      child: IgnorePointer(
+                        ignoring: isCompact,
+                        child: const AdminSidebar(),
+                      ),
+                    ),
+                  ),
 
                   // 3. Main content
                   Expanded(
