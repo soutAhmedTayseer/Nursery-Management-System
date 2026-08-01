@@ -32,7 +32,7 @@ class AssignPlanSection extends StatelessWidget {
                 CircleAvatar(
                   radius: 24.r,
                   backgroundImage: child.kid.photoUrl.isEmpty ? null : NetworkImage(child.kid.photoUrl),
-                  onBackgroundImageError: (_, _) {},
+                  onBackgroundImageError: child.kid.photoUrl.isEmpty ? null : (_, _) {},
                   child: child.kid.photoUrl.isEmpty ? const Icon(Icons.person) : null,
                 ),
                 SizedBox(width: 12.w),
