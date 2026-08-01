@@ -6,11 +6,16 @@ class AppColors {
   const AppColors._();
 
   // --- Brand greens ---
-  static const Color darkGreen = Color(0xFF2D5A27);
+  // Snapped to the Figma "kids-nursery" file's single accent green
+  // (#3b6934) — the file has no formal color styles/variables, so this is
+  // the exact hex read directly off the child-profile screen's layers.
+  static const Color darkGreen = Color(0xFF3B6934);
   static const Color primaryGreen = Color(0xFF6B9B64);
-  static const Color accentGreen = Color(0xFF4A7A3A);
-  static const Color forestGreen = Color(0xFF386A41);
+  static const Color accentGreen = Color(0xFF3B6934);
+  static const Color forestGreen = Color(0xFF3B6934);
   static const Color leafGreen = Color(0xFF80B674);
+  /// Light end of Figma's brand gradient (`linear-gradient(..., #3b6934 0%, #bcf0ae 100%)`).
+  static const Color brandGradientLight = Color(0xFFBCF0AE);
 
   // --- Semantic ---
   static const Color successGreen = Color(0xFF4CAF50);
@@ -19,11 +24,15 @@ class AppColors {
   static const Color mintTint = Color(0xFFC8F6C2);
   static const Color dangerRed = Color(0xFFC72424);
   static const Color errorRed = Color(0xFFD32F2F);
-  static const Color peachTint = Color(0xFFFFDBCF);
+  static const Color peachTint = Color(0xFFFFDAD6);
   static const Color amberTint = Color(0xFFFFE0B2);
   static const Color penaltyOrange = Color(0xFFE0762E);
   static const Color whatsappGreen = Color(0xFF25D366);
   static const Color creamTint = Color(0xFFFDF2E9);
+  /// Allergy-tag text red, e.g. "Peanuts"/"Dairy" chips.
+  static const Color allergyTagText = Color(0xFF93000A);
+  /// Emergency-contact-card label amber ("EMERGENCY CONTACT").
+  static const Color amberLabel = Color(0xFF825500);
 
   // --- Accents ---
   static const Color gold = Color(0xFFB08D5B);
@@ -31,11 +40,17 @@ class AppColors {
   static const Color brown = Color(0xFF795548);
   static const Color brownLight = Color(0xFF8D6E63);
   static const Color brownDark = Color(0xFF6D4C41);
+  /// Weekly-plan card border, Figma "kids-nursery" Manage Subscriptions (#805533).
+  static const Color subscriptionBrown = Color(0xFF805533);
+  /// "ACTIVE" pill badge text on the assign-plan panel.
+  static const Color activeBadgeText = Color(0xFF23501E);
+  /// "N Active Plans" pill badge background.
+  static const Color activePlansBadgeBg = Color(0xFFFFDDB3);
 
   // --- Text ---
-  static const Color textPrimary = Color(0xFF1A1C19);
+  static const Color textPrimary = Color(0xFF1C1C19);
   static const Color textHeading = Color(0xFF2D2D2D);
-  static const Color textSecondary = Color(0xFF5D5D5D);
+  static const Color textSecondary = Color(0xFF474747);
   static const Color textTertiary = Color(0xFF8A8A8A);
 
   // --- Surfaces ---
@@ -46,8 +61,12 @@ class AppColors {
   static const Color surfaceBone = Color(0xFFFAF8F5);
   static const Color surfaceMist = Color(0xFFF9F9F7);
   static const Color surfaceLinen = Color(0xFFFCFBF8);
-  static const Color surfaceCream = Color(0xFFF7F6F2);
-  static const Color surfaceSand = Color(0xFFF4F2EC);
+  static const Color surfaceCream = Color(0xFFF6F3EE);
+  static const Color surfaceSand = Color(0xFFF0EDE8);
   static const Color surfaceSmoke = Color(0xFFF2F2F2);
   static const Color surfaceSage = Color(0xFFF0F4EF);
+  /// Neutral chip/avatar-placeholder background (emergency-contact icons).
+  static const Color neutralChip = Color(0xFFE5E2DD);
+  /// Muted calendar-day background (Attendance Log non-highlighted days).
+  static const Color calendarMuted = Color(0xFFEBE8E3);
 }
