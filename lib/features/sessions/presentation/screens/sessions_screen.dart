@@ -7,7 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/async_state_view.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../../../core/widgets/search_field.dart';
-import '../../../subscriptions/presentation/screens/manage_subscription_screen.dart';
+import '../../../child_profile/presentation/screens/child_profile_details_screen.dart';
 import '../cubit/sessions_cubit.dart';
 import '../widgets/child_session_card.dart';
 
@@ -68,7 +68,7 @@ class SessionsScreen extends StatelessWidget {
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ManageSubscriptionScreen(childData: loaded.items[index]),
+                                builder: (_) => ChildProfileDetailsScreen(childData: loaded.items[index]),
                               ),
                             ),
                           ),
