@@ -11,31 +11,34 @@ class FinanceCubit extends Cubit<FinanceState> {
   void loadInitialData() {
     final initialData = [
       PaymentRecord(
-        id: '1', 
-        parentName: 'Sarah Mitchell', 
-        childName: 'Leo Mitchell', 
-        baseFee: 2500, 
-        overtimeHours: 0, 
-        penaltyAmount: 0, 
-        avatarColor: Colors.grey.shade200
+        id: '1',
+        parentName: 'Sarah Mitchell',
+        childName: 'Leo Mitchell',
+        baseFee: 2500,
+        overtimeHours: 0,
+        penaltyAmount: 0,
+        avatarColor: Colors.grey.shade200,
+        parentPhone: '971501234567',
       ),
       PaymentRecord(
-        id: '2', 
-        parentName: 'James Khan', 
-        childName: 'Amara Khan', 
-        baseFee: 2500, 
-        overtimeHours: 4.5, 
-        penaltyAmount: 225, 
-        avatarColor: Colors.orange.shade100
+        id: '2',
+        parentName: 'James Khan',
+        childName: 'Amara Khan',
+        baseFee: 2500,
+        overtimeHours: 4.5,
+        penaltyAmount: 225,
+        avatarColor: Colors.orange.shade100,
+        parentPhone: '971502345678',
       ),
       PaymentRecord(
-        id: '3', 
-        parentName: 'Emma Watson', 
-        childName: 'Noah Watson', 
-        baseFee: 2800, 
-        overtimeHours: 2.0, 
-        penaltyAmount: 100, 
-        avatarColor: Colors.blue.shade100
+        id: '3',
+        parentName: 'Emma Watson',
+        childName: 'Noah Watson',
+        baseFee: 2800,
+        overtimeHours: 2.0,
+        penaltyAmount: 100,
+        avatarColor: Colors.blue.shade100,
+        parentPhone: '971503456789',
       ),
     ];
     emit(FinanceState(payments: initialData, filteredPayments: initialData));
@@ -43,26 +46,42 @@ class FinanceCubit extends Cubit<FinanceState> {
 
   void addPayment(PaymentRecord newPayment) {
     final updatedList = List<PaymentRecord>.from(state.payments)..add(newPayment);
-    emit(FinanceState(
-      payments: updatedList, 
-      filteredPayments: _filterList(updatedList, state.searchQuery),
-      searchQuery: state.searchQuery,
-    ));
+    _emitFiltered(updatedList, state.searchQuery, state.penaltyFilter);
   }
 
   void filterPayments(String query) {
+    _emitFiltered(state.payments, query, state.penaltyFilter);
+  }
+
+  void setPenaltyFilter(PenaltyFilter filter) {
+    _emitFiltered(state.payments, state.searchQuery, filter);
+  }
+
+  void setRevenuePeriod(RevenuePeriod period) {
+    emit(state.copyWith(revenuePeriod: period));
+  }
+
+  void _emitFiltered(List<PaymentRecord> payments, String query, PenaltyFilter penaltyFilter) {
     emit(FinanceState(
-      payments: state.payments, 
-      filteredPayments: _filterList(state.payments, query), 
-      searchQuery: query
+      payments: payments,
+      filteredPayments: _filterList(payments, query, penaltyFilter),
+      searchQuery: query,
+      penaltyFilter: penaltyFilter,
+      revenuePeriod: state.revenuePeriod,
     ));
   }
 
-  List<PaymentRecord> _filterList(List<PaymentRecord> list, String query) {
-    if (query.isEmpty) return list;
-    return list.where((p) => 
-      p.parentName.toLowerCase().contains(query.toLowerCase()) || 
-      p.childName.toLowerCase().contains(query.toLowerCase())
-    ).toList();
+  List<PaymentRecord> _filterList(List<PaymentRecord> list, String query, PenaltyFilter penaltyFilter) {
+    return list.where((p) {
+      final matchesQuery = query.isEmpty ||
+          p.parentName.toLowerCase().contains(query.toLowerCase()) ||
+          p.childName.toLowerCase().contains(query.toLowerCase());
+      final matchesPenalty = switch (penaltyFilter) {
+        PenaltyFilter.all => true,
+        PenaltyFilter.withPenalty => p.penaltyAmount > 0,
+        PenaltyFilter.withoutPenalty => p.penaltyAmount == 0,
+      };
+      return matchesQuery && matchesPenalty;
+    }).toList();
   }
 }

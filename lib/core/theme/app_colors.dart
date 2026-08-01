@@ -21,6 +21,8 @@ class AppColors {
   static const Color errorRed = Color(0xFFD32F2F);
   static const Color peachTint = Color(0xFFFFDBCF);
   static const Color amberTint = Color(0xFFFFE0B2);
+  static const Color penaltyOrange = Color(0xFFE0762E);
+  static const Color whatsappGreen = Color(0xFF25D366);
   static const Color creamTint = Color(0xFFFDF2E9);
 
   // --- Accents ---
