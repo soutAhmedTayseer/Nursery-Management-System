@@ -6,7 +6,8 @@ import '../../data/models/kid_session.dart';
 
 class ChildSessionCard extends StatelessWidget {
   final KidSession entry;
-  const ChildSessionCard({super.key, required this.entry});
+  final VoidCallback? onTap;
+  const ChildSessionCard({super.key, required this.entry, this.onTap});
 
   String _formatElapsed(Duration duration) {
     final hours = duration.inHours.toString().padLeft(2, '0');
@@ -22,7 +23,10 @@ class ChildSessionCard extends StatelessWidget {
     // each card gets noticeably more width — scale content up so it doesn't
     // look sparse inside the extra space.
     final scale = MediaQuery.orientationOf(context) == Orientation.portrait ? 1.3 : 1.0;
-    return Container(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(28.r),
+      child: Container(
       padding: EdgeInsets.all(20.w * scale),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -73,6 +77,7 @@ class ChildSessionCard extends StatelessWidget {
             ],
           )
         ],
+      ),
       ),
     );
   }
