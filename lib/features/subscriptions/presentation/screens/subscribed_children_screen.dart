@@ -2,10 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/responsive/responsive_value.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/async_state_view.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
-// استيراد المكون الجديد
 import '../widgets/child_subscription_card.dart';
 import 'manage_subscription_screen.dart';
 
@@ -14,9 +14,6 @@ class SubscribedChildrenScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // تحديد الأبعاد بناءً على وضعية التابلت لضمان عدم حدوث Overflow
-    final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
-
     return Scaffold(
       backgroundColor: AppColors.surfaceCream,
       body: Padding(
@@ -50,10 +47,10 @@ class SubscribedChildrenScreen extends StatelessWidget {
                       return GridView.builder(
                         physics: const BouncingScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: isPortrait ? 3 : 4, // 3 في الرأسي و4 في الأفقي
+                          crossAxisCount: const ResponsiveValue<int>(compact: 2, medium: 3, expanded: 4).resolve(context),
                           mainAxisSpacing: 24.w,
                           crossAxisSpacing: 24.w,
-                          childAspectRatio: isPortrait ? 0.75 : 0.88, // نسبة متغيرة لمنع الـ Overflow
+                          childAspectRatio: const ResponsiveValue<double>(compact: 0.78, medium: 0.75, expanded: 0.85).resolve(context),
                         ),
                         itemCount: loaded.items.length,
                         itemBuilder: (context, index) {
