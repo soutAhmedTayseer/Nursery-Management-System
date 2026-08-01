@@ -41,8 +41,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPortrait = MediaQuery.sizeOf(context).height > MediaQuery.sizeOf(context).width;
     return ScreenUtilInit(
-      designSize: const Size(1440, 900), // Laptop/Desktop design reference
+      // Swap design axes in portrait so `.sp`/`.w`/`.h` scale off the same
+      // physical dimension as landscape — otherwise rotating a tablet shrinks
+      // every font because the short edge suddenly maps to the 1440 axis.
+      designSize: isPortrait ? const Size(900, 1440) : const Size(1440, 900),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
