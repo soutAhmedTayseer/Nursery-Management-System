@@ -62,7 +62,7 @@ class FinanceStatCard extends StatelessWidget {
             SizedBox(height: 12.h),
             trendWidget!
           ],
-          const Spacer(),
+          SizedBox(height: 24.h),
           Text(
             subtitle, 
             style: TextStyle(
