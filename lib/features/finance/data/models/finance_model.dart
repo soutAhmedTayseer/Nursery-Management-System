@@ -8,6 +8,8 @@ class PaymentRecord {
   final double overtimeHours;
   final double penaltyAmount;
   final Color avatarColor;
+  /// E.164-ish digits only (no `+`), e.g. "971501234567". Empty when unknown.
+  final String parentPhone;
 
   PaymentRecord({
     required this.id,
@@ -17,6 +19,7 @@ class PaymentRecord {
     required this.overtimeHours,
     required this.penaltyAmount,
     required this.avatarColor,
+    this.parentPhone = '',
   });
 
   double get totalDue => baseFee + penaltyAmount;
