@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../widgets/assign_plan_section.dart';
@@ -25,16 +26,12 @@ class ManageSubscriptionScreen extends StatelessWidget {
         ),
         title: Text('subscriptions_admin_appbar_title'.tr(), style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isPortrait = constraints.maxWidth < 800; 
-
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(32.w),
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(32.w),
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
                 // 1. Header
                 Text('subscriptions_manage_title'.tr(), style: TextStyle(fontSize: 34.sp, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
                 Text('subscriptions_manage_subtitle'.tr(), style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600)),
@@ -78,7 +75,7 @@ class ManageSubscriptionScreen extends StatelessWidget {
                 SizedBox(height: 48.h),
 
                 // 3. Split Layout (Assign Plan & History)
-                if (isPortrait) ...[
+                if (!context.isExpanded) ...[
                   AssignPlanSection(child: childData),
                   SizedBox(height: 32.h),
                   PlanHistorySection(childName: childData.kid.fullName),
@@ -94,9 +91,7 @@ class ManageSubscriptionScreen extends StatelessWidget {
                 ],
               ],
             ),
-          );
-        }
-      ),
+          ),
     );
   }
 }
