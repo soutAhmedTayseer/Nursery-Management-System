@@ -46,6 +46,10 @@
 
   "overview_capacity_title": "CAPACITY",
   "overview_capacity_subtitle": "Total Kids Present",
+  "overview_capacity_unit": "/ {capacity}",
+  "overview_capacity_edit_title": "Set Max Capacity",
+  "overview_capacity_edit_label": "Maximum kids on site",
+  "overview_capacity_edit_save": "Save",
   "overview_operations_title": "OPERATIONS",
   "overview_operations_subtitle": "Total Running Hours",
   "overview_trend_last_week": "12% from last week",

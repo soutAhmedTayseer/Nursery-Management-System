@@ -13,7 +13,10 @@ class OverviewCubit extends Cubit<OverviewState> {
     // No "today's occupancy summary" endpoint yet — pull the whole roster in
     // one page. Fine at this app's scale; a real backend would expose a
     // dedicated summary instead of paging through everyone.
-    final result = await _sessionsRepository.fetchKidSessions(page: 1, pageSize: 1000);
+    final result = await _sessionsRepository.fetchKidSessions(
+      page: 1,
+      pageSize: 1000,
+    );
 
     var checkedInCount = 0;
     var totalHoursToday = 0.0;
@@ -23,10 +26,11 @@ class OverviewCubit extends Cubit<OverviewState> {
       totalHoursToday += (kidSession.elapsed?.inMinutes ?? 0) / 60;
     }
 
-    emit(OverviewLoaded(
-      checkedInCount: checkedInCount,
-      totalRoster: result.total,
-      totalHoursToday: totalHoursToday,
-    ));
+    emit(
+      OverviewLoaded(
+        checkedInCount: checkedInCount,
+        totalHoursToday: totalHoursToday,
+      ),
+    );
   }
 }

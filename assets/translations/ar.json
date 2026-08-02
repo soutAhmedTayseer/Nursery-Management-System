@@ -46,6 +46,10 @@
 
   "overview_capacity_title": "السعة",
   "overview_capacity_subtitle": "إجمالي الأطفال الحاضرين",
+  "overview_capacity_unit": "/ {capacity}",
+  "overview_capacity_edit_title": "تحديد السعة القصوى",
+  "overview_capacity_edit_label": "الحد الأقصى للأطفال في الموقع",
+  "overview_capacity_edit_save": "حفظ",
   "overview_operations_title": "العمليات",
   "overview_operations_subtitle": "إجمالي ساعات التشغيل",
   "overview_trend_last_week": "زيادة 12% عن الأسبوع الماضي",

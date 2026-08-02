@@ -11,6 +11,7 @@ class DashboardStatCard extends StatelessWidget {
   final IconData icon;
   final Color themeColor;
   final Widget bottomWidget;
+  final VoidCallback? onTap;
 
   const DashboardStatCard({
     super.key,
@@ -21,18 +22,23 @@ class DashboardStatCard extends StatelessWidget {
     required this.icon,
     required this.themeColor,
     required this.bottomWidget,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final scale = context.uiScale;
-    return Container(
+    final card = Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(32.r),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 20, offset: const Offset(0, 10))
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
       child: Column(
@@ -44,7 +50,12 @@ class DashboardStatCard extends StatelessWidget {
             children: [
               Text(
                 title.toUpperCase(),
-                style: TextStyle(fontSize: (12 * scale).sp, fontWeight: FontWeight.w800, color: themeColor, letterSpacing: 1.5),
+                style: TextStyle(
+                  fontSize: (12 * scale).sp,
+                  fontWeight: FontWeight.w800,
+                  color: themeColor,
+                  letterSpacing: 1.5,
+                ),
               ),
               CircleAvatar(
                 radius: (18 * scale).r,
@@ -60,21 +71,48 @@ class DashboardStatCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(value, style: TextStyle(fontSize: (48 * scale).sp, fontWeight: FontWeight.w900, color: AppColors.textPrimary, height: 1)),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: (48 * scale).sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                  height: 1,
+                ),
+              ),
               if (unit != null) ...[
                 SizedBox(width: 8.w),
-                Text(unit!, style: TextStyle(fontSize: (16 * scale).sp, fontWeight: FontWeight.bold, color: Colors.grey.shade500)),
-              ]
+                Text(
+                  unit!,
+                  style: TextStyle(
+                    fontSize: (16 * scale).sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
             ],
           ),
           SizedBox(height: 8.h),
-          Text(subtitle, style: TextStyle(fontSize: (14 * scale).sp, color: Colors.grey.shade500)),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: (14 * scale).sp,
+              color: Colors.grey.shade500,
+            ),
+          ),
 
           SizedBox(height: 24.h),
           // Dynamic Bottom Section
           bottomWidget,
         ],
       ),
+    );
+    if (onTap == null) return card;
+    return InkWell(
+      borderRadius: BorderRadius.circular(32.r),
+      onTap: onTap,
+      child: card,
     );
   }
 }

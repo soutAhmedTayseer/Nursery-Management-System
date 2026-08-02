@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/di/injection.dart';
@@ -13,6 +14,7 @@ import '../../../finance/domain/payment_records.dart';
 import '../../../finance/presentation/cubit/finance_cubit.dart';
 import '../../../finance/presentation/cubit/finance_state.dart';
 import '../../../sessions/data/repositories/sessions_repository.dart';
+import '../../../settings/presentation/cubit/nursery_settings_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_state.dart';
 import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
@@ -38,95 +40,152 @@ class OverviewScreen extends StatelessWidget {
     final isCompact = context.isCompact;
 
     return BlocProvider(
-      create: (_) => OverviewCubit(sl<SessionsRepository>())..fetchDashboardData(),
+      create: (_) =>
+          OverviewCubit(sl<SessionsRepository>())..fetchDashboardData(),
       child: Builder(
         builder: (context) => BlocBuilder<OverviewCubit, OverviewState>(
-          builder: (context, overview) => BlocBuilder<PlanAssignmentsCubit, PlanAssignmentsState>(
-            builder: (context, assignments) => BlocBuilder<PlansCubit, PlansState>(
-              builder: (context, plans) => BlocBuilder<FinanceCubit, FinanceState>(
-                builder: (context, finance) {
-                  final records = derivePaymentRecords(assignments, plans, finance);
-                  final pendingDues = records.fold<double>(0, (sum, r) => sum + r.totalDue);
-                  final overtimeAlerts = [
-                    for (final r in records)
-                      if (r.overtimeHours > 0) OvertimeAlert(kidName: r.childName, overtimeHours: r.overtimeHours),
-                  ];
+          builder: (context, overview) => BlocBuilder<NurserySettingsCubit, int>(
+            builder: (context, capacity) =>
+                BlocBuilder<PlanAssignmentsCubit, PlanAssignmentsState>(
+                  builder: (context, assignments) =>
+                      BlocBuilder<PlansCubit, PlansState>(
+                        builder: (context, plans) =>
+                            BlocBuilder<FinanceCubit, FinanceState>(
+                              builder: (context, finance) {
+                                final records = derivePaymentRecords(
+                                  assignments,
+                                  plans,
+                                  finance,
+                                );
+                                final pendingDues = records.fold<double>(
+                                  0,
+                                  (sum, r) => sum + r.totalDue,
+                                );
+                                final overtimeAlerts = [
+                                  for (final r in records)
+                                    if (r.overtimeHours > 0)
+                                      OvertimeAlert(
+                                        kidName: r.childName,
+                                        overtimeHours: r.overtimeHours,
+                                      ),
+                                ];
 
-                  final statCards = _buildStatCards(context, overview, pendingDues);
-                  final availableWidth = MediaQuery.sizeOf(context).width - spacing.pagePadding * 2;
-                  final scale = context.uiScale;
-                  final cardWidth = ((availableWidth - spacing.gutter * (statCards.length - 1)) / statCards.length)
-                      .clamp(240.0 * scale, 400.0 * scale);
+                                final statCards = _buildStatCards(
+                                  context,
+                                  overview,
+                                  pendingDues,
+                                  capacity,
+                                );
+                                final availableWidth =
+                                    MediaQuery.sizeOf(context).width -
+                                    spacing.pagePadding * 2;
+                                final scale = context.uiScale;
+                                final cardWidth =
+                                    ((availableWidth -
+                                                spacing.gutter *
+                                                    (statCards.length - 1)) /
+                                            statCards.length)
+                                        .clamp(240.0 * scale, 400.0 * scale);
 
-                  final statsRow = MouseWheelHorizontalScroll(
-                    child: Row(
-                      children: [
-                        for (int i = 0; i < statCards.length; i++) ...[
-                          if (i > 0) SizedBox(width: spacing.gutter),
-                          SizedBox(width: cardWidth, child: statCards[i]),
-                        ],
-                      ],
-                    ),
-                  );
+                                final statsRow = MouseWheelHorizontalScroll(
+                                  child: Row(
+                                    children: [
+                                      for (
+                                        int i = 0;
+                                        i < statCards.length;
+                                        i++
+                                      ) ...[
+                                        if (i > 0)
+                                          SizedBox(width: spacing.gutter),
+                                        SizedBox(
+                                          width: cardWidth,
+                                          child: statCards[i],
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                );
 
-                  const feed = LiveActivityFeed();
-                  final alerts = AlertsNotificationsSection(alerts: overtimeAlerts);
+                                const feed = LiveActivityFeed();
+                                final alerts = AlertsNotificationsSection(
+                                  alerts: overtimeAlerts,
+                                );
 
-                  // Feed and alerts panels each pin their own header and scroll
-                  // their own content — so the whole screen fits without a
-                  // page-level scroll on any breakpoint.
-                  final panels = isCompact
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(child: feed),
-                            SizedBox(height: spacing.xxl),
-                            Expanded(child: alerts),
-                          ],
-                        )
-                      : Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(child: feed),
-                            SizedBox(width: spacing.xxl),
-                            Expanded(child: alerts),
-                          ],
-                        );
+                                // Feed and alerts panels each pin their own header and scroll
+                                // their own content — so the whole screen fits without a
+                                // page-level scroll on any breakpoint.
+                                final panels = isCompact
+                                    ? Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          Expanded(child: feed),
+                                          SizedBox(height: spacing.xxl),
+                                          Expanded(child: alerts),
+                                        ],
+                                      )
+                                    : Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          Expanded(child: feed),
+                                          SizedBox(width: spacing.xxl),
+                                          Expanded(child: alerts),
+                                        ],
+                                      );
 
-                  return Scaffold(
-                    backgroundColor: AppColors.surfaceCream,
-                    body: Padding(
-                      padding: EdgeInsets.all(spacing.pagePadding),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          statsRow,
-                          SizedBox(height: spacing.xxl),
-                          Expanded(child: panels),
-                        ],
+                                return Scaffold(
+                                  backgroundColor: AppColors.surfaceCream,
+                                  body: Padding(
+                                    padding: EdgeInsets.all(
+                                      spacing.pagePadding,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        statsRow,
+                                        SizedBox(height: spacing.xxl),
+                                        Expanded(child: panels),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
+                ),
           ),
         ),
       ),
     );
   }
 
-  List<Widget> _buildStatCards(BuildContext context, OverviewState overview, double pendingDues) {
+  List<Widget> _buildStatCards(
+    BuildContext context,
+    OverviewState overview,
+    double pendingDues,
+    int capacity,
+  ) {
     final scale = context.uiScale;
     final loaded = overview is OverviewLoaded ? overview : null;
+    final checkedIn = loaded?.checkedInCount ?? 0;
+    final occupancyFraction = capacity == 0
+        ? 0.0
+        : (checkedIn / capacity).clamp(0, 1).toDouble();
     return [
       DashboardStatCard(
         title: 'overview_capacity_title'.tr(),
-        value: '${loaded?.checkedInCount ?? 0}',
+        value: '$checkedIn',
+        unit: 'overview_capacity_unit'.tr(namedArgs: {'capacity': '$capacity'}),
         subtitle: 'overview_capacity_subtitle'.tr(),
         icon: Icons.tag_faces_rounded,
         themeColor: AppColors.successGreen,
-        bottomWidget: _buildProgressBar(loaded?.occupancyFraction ?? 0, AppColors.successGreen),
+        bottomWidget: _buildProgressBar(
+          occupancyFraction,
+          AppColors.successGreen,
+        ),
+        onTap: () => _editCapacity(context, capacity),
       ),
       DashboardStatCard(
         title: 'overview_operations_title'.tr(),
@@ -136,11 +195,22 @@ class OverviewScreen extends StatelessWidget {
         themeColor: AppColors.gold,
         bottomWidget: Row(
           children: [
-            Icon(Icons.trending_up, color: AppColors.gold, size: (18 * scale).w),
+            Icon(
+              Icons.trending_up,
+              color: AppColors.gold,
+              size: (18 * scale).w,
+            ),
             SizedBox(width: 8.w),
             // No historical backend yet to compute a real week-over-week
             // trend — illustrative, matches the Figma reference copy.
-            Text('overview_trend_last_week'.tr(), style: TextStyle(fontSize: (12 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.gold)),
+            Text(
+              'overview_trend_last_week'.tr(),
+              style: TextStyle(
+                fontSize: (12 * scale).sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.gold,
+              ),
+            ),
           ],
         ),
       ),
@@ -152,22 +222,71 @@ class OverviewScreen extends StatelessWidget {
         icon: Icons.account_balance_wallet,
         themeColor: AppColors.errorRed,
         bottomWidget: InkWell(
-          onTap: () => context.read<AdminMainLayoutCubit>().changeScreen(_financeTabIndex),
-          child: Text('overview_view_ledger'.tr(), style: TextStyle(fontSize: (14 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
+          onTap: () => context.read<AdminMainLayoutCubit>().changeScreen(
+            _financeTabIndex,
+          ),
+          child: Text(
+            'overview_view_ledger'.tr(),
+            style: TextStyle(
+              fontSize: (14 * scale).sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkGreen,
+            ),
+          ),
         ),
       ),
     ];
+  }
+
+  Future<void> _editCapacity(BuildContext context, int currentCapacity) async {
+    final cubit = context.read<NurserySettingsCubit>();
+    final controller = TextEditingController(text: '$currentCapacity');
+    final newCapacity = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('overview_capacity_edit_title'.tr()),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: 'overview_capacity_edit_label'.tr(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text('action_cancel'.tr()),
+          ),
+          ElevatedButton(
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(int.tryParse(controller.text)),
+            child: Text('overview_capacity_edit_save'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (newCapacity != null && newCapacity > 0) cubit.setCapacity(newCapacity);
   }
 
   Widget _buildProgressBar(double percentage, Color color) {
     return Container(
       height: 5.h,
       width: double.infinity,
-      decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(2.r)),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(2.r),
+      ),
       child: FractionallySizedBox(
         alignment: Alignment.centerLeft,
         widthFactor: percentage,
-        child: Container(decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2.r))),
+        child: Container(
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2.r),
+          ),
+        ),
       ),
     );
   }

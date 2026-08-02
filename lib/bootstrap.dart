@@ -12,6 +12,7 @@ import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'features/dashboard/presentation/cubit/schedule_cubit.dart';
 import 'features/finance/presentation/cubit/finance_cubit.dart';
+import 'features/settings/presentation/cubit/nursery_settings_cubit.dart';
 import 'features/subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import 'features/subscriptions/presentation/cubit/plans_cubit.dart';
 
@@ -26,7 +27,8 @@ Future<void> bootstrap() async {
     await windowManager.ensureInitialized();
     await windowManager.setMinimumSize(_minWindowSize);
     final size = await windowManager.getSize();
-    if (size.width < _minWindowSize.width || size.height < _minWindowSize.height) {
+    if (size.width < _minWindowSize.width ||
+        size.height < _minWindowSize.height) {
       await windowManager.setSize(_minWindowSize);
     }
   }
@@ -46,7 +48,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPortrait = MediaQuery.sizeOf(context).height > MediaQuery.sizeOf(context).width;
+    final isPortrait =
+        MediaQuery.sizeOf(context).height > MediaQuery.sizeOf(context).width;
     return ScreenUtilInit(
       // Swap design axes in portrait so `.sp`/`.w`/`.h` scale off the same
       // physical dimension as landscape — otherwise rotating a tablet shrinks
@@ -61,6 +64,7 @@ class MyApp extends StatelessWidget {
             BlocProvider(create: (_) => PlanAssignmentsCubit()),
             BlocProvider(create: (_) => FinanceCubit()),
             BlocProvider(create: (_) => ScheduleCubit()),
+            BlocProvider(create: (_) => NurserySettingsCubit()),
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
