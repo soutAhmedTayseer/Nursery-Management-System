@@ -55,8 +55,11 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
 
   var _childNameController = TextEditingController();
   var _dobController = TextEditingController();
+  var _motherPhoneController = TextEditingController();
+  var _fatherPhoneController = TextEditingController();
   String? _selectedPlanId;
   List<String> _allergies = [];
+  var _formKeys = List.generate(_stepCount, (_) => GlobalKey<FormState>());
 
   static const _stepCount = 4;
 
@@ -65,6 +68,8 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     _pageController.dispose();
     _childNameController.dispose();
     _dobController.dispose();
+    _motherPhoneController.dispose();
+    _fatherPhoneController.dispose();
     super.dispose();
   }
 
@@ -89,7 +94,21 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
 
   void _next(BuildContext context, RegistrationCubit cubit) {
     if (_currentStep < _stepCount - 1) {
+      if (!(_formKeys[_currentStep].currentState?.validate() ?? true)) return;
       _goToStep(_currentStep + 1);
+      return;
+    }
+    // Submitting: swipe/step-dot navigation can reach here without ever
+    // triggering a step's Next-button validation, so re-validate everything.
+    for (var i = 0; i < _stepCount; i++) {
+      if (!(_formKeys[i].currentState?.validate() ?? true)) {
+        _goToStep(i);
+        return;
+      }
+    }
+    if (_motherPhoneController.text.trim().isEmpty && _fatherPhoneController.text.trim().isEmpty) {
+      AppSnackbar.showError(context, 'registration_parent_required_error'.tr());
+      _goToStep(1);
       return;
     }
     final selected = _findSelectedPlan(context);
@@ -123,13 +142,18 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     _pageController.jumpToPage(0);
     _childNameController.dispose();
     _dobController.dispose();
+    _motherPhoneController.dispose();
+    _fatherPhoneController.dispose();
     setState(() {
       _currentStep = 0;
       _formGeneration++; // forces fresh field widgets, clearing all input state
       _childNameController = TextEditingController();
       _dobController = TextEditingController();
+      _motherPhoneController = TextEditingController();
+      _fatherPhoneController = TextEditingController();
       _selectedPlanId = null;
       _allergies = [];
+      _formKeys = List.generate(_stepCount, (_) => GlobalKey<FormState>());
     });
   }
 
@@ -188,10 +212,17 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 hint: 'registration_hint_child_name'.tr(),
                 inputType: RegistrationFieldInputType.letters,
                 controller: _childNameController,
+                required: true,
               ),
             ),
             _FieldRow(
-              RegistrationInputField(label: 'registration_label_dob'.tr(), hint: 'registration_hint_date'.tr(), inputType: RegistrationFieldInputType.date, controller: _dobController),
+              RegistrationInputField(
+                label: 'registration_label_dob'.tr(),
+                hint: 'registration_hint_date'.tr(),
+                inputType: RegistrationFieldInputType.date,
+                controller: _dobController,
+                required: true,
+              ),
               RegistrationInputField(label: 'registration_label_enrol_date'.tr(), hint: 'registration_hint_date'.tr(), inputType: RegistrationFieldInputType.date),
             ),
             _FieldRow(
@@ -222,7 +253,12 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
         children: [
           _fieldRows(context, spacing, [
             _FieldRow(
-              RegistrationInputField(label: 'registration_label_mother_phone'.tr(), hint: 'registration_hint_phone'.tr(), inputType: RegistrationFieldInputType.digits),
+              RegistrationInputField(
+                label: 'registration_label_mother_phone'.tr(),
+                hint: 'registration_hint_phone'.tr(),
+                inputType: RegistrationFieldInputType.digits,
+                controller: _motherPhoneController,
+              ),
               RegistrationInputField(label: 'registration_label_contact_email'.tr(), hint: 'registration_hint_email'.tr(), inputType: RegistrationFieldInputType.email),
             ),
             _FieldRow(
@@ -251,7 +287,12 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
         children: [
           _fieldRows(context, spacing, [
             _FieldRow(
-              RegistrationInputField(label: 'registration_label_father_phone'.tr(), hint: 'registration_hint_phone'.tr(), inputType: RegistrationFieldInputType.digits),
+              RegistrationInputField(
+                label: 'registration_label_father_phone'.tr(),
+                hint: 'registration_hint_phone'.tr(),
+                inputType: RegistrationFieldInputType.digits,
+                controller: _fatherPhoneController,
+              ),
               RegistrationInputField(label: 'registration_label_contact_email'.tr(), hint: 'registration_hint_email'.tr(), inputType: RegistrationFieldInputType.email),
             ),
             _FieldRow(
@@ -330,10 +371,10 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                       child: PageView(
                         key: ValueKey(_formGeneration),
                         controller: _pageController,
-                        physics: const NeverScrollableScrollPhysics(),
                         onPageChanged: (i) => setState(() => _currentStep = i),
                         children: [
-                          for (final page in pages) SingleChildScrollView(child: page),
+                          for (var i = 0; i < pages.length; i++)
+                            Form(key: _formKeys[i], child: SingleChildScrollView(child: pages[i])),
                         ],
                       ),
                     ),
@@ -341,45 +382,58 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 ),
                 SizedBox(height: spacing.xl),
 
-                // 3. Footer navigation
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: _currentStep > 0 ? _back : null,
-                      child: Text(
-                        'registration_back'.tr(),
-                        style: TextStyle(fontSize: (14 * context.uiScale).sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1.5),
-                      ),
-                    ),
-                    Text(
-                      'registration_step_of'.tr(args: ['${_currentStep + 1}', '$_stepCount']),
-                      style: TextStyle(fontSize: (13 * context.uiScale).sp, color: Colors.grey.shade500, fontWeight: FontWeight.w600),
-                    ),
-                    BlocBuilder<RegistrationCubit, RegistrationState>(
-                      builder: (context, state) {
-                        final isLoading = state is RegistrationLoading;
-                        final isLastStep = _currentStep == _stepCount - 1;
-                        final scale = context.uiScale;
-                        return ElevatedButton(
-                          onPressed: isLoading ? null : () => _next(context, context.read<RegistrationCubit>()),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.leafGreen,
-                            padding: EdgeInsets.symmetric(horizontal: spacing.xl, vertical: spacing.md * scale),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.r)),
-                            elevation: 0,
+                // 3. Footer navigation — on bigger screens, swiping/tapping a
+                // step dot replaces Back and Next, so only the final Save
+                // action still needs a button down here.
+                Builder(builder: (context) {
+                  final isLastStep = _currentStep == _stepCount - 1;
+                  final showFullFooter = context.isCompact || isLastStep;
+                  if (!showFullFooter) return const SizedBox.shrink();
+                  final showBackAndStepOf = context.isCompact;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (showBackAndStepOf)
+                        TextButton(
+                          onPressed: _currentStep > 0 ? _back : null,
+                          child: Text(
+                            'registration_back'.tr(),
+                            style: TextStyle(fontSize: (14 * context.uiScale).sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1.5),
                           ),
-                          child: isLoading
-                              ? SizedBox(width: 24.w, height: 24.w, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                              : Text(
-                                  isLastStep ? 'registration_save_button'.tr() : 'registration_next'.tr(),
-                                  style: TextStyle(fontSize: (16 * scale).sp, fontWeight: FontWeight.bold, color: Colors.white),
-                                ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                        )
+                      else
+                        const SizedBox.shrink(),
+                      if (showBackAndStepOf)
+                        Text(
+                          'registration_step_of'.tr(args: ['${_currentStep + 1}', '$_stepCount']),
+                          style: TextStyle(fontSize: (13 * context.uiScale).sp, color: Colors.grey.shade500, fontWeight: FontWeight.w600),
+                        )
+                      else
+                        const SizedBox.shrink(),
+                      BlocBuilder<RegistrationCubit, RegistrationState>(
+                        builder: (context, state) {
+                          final isLoading = state is RegistrationLoading;
+                          final scale = context.uiScale;
+                          return ElevatedButton(
+                            onPressed: isLoading ? null : () => _next(context, context.read<RegistrationCubit>()),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.leafGreen,
+                              padding: EdgeInsets.symmetric(horizontal: spacing.xl, vertical: spacing.md * scale),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.r)),
+                              elevation: 0,
+                            ),
+                            child: isLoading
+                                ? SizedBox(width: 24.w, height: 24.w, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                : Text(
+                                    isLastStep ? 'registration_save_button'.tr() : 'registration_next'.tr(),
+                                    style: TextStyle(fontSize: (16 * scale).sp, fontWeight: FontWeight.bold, color: Colors.white),
+                                  ),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                }),
               ],
             ),
           ),

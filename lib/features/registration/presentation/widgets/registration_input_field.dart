@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -19,6 +20,8 @@ enum RegistrationFieldInputType {
 // letters, not just Latin.
 final _lettersOnly = RegExp(r'[a-zA-Z؀-ۿ ]');
 final _alphanumeric = RegExp(r'[a-zA-Z0-9؀-ۿ ,\.\-]');
+final _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+final _phonePattern = RegExp(r'^\d{7,15}$');
 
 class RegistrationInputField extends StatefulWidget {
   final String label;
@@ -31,6 +34,12 @@ class RegistrationInputField extends StatefulWidget {
   /// pass one keep managing their own internal controller, unread.
   final TextEditingController? controller;
 
+  /// Blocks form submission when left empty. Fields left false are still
+  /// format-validated (email/phone shape) if the visitor typed something,
+  /// but an empty value is accepted — used for the mother/father sections,
+  /// where only one parent's details need to be filled in, not both.
+  final bool required;
+
   const RegistrationInputField({
     super.key,
     required this.label,
@@ -38,6 +47,7 @@ class RegistrationInputField extends StatefulWidget {
     this.maxLines = 1,
     this.inputType = RegistrationFieldInputType.text,
     this.controller,
+    this.required = false,
   });
 
   @override
@@ -100,6 +110,18 @@ class _RegistrationInputFieldState extends State<RegistrationInputField> {
         _ => null,
       };
 
+  String? _validate(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) {
+      return widget.required ? 'registration_error_required'.tr() : null;
+    }
+    return switch (widget.inputType) {
+      RegistrationFieldInputType.email => _emailPattern.hasMatch(text) ? null : 'registration_error_email'.tr(),
+      RegistrationFieldInputType.digits => _phonePattern.hasMatch(text) ? null : 'registration_error_phone'.tr(),
+      _ => null,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final scale = context.uiScale;
@@ -123,6 +145,8 @@ class _RegistrationInputFieldState extends State<RegistrationInputField> {
           keyboardType: _keyboardType,
           inputFormatters: _formatters,
           onTap: _isDate ? _pickDate : (_isTime ? _pickTime : null),
+          validator: _validate,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           style: TextStyle(fontSize: (14 * scale).sp, color: Colors.black87),
           decoration: InputDecoration(
             hintText: widget.hint,
@@ -142,6 +166,14 @@ class _RegistrationInputFieldState extends State<RegistrationInputField> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: AppColors.accentGreen, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: const BorderSide(color: AppColors.errorRed, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: const BorderSide(color: AppColors.errorRed, width: 1.5),
             ),
           ),
         ),
