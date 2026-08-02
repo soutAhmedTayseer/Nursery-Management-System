@@ -1,13 +1,38 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../sessions/data/repositories/sessions_repository.dart';
 import 'overview_state.dart';
 
 class OverviewCubit extends Cubit<OverviewState> {
-  OverviewCubit() : super(OverviewInitial());
+  OverviewCubit(this._sessionsRepository) : super(OverviewInitial());
 
-  void fetchDashboardData() async {
+  final SessionsRepository _sessionsRepository;
+
+  Future<void> fetchDashboardData() async {
     emit(OverviewLoading());
-    // محاكاة جلب البيانات من الـ API
-    await Future.delayed(const Duration(milliseconds: 800));
-    emit(OverviewLoaded());
+    // No "today's occupancy summary" endpoint yet — pull the whole roster in
+    // one page. Fine at this app's scale; a real backend would expose a
+    // dedicated summary instead of paging through everyone.
+    final result = await _sessionsRepository.fetchKidSessions(page: 1, pageSize: 1000);
+
+    var checkedInCount = 0;
+    var totalHoursToday = 0.0;
+    final events = <ActivityEvent>[];
+    for (final kidSession in result.items) {
+      if (!kidSession.isCheckedIn) continue;
+      checkedInCount++;
+      totalHoursToday += (kidSession.elapsed?.inMinutes ?? 0) / 60;
+      final checkedInAt = kidSession.activeSession!.checkedInAt;
+      if (checkedInAt == null) continue;
+      events.add(ActivityEvent(kidName: kidSession.kid.fullName, isCheckIn: true, at: checkedInAt));
+    }
+    events.sort((a, b) => b.at.compareTo(a.at));
+
+    emit(OverviewLoaded(
+      checkedInCount: checkedInCount,
+      totalRoster: result.total,
+      totalHoursToday: totalHoursToday,
+      recentEvents: events.take(5).toList(),
+    ));
   }
 }

@@ -4,8 +4,20 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
 
+class OvertimeAlert {
+  const OvertimeAlert({required this.kidName, required this.overtimeHours});
+
+  final String kidName;
+  final double overtimeHours;
+}
+
+/// Real overtime alerts, one per kid with overtimeHours > 0 in FinanceCubit
+/// — no fake "Finance Sync Complete" filler notification, since there's no
+/// real bank-sync feature behind it.
 class AlertsNotificationsSection extends StatelessWidget {
-  const AlertsNotificationsSection({super.key});
+  const AlertsNotificationsSection({super.key, required this.alerts});
+
+  final List<OvertimeAlert> alerts;
 
   @override
   Widget build(BuildContext context) {
@@ -24,49 +36,32 @@ class AlertsNotificationsSection extends StatelessWidget {
         SizedBox(height: 20.h),
 
         Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAlertCard(
-                  scale: scale,
-                  isUrgent: true,
-                  title: 'alerts_overtime_leo'.tr(),
-                  description: 'alerts_overtime_leo_desc'.tr(),
-                  borderColor: AppColors.brownLight,
-                  icon: Icons.warning_amber_rounded,
-                  actions: Row(
+          child: alerts.isEmpty
+              ? Center(child: Text('alerts_empty'.tr(), style: TextStyle(fontSize: (13 * scale).sp, color: Colors.grey.shade500)))
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildActionButton('alerts_call_parent'.tr(), scale, isPrimary: true),
-                      SizedBox(width: 12.w),
-                      _buildActionButton('alerts_extend_session'.tr(), scale, isPrimary: false),
+                      for (final alert in alerts) ...[
+                        _buildAlertCard(
+                          scale: scale,
+                          title: 'alerts_overtime_title'.tr(namedArgs: {'name': alert.kidName}),
+                          description: 'alerts_overtime_desc'.tr(namedArgs: {'hours': alert.overtimeHours.toStringAsFixed(1)}),
+                          borderColor: AppColors.brownLight,
+                          icon: Icons.warning_amber_rounded,
+                          actions: Row(
+                            children: [
+                              _buildActionButton('alerts_call_parent'.tr(), scale, isPrimary: true),
+                              SizedBox(width: 12.w),
+                              _buildActionButton('alerts_extend_session'.tr(), scale, isPrimary: false),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                      ],
                     ],
                   ),
                 ),
-                SizedBox(height: 16.h),
-
-                _buildAlertCard(
-                  scale: scale,
-                  isUrgent: true,
-                  title: 'alerts_overtime_amira'.tr(),
-                  description: 'alerts_overtime_amira_desc'.tr(),
-                  borderColor: AppColors.brownLight,
-                  icon: Icons.warning_amber_rounded,
-                ),
-                SizedBox(height: 16.h),
-
-                _buildAlertCard(
-                  scale: scale,
-                  isUrgent: false,
-                  title: 'alerts_finance_sync_title'.tr(),
-                  description: 'alerts_finance_sync_desc'.tr(),
-                  borderColor: AppColors.darkGreen,
-                  icon: Icons.check_circle_outline,
-                  time: 'alerts_time_2h_ago'.tr(),
-                ),
-              ],
-            ),
-          ),
         ),
       ],
     );
@@ -74,7 +69,6 @@ class AlertsNotificationsSection extends StatelessWidget {
 
   Widget _buildAlertCard({
     required double scale,
-    required bool isUrgent,
     required String title,
     required String description,
     required Color borderColor,
@@ -114,8 +108,8 @@ class AlertsNotificationsSection extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(title, style: TextStyle(fontSize: (16 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                              if (isUrgent) Text('alerts_urgent_badge'.tr(), style: TextStyle(fontSize: (10 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.brownLight, letterSpacing: 1)),
+                              Expanded(child: Text(title, style: TextStyle(fontSize: (16 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary))),
+                              Text('alerts_urgent_badge'.tr(), style: TextStyle(fontSize: (10 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.brownLight, letterSpacing: 1)),
                             ],
                           ),
                           SizedBox(height: 8.h),

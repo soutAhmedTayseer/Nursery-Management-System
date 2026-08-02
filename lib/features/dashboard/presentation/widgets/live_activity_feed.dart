@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../cubit/overview_state.dart';
 
+/// Real recent check-in/check-out events, most recent first — replaces the
+/// old hardcoded "Upcoming Activity"/"Past Activity" mock, since there's no
+/// activities-scheduling feature behind those yet.
 class LiveActivityFeed extends StatelessWidget {
-  const LiveActivityFeed({super.key});
+  const LiveActivityFeed({super.key, required this.events});
+
+  final List<ActivityEvent> events;
 
   @override
   Widget build(BuildContext context) {
@@ -30,97 +36,53 @@ class LiveActivityFeed extends StatelessWidget {
         SizedBox(height: 20.h),
 
         Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Upcoming Activity Card
-                Container(
-                  padding: EdgeInsets.all(20.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(32.r),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 15, offset: const Offset(0, 8))],
-                  ),
-                  child: Row(
+          child: events.isEmpty
+              ? Center(child: Text('feed_empty'.tr(), style: TextStyle(fontSize: (13 * scale).sp, color: Colors.grey.shade500)))
+              : SingleChildScrollView(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Image Placeholder (The Girl)
-                      Container(
-                        width: (100 * scale).w,
-                        height: (120 * scale).h,
-                        decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(16.r)),
-                        child: Icon(Icons.child_care, size: (50 * scale).w, color: Colors.grey.shade400), // استخدم الصورة الحقيقية هنا
-                      ),
-                      SizedBox(width: 20.w),
-
-                      // Content
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('feed_upcoming_activity'.tr(), style: TextStyle(fontSize: (10 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.gold, letterSpacing: 1.2)),
-                            SizedBox(height: 8.h),
-                            Text('feed_upcoming_time_title'.tr(), style: TextStyle(fontSize: (18 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                            SizedBox(height: 8.h),
-                            Text(
-                              'feed_upcoming_desc'.tr(),
-                              style: TextStyle(fontSize: (13 * scale).sp, color: Colors.grey.shade500, height: 1.5),
-                            ),
-                            SizedBox(height: 16.h),
-                            // Avatars row
-                            Row(
-                              children: [
-                                _buildOverlapAvatar('assets/images/child_1.png', scale),
-                                _buildOverlapAvatar('assets/images/child_2.png', scale, offset: -10),
-                                _buildOverlapAvatar('assets/images/child_3.png', scale, offset: -20),
-                                Transform.translate(
-                                  offset: Offset(-30.w, 0),
-                                  child: CircleAvatar(radius: (14 * scale).r, backgroundColor: Colors.grey.shade200, child: Text('+12', style: TextStyle(fontSize: (10 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary))),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                      for (var i = 0; i < events.length; i++) ...[
+                        _buildEventTile(events[i], scale, emphasized: i == 0),
+                        if (i != events.length - 1) SizedBox(height: 12.h),
+                      ],
                     ],
                   ),
                 ),
-                SizedBox(height: 16.h),
-
-                // Past Activity Tile
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-                  decoration: BoxDecoration(color: AppColors.surfaceSmoke, borderRadius: BorderRadius.circular(24.r)),
-                  child: Row(
-                    children: [
-                      Icon(Icons.history, color: Colors.grey.shade600, size: (20 * scale).w),
-                      SizedBox(width: 16.w),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('feed_past_activity_title'.tr(), style: TextStyle(fontSize: (14 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                          SizedBox(height: 4.h),
-                          Text('feed_past_activity_desc'.tr(), style: TextStyle(fontSize: (11 * scale).sp, color: Colors.grey.shade600)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
       ],
     );
   }
 
-  Widget _buildOverlapAvatar(String imagePath, double scale, {double offset = 0}) {
-    return Transform.translate(
-      offset: Offset(offset.w, 0),
-      child: Container(
-        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-        child: CircleAvatar(radius: (14 * scale).r, backgroundColor: Colors.green.shade50, backgroundImage: AssetImage(imagePath), onBackgroundImageError: (_, _) {}),
+  Widget _buildEventTile(ActivityEvent event, double scale, {required bool emphasized}) {
+    final ago = DateTime.now().difference(event.at);
+    final agoText = ago.inMinutes < 60 ? 'feed_minutes_ago'.tr(namedArgs: {'n': '${ago.inMinutes}'}) : 'feed_hours_ago'.tr(namedArgs: {'n': '${ago.inHours}'});
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      decoration: BoxDecoration(
+        color: emphasized ? Colors.white : AppColors.surfaceSmoke,
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: emphasized ? [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 15, offset: const Offset(0, 8))] : null,
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: (20 * scale).r,
+            backgroundColor: AppColors.successTint,
+            child: Icon(Icons.login, color: AppColors.successDark, size: (18 * scale).w),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('feed_checked_in'.tr(namedArgs: {'name': event.kidName}), style: TextStyle(fontSize: (14 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                SizedBox(height: 4.h),
+                Text(agoText, style: TextStyle(fontSize: (11 * scale).sp, color: Colors.grey.shade600)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
