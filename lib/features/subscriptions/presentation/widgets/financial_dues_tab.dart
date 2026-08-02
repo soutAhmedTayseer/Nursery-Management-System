@@ -4,14 +4,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/responsive/breakpoints.dart';
-import '../../../../core/responsive/responsive_value.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../../data/models/subscription_plan.dart';
 import '../cubit/plans_cubit.dart';
 import '../cubit/plans_state.dart';
 import 'assign_plan_section.dart';
 import 'plan_category_card.dart';
+import 'plan_category_edit_dialog.dart';
 import 'plan_history_section.dart';
 
 /// Body content of subscription management — global plans, assign-plan
@@ -38,6 +39,12 @@ class FinancialDuesTab extends StatefulWidget {
   @override
   State<FinancialDuesTab> createState() => _FinancialDuesTabState();
 }
+
+int _columnsFor(BuildContext context) => switch (context.breakpoint) {
+      Breakpoint.compact => 1,
+      Breakpoint.medium => 2,
+      Breakpoint.expanded => 3,
+    };
 
 class _FinancialDuesTabState extends State<FinancialDuesTab> {
   // No backend endpoint for plan assignment yet — plan + history live only
@@ -72,42 +79,58 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
   Widget build(BuildContext context) {
     final kid = widget.childData.kid;
     final parentName = kid.emergencyContactName.isNotEmpty ? kid.emergencyContactName : kid.fullName;
+    final spacing = AppSpacing.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 1. Global Plans (Bento Grid — matches Figma "Manage Subscriptions", node 4:1111)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                SvgPicture.asset('assets/icons/subscriptions/plans_heading.svg', width: 20.w, height: 20.w),
-                SizedBox(width: 8.w),
-                Text('subscriptions_global_plans_title'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-              ],
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-              decoration: BoxDecoration(color: AppColors.activePlansBadgeBg, borderRadius: BorderRadius.circular(999)),
-              child: Text('subscriptions_active_plans_badge'.tr(), style: TextStyle(fontSize: 12.sp, color: AppColors.amberLabel, fontWeight: FontWeight.w500)),
-            )
-          ],
-        ),
-        SizedBox(height: 20.h),
-
         BlocBuilder<PlansCubit, PlansState>(
           builder: (context, state) {
-            return Wrap(
-              spacing: 24.w,
-              runSpacing: 24.w,
+            final columns = _columnsFor(context);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (final category in state.categories)
-                  SizedBox(
-                    width: (MediaQuery.sizeOf(context).width - 64.w - 48.w) /
-                        const ResponsiveValue<int>(compact: 1, medium: 2, expanded: 3).resolve(context),
-                    child: PlanCategoryCard(category: category, onEdit: () {}),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        SvgPicture.asset('assets/icons/subscriptions/plans_heading.svg', width: 20.w, height: 20.w),
+                        SizedBox(width: 8.w),
+                        Text('subscriptions_global_plans_title'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      ],
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                      decoration: BoxDecoration(color: AppColors.activePlansBadgeBg, borderRadius: BorderRadius.circular(999)),
+                      child: Text(
+                        'subscriptions_active_plans_badge'.tr(namedArgs: {'count': '${state.categories.length}'}),
+                        style: TextStyle(fontSize: 12.sp, color: AppColors.amberLabel, fontWeight: FontWeight.w500),
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(height: 20.h),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final cardWidth = (constraints.maxWidth - spacing.gutter * (columns - 1)) / columns;
+                    return Wrap(
+                      spacing: spacing.gutter,
+                      runSpacing: spacing.gutter,
+                      children: [
+                        for (final category in state.categories)
+                          SizedBox(
+                            width: cardWidth,
+                            child: PlanCategoryCard(
+                              category: category,
+                              onEdit: () => PlanCategoryEditDialog.show(context, category: category),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
               ],
             );
           },

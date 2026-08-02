@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:nursery_shared/nursery_shared.dart';
 import 'package:window_manager/window_manager.dart';
@@ -9,6 +10,7 @@ import 'core/di/injection.dart';
 import 'core/routes/app_router.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'features/subscriptions/presentation/cubit/plans_cubit.dart';
 
 const _minWindowSize = Size(1280, 800);
 
@@ -50,15 +52,18 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'app_title'.tr(),
-          localizationsDelegates: context.localizationDelegates,
-          supportedLocales: context.supportedLocales,
-          locale: context.locale,
-          theme: AppTheme.light(),
-          onGenerateRoute: AppRouter.onGenerateRoute,
-          initialRoute: AppRoutes.adminSplash,
+        return BlocProvider(
+          create: (_) => PlansCubit(),
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'app_title'.tr(),
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+            theme: AppTheme.light(),
+            onGenerateRoute: AppRouter.onGenerateRoute,
+            initialRoute: AppRoutes.adminSplash,
+          ),
         );
       },
     );

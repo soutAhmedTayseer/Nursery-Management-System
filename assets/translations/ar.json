@@ -194,7 +194,7 @@
   "subscriptions_manage_title": "إدارة الاشتراكات",
   "subscriptions_manage_subtitle": "تهيئة خطط الحضانة العامة وتعيين الاشتراكات للطلاب.",
   "subscriptions_global_plans_title": "خطط الاشتراك العامة",
-  "subscriptions_active_plans_badge": "4 خطط نشطة",
+  "subscriptions_active_plans_badge": "{count} خطط نشطة",
   "subscriptions_screen_title": "خطط الاشتراك",
   "subscriptions_screen_subtitle": "اختر التجربة المثالية لطفلك.",
   "subscriptions_add_category": "إضافة فئة",

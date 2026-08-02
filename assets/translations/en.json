@@ -194,7 +194,7 @@
   "subscriptions_manage_title": "Manage Subscriptions",
   "subscriptions_manage_subtitle": "Configure global nursery plans and assign subscriptions to students.",
   "subscriptions_global_plans_title": "Global Subscription Plans",
-  "subscriptions_active_plans_badge": "4 Active Plans",
+  "subscriptions_active_plans_badge": "{count} Active Plans",
   "subscriptions_screen_title": "Subscription Plans",
   "subscriptions_screen_subtitle": "Choose the perfect curated experience for your little one.",
   "subscriptions_add_category": "Add Category",

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+
 /// One priced option inside a [PlanCategory] (e.g. "3 hours / 3 Days — 600 AED").
 /// Label/price/badge are admin-entered content, not translation keys.
 class PlanLineItem {
@@ -17,13 +19,6 @@ class PlanLineItem {
   /// Optional small pill, e.g. "BEST VALUE". Null renders no badge.
   final String? badgeText;
 
-  PlanLineItem copyWith({String? label, String? price, String? badgeText}) =>
-      PlanLineItem(
-        id: id,
-        label: label ?? this.label,
-        price: price ?? this.price,
-        badgeText: badgeText,
-      );
 }
 
 /// A group of priced [lineItems] under one heading (e.g. "Monthly Packages").
@@ -71,7 +66,7 @@ const List<PlanCategory> kInitialPlanCategories = [
     id: 'monthly_packages',
     name: 'Monthly Packages',
     icon: Icons.calendar_month,
-    themeColor: Color(0xFF3B6934), // AppColors.darkGreen
+    themeColor: AppColors.darkGreen,
     lineItems: [
       PlanLineItem(id: 'mp_3h_3d', label: '3 hours / 3 Days', price: '600 AED'),
       PlanLineItem(id: 'mp_3h_5d', label: '3 hours / 5 Days', price: '1000 AED'),
@@ -84,7 +79,7 @@ const List<PlanCategory> kInitialPlanCategories = [
     id: 'daily_subscription',
     name: 'Daily Subscription',
     icon: Icons.access_time,
-    themeColor: Color(0xFF825500), // AppColors.amberLabel
+    themeColor: AppColors.amberLabel,
     lineItems: [
       PlanLineItem(id: 'ds_1h', label: 'One Hour', price: '35 AED'),
       PlanLineItem(id: 'ds_23h', label: '2 / 3 Hours', price: '70 AED'),
@@ -101,7 +96,7 @@ const List<PlanCategory> kInitialPlanCategories = [
     id: 'weekly_special_offers',
     name: 'Weekly Special Offers',
     icon: Icons.star,
-    themeColor: Color(0xFF3B6934), // AppColors.darkGreen
+    themeColor: AppColors.darkGreen,
     isFeatured: true,
     lineItems: [
       PlanLineItem(id: 'wso_4d3h', label: '4 Days 3 Hours', price: '250 AED'),
