@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/responsive/breakpoints.dart';
@@ -7,8 +8,10 @@ import '../../../../core/responsive/responsive_value.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../../data/models/subscription_plan.dart';
+import '../cubit/plans_cubit.dart';
+import '../cubit/plans_state.dart';
 import 'assign_plan_section.dart';
-import 'global_plan_card.dart';
+import 'plan_category_card.dart';
 import 'plan_history_section.dart';
 
 /// Body content of subscription management — global plans, assign-plan
@@ -51,17 +54,16 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
     });
   }
 
-  void _applyPlan(SubscriptionPlan plan) {
-    final newTitle = plan.titleKey.tr();
+  void _applyPlan(PlanCategory category, PlanLineItem item) {
     setState(() {
       _history.insert(0, PlanChangeEntry(
         date: DateTime.now(),
         oldPlanLabel: _currentPlanTitle,
-        newPlanLabel: newTitle,
+        newPlanLabel: item.label,
         changedBy: 'Admin',
       ));
-      _currentPlanTitle = newTitle;
-      _currentPlanPrice = plan.price;
+      _currentPlanTitle = item.label;
+      _currentPlanPrice = item.price;
     });
     widget.onPlanChanged?.call(_currentPlanTitle, _currentPlanPrice);
   }
@@ -94,27 +96,19 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
         ),
         SizedBox(height: 20.h),
 
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: const ResponsiveValue<int>(compact: 2, medium: 2, expanded: 4).resolve(context),
-            mainAxisSpacing: 24.w,
-            crossAxisSpacing: 24.w,
-            mainAxisExtent: 220.h,
-          ),
-          itemCount: kSubscriptionPlans.length,
-          itemBuilder: (context, index) {
-            final plan = kSubscriptionPlans[index];
-            return GlobalPlanCard(
-              title: plan.titleKey.tr(),
-              duration: plan.durationKey.tr(),
-              price: plan.price,
-              icon: plan.icon,
-              themeColor: plan.themeColor,
-              isSolid: plan.isSolid,
-              priceSuffixKey: plan.priceSuffixKey,
-              iconAsset: plan.iconAsset,
+        BlocBuilder<PlansCubit, PlansState>(
+          builder: (context, state) {
+            return Wrap(
+              spacing: 24.w,
+              runSpacing: 24.w,
+              children: [
+                for (final category in state.categories)
+                  SizedBox(
+                    width: (MediaQuery.sizeOf(context).width - 64.w - 48.w) /
+                        const ResponsiveValue<int>(compact: 1, medium: 2, expanded: 3).resolve(context),
+                    child: PlanCategoryCard(category: category, onEdit: () {}),
+                  ),
+              ],
             );
           },
         ),
