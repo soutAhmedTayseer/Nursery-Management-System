@@ -15,6 +15,7 @@ import '../../../subscriptions/data/models/subscription_plan.dart';
 import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
 import '../cubit/registration_cubit.dart';
 import '../cubit/registration_state.dart';
+import '../widgets/agreement_section.dart';
 import '../widgets/allergies_section.dart';
 import '../widgets/emergency_contact_section.dart';
 import '../widgets/registration_form_section.dart';
@@ -57,11 +58,14 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
   var _dobController = TextEditingController();
   var _motherPhoneController = TextEditingController();
   var _fatherPhoneController = TextEditingController();
+  var _signatureController = TextEditingController();
   String? _selectedPlanId;
   List<String> _allergies = [];
+  bool _agreementChecked = false;
+  bool? _mediaConsent;
   var _formKeys = List.generate(_stepCount, (_) => GlobalKey<FormState>());
 
-  static const _stepCount = 4;
+  static const _stepCount = 5;
 
   @override
   void dispose() {
@@ -70,7 +74,15 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     _dobController.dispose();
     _motherPhoneController.dispose();
     _fatherPhoneController.dispose();
+    _signatureController.dispose();
     super.dispose();
+  }
+
+  String _todayLabel() {
+    final now = DateTime.now();
+    final d = now.day.toString().padLeft(2, '0');
+    final m = now.month.toString().padLeft(2, '0');
+    return '$d/$m/${now.year}';
   }
 
   DateTime? _parseDob() {
@@ -106,9 +118,26 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
         return;
       }
     }
-    if (_motherPhoneController.text.trim().isEmpty && _fatherPhoneController.text.trim().isEmpty) {
+    if (_motherPhoneController.text.trim().isEmpty &&
+        _fatherPhoneController.text.trim().isEmpty) {
       AppSnackbar.showError(context, 'registration_parent_required_error'.tr());
       _goToStep(1);
+      return;
+    }
+    if (_mediaConsent == null) {
+      AppSnackbar.showError(
+        context,
+        'registration_agreement_media_required_error'.tr(),
+      );
+      _goToStep(_stepCount - 1);
+      return;
+    }
+    if (!_agreementChecked) {
+      AppSnackbar.showError(
+        context,
+        'registration_agreement_checkbox_required_error'.tr(),
+      );
+      _goToStep(_stepCount - 1);
       return;
     }
     final selected = _findSelectedPlan(context);
@@ -144,6 +173,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     _dobController.dispose();
     _motherPhoneController.dispose();
     _fatherPhoneController.dispose();
+    _signatureController.dispose();
     setState(() {
       _currentStep = 0;
       _formGeneration++; // forces fresh field widgets, clearing all input state
@@ -151,8 +181,11 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
       _dobController = TextEditingController();
       _motherPhoneController = TextEditingController();
       _fatherPhoneController = TextEditingController();
+      _signatureController = TextEditingController();
       _selectedPlanId = null;
       _allergies = [];
+      _agreementChecked = false;
+      _mediaConsent = null;
       _formKeys = List.generate(_stepCount, (_) => GlobalKey<FormState>());
     });
   }
@@ -161,7 +194,11 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
   /// up to two fields — so the two cells in a row always share the same
   /// height and stay aligned with each other. On compact, every field just
   /// stacks full-width regardless of pairing.
-  Widget _fieldRows(BuildContext context, AppSpacing spacing, List<_FieldRow> rows) {
+  Widget _fieldRows(
+    BuildContext context,
+    AppSpacing spacing,
+    List<_FieldRow> rows,
+  ) {
     final isCompact = context.isCompact;
     final children = <Widget>[];
     for (var i = 0; i < rows.length; i++) {
@@ -186,7 +223,10 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
         );
       }
     }
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: children);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
+    );
   }
 
   @override
@@ -197,6 +237,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
       'registration_step_mother'.tr(),
       'registration_step_father'.tr(),
       'registration_step_emergency'.tr(),
+      'registration_step_agreement'.tr(),
     ];
 
     final pages = [
@@ -223,11 +264,23 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 controller: _dobController,
                 required: true,
               ),
-              RegistrationInputField(label: 'registration_label_enrol_date'.tr(), hint: 'registration_hint_date'.tr(), inputType: RegistrationFieldInputType.date),
+              RegistrationInputField(
+                label: 'registration_label_enrol_date'.tr(),
+                hint: 'registration_hint_date'.tr(),
+                inputType: RegistrationFieldInputType.date,
+              ),
             ),
             _FieldRow(
-              RegistrationInputField(label: 'registration_label_nationality'.tr(), hint: 'registration_hint_nationality'.tr(), inputType: RegistrationFieldInputType.letters),
-              RegistrationInputField(label: 'registration_label_religion'.tr(), hint: 'registration_hint_religion'.tr(), inputType: RegistrationFieldInputType.letters),
+              RegistrationInputField(
+                label: 'registration_label_nationality'.tr(),
+                hint: 'registration_hint_nationality'.tr(),
+                inputType: RegistrationFieldInputType.letters,
+              ),
+              RegistrationInputField(
+                label: 'registration_label_religion'.tr(),
+                hint: 'registration_hint_religion'.tr(),
+                inputType: RegistrationFieldInputType.letters,
+              ),
             ),
             _FieldRow(
               RegistrationInputField(
@@ -259,15 +312,35 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 inputType: RegistrationFieldInputType.digits,
                 controller: _motherPhoneController,
               ),
-              RegistrationInputField(label: 'registration_label_contact_email'.tr(), hint: 'registration_hint_email'.tr(), inputType: RegistrationFieldInputType.email),
+              RegistrationInputField(
+                label: 'registration_label_contact_email'.tr(),
+                hint: 'registration_hint_email'.tr(),
+                inputType: RegistrationFieldInputType.email,
+              ),
             ),
             _FieldRow(
-              RegistrationInputField(label: 'registration_label_occupation'.tr(), hint: 'registration_hint_occupation'.tr(), inputType: RegistrationFieldInputType.letters),
-              RegistrationInputField(label: 'registration_label_job_title'.tr(), hint: 'registration_hint_job_title'.tr(), inputType: RegistrationFieldInputType.letters),
+              RegistrationInputField(
+                label: 'registration_label_occupation'.tr(),
+                hint: 'registration_hint_occupation'.tr(),
+                inputType: RegistrationFieldInputType.letters,
+              ),
+              RegistrationInputField(
+                label: 'registration_label_job_title'.tr(),
+                hint: 'registration_hint_job_title'.tr(),
+                inputType: RegistrationFieldInputType.letters,
+              ),
             ),
             _FieldRow(
-              RegistrationInputField(label: 'registration_label_company_name'.tr(), hint: 'registration_hint_company_name'.tr(), inputType: RegistrationFieldInputType.alphanumeric),
-              RegistrationInputField(label: 'registration_label_work_phone'.tr(), hint: 'registration_hint_work_phone'.tr(), inputType: RegistrationFieldInputType.digits),
+              RegistrationInputField(
+                label: 'registration_label_company_name'.tr(),
+                hint: 'registration_hint_company_name'.tr(),
+                inputType: RegistrationFieldInputType.alphanumeric,
+              ),
+              RegistrationInputField(
+                label: 'registration_label_work_phone'.tr(),
+                hint: 'registration_hint_work_phone'.tr(),
+                inputType: RegistrationFieldInputType.digits,
+              ),
             ),
             _FieldRow(
               RegistrationInputField(
@@ -293,15 +366,35 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 inputType: RegistrationFieldInputType.digits,
                 controller: _fatherPhoneController,
               ),
-              RegistrationInputField(label: 'registration_label_contact_email'.tr(), hint: 'registration_hint_email'.tr(), inputType: RegistrationFieldInputType.email),
+              RegistrationInputField(
+                label: 'registration_label_contact_email'.tr(),
+                hint: 'registration_hint_email'.tr(),
+                inputType: RegistrationFieldInputType.email,
+              ),
             ),
             _FieldRow(
-              RegistrationInputField(label: 'registration_label_occupation'.tr(), hint: 'registration_hint_occupation'.tr(), inputType: RegistrationFieldInputType.letters),
-              RegistrationInputField(label: 'registration_label_job_title'.tr(), hint: 'registration_hint_job_title'.tr(), inputType: RegistrationFieldInputType.letters),
+              RegistrationInputField(
+                label: 'registration_label_occupation'.tr(),
+                hint: 'registration_hint_occupation'.tr(),
+                inputType: RegistrationFieldInputType.letters,
+              ),
+              RegistrationInputField(
+                label: 'registration_label_job_title'.tr(),
+                hint: 'registration_hint_job_title'.tr(),
+                inputType: RegistrationFieldInputType.letters,
+              ),
             ),
             _FieldRow(
-              RegistrationInputField(label: 'registration_label_company'.tr(), hint: 'registration_hint_company'.tr(), inputType: RegistrationFieldInputType.alphanumeric),
-              RegistrationInputField(label: 'registration_label_work_phone'.tr(), hint: 'registration_hint_work_phone'.tr(), inputType: RegistrationFieldInputType.digits),
+              RegistrationInputField(
+                label: 'registration_label_company'.tr(),
+                hint: 'registration_hint_company'.tr(),
+                inputType: RegistrationFieldInputType.alphanumeric,
+              ),
+              RegistrationInputField(
+                label: 'registration_label_work_phone'.tr(),
+                hint: 'registration_hint_work_phone'.tr(),
+                inputType: RegistrationFieldInputType.digits,
+              ),
             ),
             _FieldRow(
               RegistrationInputField(
@@ -329,6 +422,92 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
           ),
         ],
       ),
+      AgreementSection(
+        children: [
+          Text(
+            'registration_agreement_allergy_recap_label'.tr().toUpperCase(),
+            style: TextStyle(
+              fontSize: (10 * context.uiScale).sp,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textTertiary,
+              letterSpacing: 1.1,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            _allergies.isEmpty
+                ? 'registration_agreement_allergy_recap_none'.tr()
+                : _allergies.join(', '),
+            style: TextStyle(
+              fontSize: (14 * context.uiScale).sp,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: spacing.lg),
+          Text(
+            'registration_agreement_media_release_label'.tr(),
+            style: TextStyle(
+              fontSize: (13 * context.uiScale).sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          RadioListTile<bool>(
+            contentPadding: EdgeInsets.zero,
+            title: Text('registration_agreement_media_yes'.tr()),
+            value: true,
+            groupValue: _mediaConsent,
+            onChanged: (v) => setState(() => _mediaConsent = v),
+          ),
+          RadioListTile<bool>(
+            contentPadding: EdgeInsets.zero,
+            title: Text('registration_agreement_media_no'.tr()),
+            value: false,
+            groupValue: _mediaConsent,
+            onChanged: (v) => setState(() => _mediaConsent = v),
+          ),
+          SizedBox(height: spacing.lg),
+          RegistrationInputField(
+            label: 'registration_agreement_signature_label'.tr(),
+            hint: 'registration_agreement_signature_hint'.tr(),
+            inputType: RegistrationFieldInputType.letters,
+            controller: _signatureController,
+            required: true,
+          ),
+          SizedBox(height: spacing.lg),
+          Text(
+            'registration_agreement_date_label'.tr().toUpperCase(),
+            style: TextStyle(
+              fontSize: (10 * context.uiScale).sp,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textTertiary,
+              letterSpacing: 1.1,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            _todayLabel(),
+            style: TextStyle(
+              fontSize: (14 * context.uiScale).sp,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: spacing.lg),
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: _agreementChecked,
+            onChanged: (v) => setState(() => _agreementChecked = v ?? false),
+            title: Text(
+              'registration_agreement_checkbox_label'.tr(),
+              style: TextStyle(
+                fontSize: (13 * context.uiScale).sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     ];
 
     return BlocListener<RegistrationCubit, RegistrationState>(
@@ -348,7 +527,10 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
         // focused field into view.
         body: SafeArea(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: spacing.pagePadding, vertical: spacing.xl),
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.pagePadding,
+              vertical: spacing.xl,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -366,7 +548,11 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                     alignment: Alignment.topCenter,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxWidth: const ResponsiveValue<double>(compact: 640, medium: 900, expanded: 980).resolve(context),
+                        maxWidth: const ResponsiveValue<double>(
+                          compact: 640,
+                          medium: 900,
+                          expanded: 980,
+                        ).resolve(context),
                       ),
                       child: PageView(
                         key: ValueKey(_formGeneration),
@@ -374,7 +560,10 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                         onPageChanged: (i) => setState(() => _currentStep = i),
                         children: [
                           for (var i = 0; i < pages.length; i++)
-                            Form(key: _formKeys[i], child: SingleChildScrollView(child: pages[i])),
+                            Form(
+                              key: _formKeys[i],
+                              child: SingleChildScrollView(child: pages[i]),
+                            ),
                         ],
                       ),
                     ),
@@ -385,55 +574,91 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 // 3. Footer navigation — on bigger screens, swiping/tapping a
                 // step dot replaces Back and Next, so only the final Save
                 // action still needs a button down here.
-                Builder(builder: (context) {
-                  final isLastStep = _currentStep == _stepCount - 1;
-                  final showFullFooter = context.isCompact || isLastStep;
-                  if (!showFullFooter) return const SizedBox.shrink();
-                  final showBackAndStepOf = context.isCompact;
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (showBackAndStepOf)
-                        TextButton(
-                          onPressed: _currentStep > 0 ? _back : null,
-                          child: Text(
-                            'registration_back'.tr(),
-                            style: TextStyle(fontSize: (14 * context.uiScale).sp, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1.5),
-                          ),
-                        )
-                      else
-                        const SizedBox.shrink(),
-                      if (showBackAndStepOf)
-                        Text(
-                          'registration_step_of'.tr(args: ['${_currentStep + 1}', '$_stepCount']),
-                          style: TextStyle(fontSize: (13 * context.uiScale).sp, color: Colors.grey.shade500, fontWeight: FontWeight.w600),
-                        )
-                      else
-                        const SizedBox.shrink(),
-                      BlocBuilder<RegistrationCubit, RegistrationState>(
-                        builder: (context, state) {
-                          final isLoading = state is RegistrationLoading;
-                          final scale = context.uiScale;
-                          return ElevatedButton(
-                            onPressed: isLoading ? null : () => _next(context, context.read<RegistrationCubit>()),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.leafGreen,
-                              padding: EdgeInsets.symmetric(horizontal: spacing.xl, vertical: spacing.md * scale),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.r)),
-                              elevation: 0,
+                Builder(
+                  builder: (context) {
+                    final isLastStep = _currentStep == _stepCount - 1;
+                    final showFullFooter = context.isCompact || isLastStep;
+                    if (!showFullFooter) return const SizedBox.shrink();
+                    final showBackAndStepOf = context.isCompact;
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (showBackAndStepOf)
+                          TextButton(
+                            onPressed: _currentStep > 0 ? _back : null,
+                            child: Text(
+                              'registration_back'.tr(),
+                              style: TextStyle(
+                                fontSize: (14 * context.uiScale).sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade600,
+                                letterSpacing: 1.5,
+                              ),
                             ),
-                            child: isLoading
-                                ? SizedBox(width: 24.w, height: 24.w, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                : Text(
-                                    isLastStep ? 'registration_save_button'.tr() : 'registration_next'.tr(),
-                                    style: TextStyle(fontSize: (16 * scale).sp, fontWeight: FontWeight.bold, color: Colors.white),
-                                  ),
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                }),
+                          )
+                        else
+                          const SizedBox.shrink(),
+                        if (showBackAndStepOf)
+                          Text(
+                            'registration_step_of'.tr(
+                              args: ['${_currentStep + 1}', '$_stepCount'],
+                            ),
+                            style: TextStyle(
+                              fontSize: (13 * context.uiScale).sp,
+                              color: Colors.grey.shade500,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                        else
+                          const SizedBox.shrink(),
+                        BlocBuilder<RegistrationCubit, RegistrationState>(
+                          builder: (context, state) {
+                            final isLoading = state is RegistrationLoading;
+                            final scale = context.uiScale;
+                            return ElevatedButton(
+                              onPressed: isLoading
+                                  ? null
+                                  : () => _next(
+                                      context,
+                                      context.read<RegistrationCubit>(),
+                                    ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.leafGreen,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: spacing.xl,
+                                  vertical: spacing.md * scale,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: isLoading
+                                  ? SizedBox(
+                                      width: 24.w,
+                                      height: 24.w,
+                                      child: const CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(
+                                      isLastStep
+                                          ? 'registration_save_button'.tr()
+                                          : 'registration_next'.tr(),
+                                      style: TextStyle(
+                                        fontSize: (16 * scale).sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -444,7 +669,11 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
 }
 
 class _StepIndicator extends StatelessWidget {
-  const _StepIndicator({required this.labels, required this.currentStep, required this.onStepTapped});
+  const _StepIndicator({
+    required this.labels,
+    required this.currentStep,
+    required this.onStepTapped,
+  });
 
   final List<String> labels;
   final int currentStep;
@@ -460,7 +689,9 @@ class _StepIndicator extends StatelessWidget {
               child: Container(
                 height: 2,
                 margin: EdgeInsets.symmetric(horizontal: 8.w),
-                color: i <= currentStep ? AppColors.leafGreen : Colors.grey.shade300,
+                color: i <= currentStep
+                    ? AppColors.leafGreen
+                    : Colors.grey.shade300,
               ),
             ),
           _StepDot(
@@ -477,7 +708,13 @@ class _StepIndicator extends StatelessWidget {
 }
 
 class _StepDot extends StatelessWidget {
-  const _StepDot({required this.index, required this.label, required this.isActive, required this.isDone, required this.onTap});
+  const _StepDot({
+    required this.index,
+    required this.label,
+    required this.isActive,
+    required this.isDone,
+    required this.onTap,
+  });
 
   final int index;
   final String label;
@@ -495,10 +732,25 @@ class _StepDot extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: (16 * scale).r,
-            backgroundColor: isActive ? AppColors.leafGreen : (isDone ? AppColors.leafGreen.withValues(alpha: 0.15) : Colors.grey.shade200),
+            backgroundColor: isActive
+                ? AppColors.leafGreen
+                : (isDone
+                      ? AppColors.leafGreen.withValues(alpha: 0.15)
+                      : Colors.grey.shade200),
             child: isDone
-                ? Icon(Icons.check, size: (16 * scale).w, color: AppColors.leafGreen)
-                : Text('${index + 1}', style: TextStyle(fontSize: (13 * scale).sp, fontWeight: FontWeight.bold, color: isActive ? Colors.white : Colors.grey.shade500)),
+                ? Icon(
+                    Icons.check,
+                    size: (16 * scale).w,
+                    color: AppColors.leafGreen,
+                  )
+                : Text(
+                    '${index + 1}',
+                    style: TextStyle(
+                      fontSize: (13 * scale).sp,
+                      fontWeight: FontWeight.bold,
+                      color: isActive ? Colors.white : Colors.grey.shade500,
+                    ),
+                  ),
           ),
           SizedBox(height: 6.h),
           Text(
