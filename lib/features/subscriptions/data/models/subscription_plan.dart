@@ -10,6 +10,8 @@ class PlanLineItem {
     required this.label,
     required this.price,
     this.badgeText,
+    this.hoursPerDay,
+    this.daysPerCycle = 1,
   });
 
   final String id;
@@ -19,6 +21,12 @@ class PlanLineItem {
   /// Optional small pill, e.g. "BEST VALUE". Null renders no badge.
   final String? badgeText;
 
+  /// Hours covered per day. Null means "Full Day" (no fixed hour cap) —
+  /// drives Registration's derived hours display instead of a manual entry.
+  final int? hoursPerDay;
+
+  /// Days covered by this plan's billing cycle (e.g. 5 for "3 hours / 5 Days").
+  final int daysPerCycle;
 }
 
 /// A group of priced [lineItems] under one heading (e.g. "Monthly Packages").
@@ -68,11 +76,11 @@ const List<PlanCategory> kInitialPlanCategories = [
     icon: Icons.calendar_month,
     themeColor: AppColors.darkGreen,
     lineItems: [
-      PlanLineItem(id: 'mp_3h_3d', label: '3 hours / 3 Days', price: '600 AED'),
-      PlanLineItem(id: 'mp_3h_5d', label: '3 hours / 5 Days', price: '1000 AED'),
-      PlanLineItem(id: 'mp_5h_5d', label: '5 hours / 5 Days', price: '1500 AED'),
-      PlanLineItem(id: 'mp_8h_5d', label: '8 hours / 5 Days', price: '1750 AED'),
-      PlanLineItem(id: 'mp_full_5d', label: 'Full Day / 5 Days', price: '2000 AED'),
+      PlanLineItem(id: 'mp_3h_3d', label: '3 hours / 3 Days', price: '600 AED', hoursPerDay: 3, daysPerCycle: 3),
+      PlanLineItem(id: 'mp_3h_5d', label: '3 hours / 5 Days', price: '1000 AED', hoursPerDay: 3, daysPerCycle: 5),
+      PlanLineItem(id: 'mp_5h_5d', label: '5 hours / 5 Days', price: '1500 AED', hoursPerDay: 5, daysPerCycle: 5),
+      PlanLineItem(id: 'mp_8h_5d', label: '8 hours / 5 Days', price: '1750 AED', hoursPerDay: 8, daysPerCycle: 5),
+      PlanLineItem(id: 'mp_full_5d', label: 'Full Day / 5 Days', price: '2000 AED', daysPerCycle: 5),
     ],
   ),
   PlanCategory(
@@ -81,14 +89,15 @@ const List<PlanCategory> kInitialPlanCategories = [
     icon: Icons.access_time,
     themeColor: AppColors.amberLabel,
     lineItems: [
-      PlanLineItem(id: 'ds_1h', label: 'One Hour', price: '35 AED'),
-      PlanLineItem(id: 'ds_23h', label: '2 / 3 Hours', price: '70 AED'),
-      PlanLineItem(id: 'ds_4h', label: '4 Hours', price: '100 AED'),
+      PlanLineItem(id: 'ds_1h', label: 'One Hour', price: '35 AED', hoursPerDay: 1),
+      PlanLineItem(id: 'ds_23h', label: '2 / 3 Hours', price: '70 AED', hoursPerDay: 3),
+      PlanLineItem(id: 'ds_4h', label: '4 Hours', price: '100 AED', hoursPerDay: 4),
       PlanLineItem(id: 'ds_full', label: 'Full Day', price: '150 AED'),
       PlanLineItem(
         id: 'ds_weekend',
         label: 'Weekend (Sat or Sun) - 5 Hrs',
         price: '50 AED',
+        hoursPerDay: 5,
       ),
     ],
   ),
@@ -99,15 +108,16 @@ const List<PlanCategory> kInitialPlanCategories = [
     themeColor: AppColors.darkGreen,
     isFeatured: true,
     lineItems: [
-      PlanLineItem(id: 'wso_4d3h', label: '4 Days 3 Hours', price: '250 AED'),
-      PlanLineItem(id: 'wso_5d3h', label: '5 Days 3 Hours', price: '300 AED'),
-      PlanLineItem(id: 'wso_4dfull', label: '4 Days Full Day', price: '500 AED'),
-      PlanLineItem(id: 'wso_5dfull', label: '5 Days Full Day', price: '600 AED'),
+      PlanLineItem(id: 'wso_4d3h', label: '4 Days 3 Hours', price: '250 AED', hoursPerDay: 3, daysPerCycle: 4),
+      PlanLineItem(id: 'wso_5d3h', label: '5 Days 3 Hours', price: '300 AED', hoursPerDay: 3, daysPerCycle: 5),
+      PlanLineItem(id: 'wso_4dfull', label: '4 Days Full Day', price: '500 AED', daysPerCycle: 4),
+      PlanLineItem(id: 'wso_5dfull', label: '5 Days Full Day', price: '600 AED', daysPerCycle: 5),
       PlanLineItem(
         id: 'wso_15dfull',
         label: '15 Days Full Day',
         price: '1500 AED',
         badgeText: 'BEST VALUE',
+        daysPerCycle: 15,
       ),
     ],
   ),

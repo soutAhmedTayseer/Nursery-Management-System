@@ -11,12 +11,15 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../sessions/data/repositories/sessions_repository.dart';
+import '../../../subscriptions/data/models/subscription_plan.dart';
+import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
 import '../cubit/registration_cubit.dart';
 import '../cubit/registration_state.dart';
 import '../widgets/allergies_section.dart';
 import '../widgets/emergency_contact_section.dart';
 import '../widgets/registration_form_section.dart';
 import '../widgets/registration_input_field.dart';
+import '../widgets/plan_picker_section.dart';
 
 /// One row of the field grid — one or two fields that must line up together.
 class _FieldRow {
@@ -52,6 +55,8 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
 
   var _childNameController = TextEditingController();
   var _dobController = TextEditingController();
+  String? _selectedPlanId;
+  List<String> _allergies = [];
 
   static const _stepCount = 4;
 
@@ -82,12 +87,32 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     );
   }
 
-  void _next(RegistrationCubit cubit) {
+  void _next(BuildContext context, RegistrationCubit cubit) {
     if (_currentStep < _stepCount - 1) {
       _goToStep(_currentStep + 1);
-    } else {
-      cubit.registerChild(fullName: _childNameController.text, dateOfBirth: _parseDob());
+      return;
     }
+    final selected = _findSelectedPlan(context);
+    if (selected == null) {
+      AppSnackbar.showError(context, 'registration_plan_required_error'.tr());
+      _goToStep(0);
+      return;
+    }
+    cubit.registerChild(
+      fullName: _childNameController.text,
+      dateOfBirth: _parseDob(),
+      planCategory: selected.$1,
+      planItem: selected.$2,
+      allergies: _allergies.isEmpty ? null : _allergies.join(', '),
+    );
+  }
+
+  (PlanCategory, PlanLineItem)? _findSelectedPlan(BuildContext context) {
+    final compositeId = _selectedPlanId;
+    if (compositeId == null) return null;
+    final parts = compositeId.split(':');
+    if (parts.length != 2) return null;
+    return context.read<PlansCubit>().findLineItem(parts[0], parts[1]);
   }
 
   void _back() {
@@ -103,6 +128,8 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
       _formGeneration++; // forces fresh field widgets, clearing all input state
       _childNameController = TextEditingController();
       _dobController = TextEditingController();
+      _selectedPlanId = null;
+      _allergies = [];
     });
   }
 
@@ -168,14 +195,6 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
               RegistrationInputField(label: 'registration_label_enrol_date'.tr(), hint: 'registration_hint_date'.tr(), inputType: RegistrationFieldInputType.date),
             ),
             _FieldRow(
-              RegistrationInputField(label: 'registration_label_timing_from'.tr(), hint: 'registration_hint_time'.tr(), inputType: RegistrationFieldInputType.time),
-              RegistrationInputField(label: 'registration_label_timing_to'.tr(), hint: 'registration_hint_time'.tr(), inputType: RegistrationFieldInputType.time),
-            ),
-            _FieldRow(
-              RegistrationInputField(label: 'registration_label_fees'.tr(), hint: 'registration_hint_fees'.tr(), inputType: RegistrationFieldInputType.digits),
-              RegistrationInputField(label: 'registration_label_hours'.tr(), hint: 'registration_hint_weekly'.tr(), inputType: RegistrationFieldInputType.digits),
-            ),
-            _FieldRow(
               RegistrationInputField(label: 'registration_label_nationality'.tr(), hint: 'registration_hint_nationality'.tr(), inputType: RegistrationFieldInputType.letters),
               RegistrationInputField(label: 'registration_label_religion'.tr(), hint: 'registration_hint_religion'.tr(), inputType: RegistrationFieldInputType.letters),
             ),
@@ -188,7 +207,12 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
             ),
           ]),
           SizedBox(height: spacing.lg),
-          const AllergiesSection(),
+          PlanPickerSection(
+            selectedCompositeId: _selectedPlanId,
+            onChanged: (value) => setState(() => _selectedPlanId = value),
+          ),
+          SizedBox(height: spacing.lg),
+          AllergiesSection(onChanged: (value) => _allergies = value),
         ],
       ),
       RegistrationFormSection(
@@ -338,7 +362,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                         final isLastStep = _currentStep == _stepCount - 1;
                         final scale = context.uiScale;
                         return ElevatedButton(
-                          onPressed: isLoading ? null : () => _next(context.read<RegistrationCubit>()),
+                          onPressed: isLoading ? null : () => _next(context, context.read<RegistrationCubit>()),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.leafGreen,
                             padding: EdgeInsets.symmetric(horizontal: spacing.xl, vertical: spacing.md * scale),

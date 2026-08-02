@@ -55,8 +55,8 @@ class FakeSessionsRepository implements SessionsRepository {
   }
 
   @override
-  Future<void> addKid(Kid kid) async {
-    _seed.add(KidSession(kid: kid, activeSession: null, planLabel: 'Not Assigned Yet'));
+  Future<void> addKid(Kid kid, {required String planLabel}) async {
+    _seed.add(KidSession(kid: kid, activeSession: null, planLabel: planLabel));
   }
 
   @override

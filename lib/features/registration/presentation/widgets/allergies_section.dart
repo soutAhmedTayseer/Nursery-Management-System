@@ -8,7 +8,12 @@ import '../../../../core/theme/app_colors.dart';
 /// to fill, consistent data. "Other" reveals a small input; each entry typed
 /// there becomes its own removable chip.
 class AllergiesSection extends StatefulWidget {
-  const AllergiesSection({super.key});
+  const AllergiesSection({super.key, this.onChanged});
+
+  /// Called with the localized allergy labels (chip options + custom
+  /// entries) whenever the selection changes, so Registration can save them
+  /// onto the new Kid record.
+  final ValueChanged<List<String>>? onChanged;
 
   @override
   State<AllergiesSection> createState() => _AllergiesSectionState();
@@ -42,6 +47,11 @@ class _AllergiesSectionState extends State<AllergiesSection> {
       _customAllergies.add(text);
       _customController.clear();
     });
+    _notify();
+  }
+
+  void _notify() {
+    widget.onChanged?.call([for (final option in _selected) option.tr(), ..._customAllergies]);
   }
 
   @override
@@ -97,7 +107,10 @@ class _AllergiesSectionState extends State<AllergiesSection> {
                           FilterChip(
                             label: Text(option.tr(), style: TextStyle(fontSize: chipTextSize, fontWeight: FontWeight.w600)),
                             selected: _selected.contains(option),
-                            onSelected: (v) => setState(() => v ? _selected.add(option) : _selected.remove(option)),
+                            onSelected: (v) {
+                              setState(() => v ? _selected.add(option) : _selected.remove(option));
+                              _notify();
+                            },
                             selectedColor: AppColors.accentGreen.withValues(alpha: 0.15),
                             checkmarkColor: AppColors.accentGreen,
                             backgroundColor: Colors.white,
@@ -106,7 +119,10 @@ class _AllergiesSectionState extends State<AllergiesSection> {
                         for (final custom in _customAllergies)
                           InputChip(
                             label: Text(custom, style: TextStyle(fontSize: chipTextSize, fontWeight: FontWeight.w600)),
-                            onDeleted: () => setState(() => _customAllergies.remove(custom)),
+                            onDeleted: () {
+                              setState(() => _customAllergies.remove(custom));
+                              _notify();
+                            },
                             deleteIconColor: AppColors.accentGreen,
                             backgroundColor: AppColors.accentGreen.withValues(alpha: 0.1),
                             side: BorderSide(color: AppColors.accentGreen.withValues(alpha: 0.3)),

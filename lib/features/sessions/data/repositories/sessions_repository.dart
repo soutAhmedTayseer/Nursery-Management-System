@@ -24,7 +24,9 @@ abstract class SessionsRepository {
   Future<({int checkedIn, int checkedOut})> fetchAttendanceCounts();
 
   /// Adds a newly registered kid to the roster, not yet checked in.
-  Future<void> addKid(Kid kid);
+  /// [planLabel] is the display name of the plan picked at registration,
+  /// e.g. "Monthly Packages · 3 hours / 5 Days".
+  Future<void> addKid(Kid kid, {required String planLabel});
 
   /// Opens a new session for [kidId]. No-op if already checked in.
   Future<KidSession?> checkIn(String kidId);
