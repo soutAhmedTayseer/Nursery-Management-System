@@ -10,6 +10,7 @@ import 'core/di/injection.dart';
 import 'core/routes/app_router.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'features/dashboard/presentation/cubit/schedule_cubit.dart';
 import 'features/finance/presentation/cubit/finance_cubit.dart';
 import 'features/subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import 'features/subscriptions/presentation/cubit/plans_cubit.dart';
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
             BlocProvider(create: (_) => PlansCubit()),
             BlocProvider(create: (_) => PlanAssignmentsCubit()),
             BlocProvider(create: (_) => FinanceCubit()),
+            BlocProvider(create: (_) => ScheduleCubit()),
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,

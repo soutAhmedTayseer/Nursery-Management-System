@@ -69,9 +69,7 @@ class OverviewScreen extends StatelessWidget {
                     ),
                   );
 
-                  final feed = overview is OverviewLoaded
-                      ? LiveActivityFeed(events: overview.recentEvents)
-                      : const Center(child: CircularProgressIndicator());
+                  const feed = LiveActivityFeed();
                   final alerts = AlertsNotificationsSection(alerts: overtimeAlerts);
 
                   // Feed and alerts panels each pin their own header and scroll

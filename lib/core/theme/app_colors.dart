@@ -69,4 +69,15 @@ class AppColors {
   static const Color neutralChip = Color(0xFFE5E2DD);
   /// Muted calendar-day background (Attendance Log non-highlighted days).
   static const Color calendarMuted = Color(0xFFEBE8E3);
+
+  // --- Daily schedule pastels (per-activity icon-circle backgrounds) ---
+  static const Color schedulePastelAmber = Color(0xFFFFF3CD);
+  static const Color schedulePastelPeach = Color(0xFFFFE5D9);
+  static const Color schedulePastelPink = Color(0xFFFFD6E0);
+  static const Color schedulePastelRose = Color(0xFFFFC0CB);
+  static const Color schedulePastelBlush = Color(0xFFE8AEB7);
+  static const Color schedulePastelSage = Color(0xFFD8E2DC);
+  static const Color schedulePastelMint = Color(0xFFD8F3DC);
+  static const Color schedulePastelGreen = Color(0xFFB7E4C7);
+  static const Color schedulePastelDeepGreen = Color(0xFF95D5B2);
 }

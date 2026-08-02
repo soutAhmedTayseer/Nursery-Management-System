@@ -17,22 +17,16 @@ class OverviewCubit extends Cubit<OverviewState> {
 
     var checkedInCount = 0;
     var totalHoursToday = 0.0;
-    final events = <ActivityEvent>[];
     for (final kidSession in result.items) {
       if (!kidSession.isCheckedIn) continue;
       checkedInCount++;
       totalHoursToday += (kidSession.elapsed?.inMinutes ?? 0) / 60;
-      final checkedInAt = kidSession.activeSession!.checkedInAt;
-      if (checkedInAt == null) continue;
-      events.add(ActivityEvent(kidName: kidSession.kid.fullName, isCheckIn: true, at: checkedInAt));
     }
-    events.sort((a, b) => b.at.compareTo(a.at));
 
     emit(OverviewLoaded(
       checkedInCount: checkedInCount,
       totalRoster: result.total,
       totalHoursToday: totalHoursToday,
-      recentEvents: events.take(5).toList(),
     ));
   }
 }

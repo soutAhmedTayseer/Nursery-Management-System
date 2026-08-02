@@ -1,89 +1,150 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../cubit/overview_state.dart';
+import '../../data/models/schedule_item.dart';
+import '../cubit/schedule_cubit.dart';
+import '../cubit/schedule_state.dart';
+import '../screens/schedule_feed_screen.dart';
 
-/// Real recent check-in/check-out events, most recent first — replaces the
-/// old hardcoded "Upcoming Activity"/"Past Activity" mock, since there's no
-/// activities-scheduling feature behind those yet.
+/// Latest-finished / live-now / next-upcoming, styled to match Figma node
+/// 1:248's "Live Activity Feed" card exactly (no kid photo asset available,
+/// so the thumbnail is an icon tile in the activity's theme color instead).
 class LiveActivityFeed extends StatelessWidget {
-  const LiveActivityFeed({super.key, required this.events});
-
-  final List<ActivityEvent> events;
+  const LiveActivityFeed({super.key});
 
   @override
   Widget build(BuildContext context) {
     final scale = context.uiScale;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section Header — stays put; only the content below scrolls.
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return BlocBuilder<ScheduleCubit, ScheduleState>(
+      builder: (context, schedule) {
+        final nowMinutes = nowInUaeMinutes();
+        ScheduleItemModel? finished;
+        ScheduleItemModel? active;
+        ScheduleItemModel? upcoming;
+        for (final item in schedule.items) {
+          switch (item.statusAt(nowMinutes)) {
+            case ActivityStatus.completed:
+              if (finished == null || item.endMinutes > finished.endMinutes) finished = item;
+            case ActivityStatus.active:
+              active ??= item;
+            case ActivityStatus.upcoming:
+              if (upcoming == null || item.startMinutes < upcoming.startMinutes) upcoming = item;
+          }
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('feed_title'.tr(), style: TextStyle(fontSize: (22 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CircleAvatar(radius: (4 * scale).r, backgroundColor: Colors.green),
-                SizedBox(width: 8.w),
-                Text('feed_live_now'.tr(), style: TextStyle(fontSize: (10 * scale).sp, fontWeight: FontWeight.bold, color: Colors.green, letterSpacing: 1)),
+                Text('feed_title'.tr(), style: TextStyle(fontSize: (24 * scale).sp, fontWeight: FontWeight.bold, letterSpacing: -0.6, color: AppColors.textPrimary)),
+                Row(
+                  children: [
+                    Container(width: 8.w, height: 8.w, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.darkGreen)),
+                    SizedBox(width: 8.w),
+                    Text('feed_live_now'.tr(), style: TextStyle(fontSize: (12 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen, letterSpacing: 1.2)),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
-        SizedBox(height: 20.h),
-
-        Expanded(
-          child: events.isEmpty
-              ? Center(child: Text('feed_empty'.tr(), style: TextStyle(fontSize: (13 * scale).sp, color: Colors.grey.shade500)))
-              : SingleChildScrollView(
+            SizedBox(height: 24.h),
+            Expanded(
+              child: SingleChildScrollView(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(24.r),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ScheduleFeedScreen())),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      for (var i = 0; i < events.length; i++) ...[
-                        _buildEventTile(events[i], scale, emphasized: i == 0),
-                        if (i != events.length - 1) SizedBox(height: 12.h),
-                      ],
+                      _FeedCard(item: active, scale: scale, eyebrow: 'schedule_in_session_badge'.tr(), eyebrowColor: AppColors.darkGreen, emptyText: 'feed_none_live'.tr(), badgeIcon: Icons.play_arrow_rounded),
+                      SizedBox(height: 20.h),
+                      _FeedCard(item: finished, scale: scale, eyebrow: 'feed_completed_label'.tr(), eyebrowColor: AppColors.textTertiary, emptyText: 'feed_none_finished'.tr(), badgeIcon: Icons.check),
+                      SizedBox(height: 20.h),
+                      _FeedCard(item: upcoming, scale: scale, eyebrow: 'feed_upcoming_label'.tr(), eyebrowColor: AppColors.amberLabel, emptyText: 'feed_none_upcoming'.tr(), badgeIcon: Icons.schedule),
                     ],
                   ),
                 ),
-        ),
-      ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
+}
 
-  Widget _buildEventTile(ActivityEvent event, double scale, {required bool emphasized}) {
-    final ago = DateTime.now().difference(event.at);
-    final agoText = ago.inMinutes < 60 ? 'feed_minutes_ago'.tr(namedArgs: {'n': '${ago.inMinutes}'}) : 'feed_hours_ago'.tr(namedArgs: {'n': '${ago.inHours}'});
+class _FeedCard extends StatelessWidget {
+  const _FeedCard({required this.item, required this.scale, required this.eyebrow, required this.eyebrowColor, required this.emptyText, required this.badgeIcon});
+
+  final ScheduleItemModel? item;
+  final double scale;
+  final String eyebrow;
+  final Color eyebrowColor;
+  final String emptyText;
+  final IconData badgeIcon;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      width: double.infinity,
+      padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: emphasized ? Colors.white : AppColors.surfaceSmoke,
-        borderRadius: BorderRadius.circular(24.r),
-        boxShadow: emphasized ? [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 15, offset: const Offset(0, 8))] : null,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(48.r),
       ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: (20 * scale).r,
-            backgroundColor: AppColors.successTint,
-            child: Icon(Icons.login, color: AppColors.successDark, size: (18 * scale).w),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
+      child: item == null
+          ? Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.h),
+              child: Text(emptyText, style: TextStyle(fontSize: (13 * scale).sp, color: Colors.grey.shade500)),
+            )
+          : Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('feed_checked_in'.tr(namedArgs: {'name': event.kidName}), style: TextStyle(fontSize: (14 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                SizedBox(height: 4.h),
-                Text(agoText, style: TextStyle(fontSize: (11 * scale).sp, color: Colors.grey.shade600)),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: (128 * scale).w,
+                      height: (128 * scale).w,
+                      decoration: BoxDecoration(color: item!.themeColor, borderRadius: BorderRadius.circular(48.r)),
+                      child: Icon(item!.icon, size: (48 * scale).w, color: AppColors.textPrimary),
+                    ),
+                    Positioned(
+                      top: -8.h,
+                      right: -8.w,
+                      child: Container(
+                        width: (28 * scale).w,
+                        height: (28 * scale).w,
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: eyebrowColor, border: Border.all(color: Colors.white, width: 2)),
+                        child: Icon(badgeIcon, size: (14 * scale).w, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(width: 24.w),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(eyebrow, style: TextStyle(fontSize: (14 * scale).sp, fontWeight: FontWeight.bold, letterSpacing: 1.4, color: eyebrowColor)),
+                        SizedBox(height: 4.h),
+                        Text('${item!.timeSlotLabel.split(' - ').first} - ${item!.title}', style: TextStyle(fontSize: (20 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                        if (item!.description.isNotEmpty) ...[
+                          SizedBox(height: 4.h),
+                          Text(item!.description, style: TextStyle(fontSize: (14 * scale).sp, color: Colors.grey.shade600, height: 1.6)),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
