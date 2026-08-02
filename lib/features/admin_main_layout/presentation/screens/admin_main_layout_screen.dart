@@ -9,7 +9,8 @@ import '../../../finance/presentation/screens/finance_screen.dart';
 import '../../../registration/presentation/screens/registration_screen.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 import '../../../sessions/presentation/screens/sessions_screen.dart';
-import '../../../subscriptions/presentation/screens/subscribed_children_screen.dart';
+import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
+import '../../../subscriptions/presentation/screens/subscription_plans_screen.dart';
 import '../cubit/admin_main_layout_cubit.dart';
 import '../cubit/admin_main_layout_state.dart';
 import '../widgets/admin_sidebar.dart';
@@ -24,7 +25,7 @@ class AdminMainLayoutScreen extends StatelessWidget {
       const OverviewScreen(),
       const RegistrationScreen(),
       const SessionsScreen(),
-      const SubscribedChildrenScreen(),
+      const SubscriptionPlansScreen(),
       const FinanceScreen(),
       Center(child: Text('layout_profiles_screen'.tr())),
       Center(child: Text('layout_settings_screen'.tr())),
@@ -35,6 +36,7 @@ class AdminMainLayoutScreen extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => AdminMainLayoutCubit()),
         BlocProvider(create: (_) => sl<SessionsCubit>()..loadSessions()),
+        BlocProvider(create: (_) => PlansCubit()),
       ],
       child: BlocBuilder<AdminMainLayoutCubit, AdminMainLayoutState>(
         builder: (context, state) {

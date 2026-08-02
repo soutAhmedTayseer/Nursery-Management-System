@@ -215,10 +215,6 @@
   "subscriptions_delete_category_confirm_message": "This removes \"{name}\" and all its plans. This cannot be undone.",
   "subscriptions_save": "Save",
 
-  "subscribed_children_title": "Subscribed Children",
-  "subscribed_children_subtitle": "Manage financial plans, billing cycles, and subscription tiers.",
-  "subscribed_children_coming_soon": "This screen is being redesigned. Check back soon.",
-
   "assign_plan_title": "Assign Plan",
   "assign_plan_parent_label": "Parent: Sarah {lastName}",
   "assign_plan_parent_name_label": "Parent: {name}",

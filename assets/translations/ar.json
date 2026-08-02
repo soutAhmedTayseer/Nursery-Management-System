@@ -215,10 +215,6 @@
   "subscriptions_delete_category_confirm_message": "سيؤدي هذا إلى إزالة \"{name}\" وكل خططها. لا يمكن التراجع عن هذا.",
   "subscriptions_save": "حفظ",
 
-  "subscribed_children_title": "الأطفال المشتركون",
-  "subscribed_children_subtitle": "إدارة الخطط المالية ودورات الفوترة وفئات الاشتراك.",
-  "subscribed_children_coming_soon": "يتم إعادة تصميم هذه الشاشة. تابعونا قريباً.",
-
   "assign_plan_title": "تعيين خطة",
   "assign_plan_parent_label": "ولي الأمر: سارة {lastName}",
   "assign_plan_parent_name_label": "ولي الأمر: {name}",
