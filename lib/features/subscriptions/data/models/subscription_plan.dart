@@ -1,87 +1,122 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
-
-/// The nursery's fixed set of global plans. No backend endpoint for plans
-/// yet, so this is a hardcoded catalog rather than fetched data — titles/
-/// durations stay as translation keys so callers still localize them.
-class SubscriptionPlan {
-  const SubscriptionPlan({
+/// One priced option inside a [PlanCategory] (e.g. "3 hours / 3 Days — 600 AED").
+/// Label/price/badge are admin-entered content, not translation keys.
+class PlanLineItem {
+  const PlanLineItem({
     required this.id,
-    required this.titleKey,
-    required this.durationKey,
+    required this.label,
     required this.price,
-    required this.icon,
-    required this.themeColor,
-    this.isSolid = false,
-    this.priceSuffixKey = 'global_plan_per_month_suffix',
-    this.iconAsset,
+    this.badgeText,
   });
 
   final String id;
-  final String titleKey;
-  final String durationKey;
+  final String label;
   final String price;
+
+  /// Optional small pill, e.g. "BEST VALUE". Null renders no badge.
+  final String? badgeText;
+
+  PlanLineItem copyWith({String? label, String? price, String? badgeText}) =>
+      PlanLineItem(
+        id: id,
+        label: label ?? this.label,
+        price: price ?? this.price,
+        badgeText: badgeText,
+      );
+}
+
+/// A group of priced [lineItems] under one heading (e.g. "Monthly Packages").
+/// Admin manages the full catalog as a list of these via [PlansCubit] — no
+/// backend endpoint wired yet, so this is in-memory state seeded from
+/// [kInitialPlanCategories].
+class PlanCategory {
+  const PlanCategory({
+    required this.id,
+    required this.name,
+    required this.icon,
+    required this.themeColor,
+    required this.lineItems,
+    this.isFeatured = false,
+  });
+
+  final String id;
+  final String name;
   final IconData icon;
   final Color themeColor;
-  final bool isSolid;
-  final String priceSuffixKey;
+  final bool isFeatured;
+  final List<PlanLineItem> lineItems;
 
-  /// Figma-exported SVG badge (bg + glyph baked together) for the
-  /// GlobalPlanCard icon. Null falls back to [icon] on a themeColor-tinted
-  /// container — used for the solid Winter Camp card, whose translucent
-  /// white badge doesn't survive standalone SVG export.
-  final String? iconAsset;
+  PlanCategory copyWith({
+    String? name,
+    IconData? icon,
+    Color? themeColor,
+    bool? isFeatured,
+    List<PlanLineItem>? lineItems,
+  }) =>
+      PlanCategory(
+        id: id,
+        name: name ?? this.name,
+        icon: icon ?? this.icon,
+        themeColor: themeColor ?? this.themeColor,
+        isFeatured: isFeatured ?? this.isFeatured,
+        lineItems: lineItems ?? this.lineItems,
+      );
 }
 
-const List<SubscriptionPlan> kSubscriptionPlans = [
-  SubscriptionPlan(
-    id: 'monthly',
-    titleKey: 'subscriptions_plan_monthly',
-    durationKey: 'subscriptions_plan_monthly_duration',
-    price: '\$240',
+/// Seed catalog mirroring Figma node 181:249 ("Parent - Subscription Plans").
+/// [PlansCubit] starts from this list — there is no backend catalog yet.
+const List<PlanCategory> kInitialPlanCategories = [
+  PlanCategory(
+    id: 'monthly_packages',
+    name: 'Monthly Packages',
     icon: Icons.calendar_month,
-    themeColor: AppColors.darkGreen,
-    iconAsset: 'assets/icons/subscriptions/plan_monthly.svg',
+    themeColor: Color(0xFF3B6934), // AppColors.darkGreen
+    lineItems: [
+      PlanLineItem(id: 'mp_3h_3d', label: '3 hours / 3 Days', price: '600 AED'),
+      PlanLineItem(id: 'mp_3h_5d', label: '3 hours / 5 Days', price: '1000 AED'),
+      PlanLineItem(id: 'mp_5h_5d', label: '5 hours / 5 Days', price: '1500 AED'),
+      PlanLineItem(id: 'mp_8h_5d', label: '8 hours / 5 Days', price: '1750 AED'),
+      PlanLineItem(id: 'mp_full_5d', label: 'Full Day / 5 Days', price: '2000 AED'),
+    ],
   ),
-  SubscriptionPlan(
-    id: 'weekly',
-    titleKey: 'subscriptions_plan_weekly_focus',
-    durationKey: 'subscriptions_plan_weekly_duration',
-    price: '\$450',
-    icon: Icons.calendar_today,
-    themeColor: AppColors.subscriptionBrown,
-    iconAsset: 'assets/icons/subscriptions/plan_weekly.svg',
-  ),
-  SubscriptionPlan(
-    id: 'hourly',
-    titleKey: 'subscriptions_plan_hourly',
-    durationKey: 'subscriptions_plan_hourly_duration',
-    price: '\$18',
+  PlanCategory(
+    id: 'daily_subscription',
+    name: 'Daily Subscription',
     icon: Icons.access_time,
-    themeColor: AppColors.amberLabel,
-    priceSuffixKey: 'global_plan_per_hour_suffix',
-    iconAsset: 'assets/icons/subscriptions/plan_hourly.svg',
+    themeColor: Color(0xFF825500), // AppColors.amberLabel
+    lineItems: [
+      PlanLineItem(id: 'ds_1h', label: 'One Hour', price: '35 AED'),
+      PlanLineItem(id: 'ds_23h', label: '2 / 3 Hours', price: '70 AED'),
+      PlanLineItem(id: 'ds_4h', label: '4 Hours', price: '100 AED'),
+      PlanLineItem(id: 'ds_full', label: 'Full Day', price: '150 AED'),
+      PlanLineItem(
+        id: 'ds_weekend',
+        label: 'Weekend (Sat or Sun) - 5 Hrs',
+        price: '50 AED',
+      ),
+    ],
   ),
-  SubscriptionPlan(
-    id: 'winter_camp',
-    titleKey: 'subscriptions_plan_winter_camp',
-    durationKey: 'subscriptions_plan_winter_duration',
-    price: '\$1,200',
-    icon: Icons.holiday_village,
-    themeColor: AppColors.forestGreen,
-    isSolid: true,
-    priceSuffixKey: 'global_plan_per_package_suffix',
+  PlanCategory(
+    id: 'weekly_special_offers',
+    name: 'Weekly Special Offers',
+    icon: Icons.star,
+    themeColor: Color(0xFF3B6934), // AppColors.darkGreen
+    isFeatured: true,
+    lineItems: [
+      PlanLineItem(id: 'wso_4d3h', label: '4 Days 3 Hours', price: '250 AED'),
+      PlanLineItem(id: 'wso_5d3h', label: '5 Days 3 Hours', price: '300 AED'),
+      PlanLineItem(id: 'wso_4dfull', label: '4 Days Full Day', price: '500 AED'),
+      PlanLineItem(id: 'wso_5dfull', label: '5 Days Full Day', price: '600 AED'),
+      PlanLineItem(
+        id: 'wso_15dfull',
+        label: '15 Days Full Day',
+        price: '1500 AED',
+        badgeText: 'BEST VALUE',
+      ),
+    ],
   ),
 ];
-
-SubscriptionPlan? findPlanById(String? id) {
-  if (id == null) return null;
-  for (final plan in kSubscriptionPlans) {
-    if (plan.id == id) return plan;
-  }
-  return null;
-}
 
 /// One row of a child's plan-change log.
 class PlanChangeEntry {
