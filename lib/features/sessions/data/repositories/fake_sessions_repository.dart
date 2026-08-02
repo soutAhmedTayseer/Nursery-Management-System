@@ -1,5 +1,6 @@
 import 'package:nursery_shared/nursery_shared.dart';
 
+import '../../../../core/services/qr_code_service.dart';
 import '../../../../core/testing/fake_failure_switch.dart';
 import '../models/kid_session.dart';
 import 'sessions_repository.dart';
@@ -8,7 +9,9 @@ import 'sessions_repository.dart';
 /// inside `SessionsCubit`.
 ///
 /// Filters and slices exactly as the server will, so cubit pagination logic is
-/// already correct when this is swapped out.
+/// already correct when this is swapped out. Mutable (not `static final`) —
+/// registration and clock-in/out write through here so every screen backed
+/// by this repository stays in sync.
 class FakeSessionsRepository implements SessionsRepository {
   FakeSessionsRepository({
     required this.failureSwitch,
@@ -30,9 +33,7 @@ class FakeSessionsRepository implements SessionsRepository {
     final needle = query.trim().toLowerCase();
     final matches = needle.isEmpty
         ? _seed
-        : _seed
-            .where((e) => e.kid.fullName.toLowerCase().contains(needle))
-            .toList(growable: false);
+        : _seed.where((e) => e.kid.fullName.toLowerCase().contains(needle)).toList(growable: false);
 
     final start = (page - 1) * pageSize;
     final items = start >= matches.length
@@ -46,6 +47,76 @@ class FakeSessionsRepository implements SessionsRepository {
       pageSize: pageSize,
     );
   }
+
+  @override
+  Future<({int checkedIn, int checkedOut})> fetchAttendanceCounts() async {
+    final checkedIn = _seed.where((e) => e.isCheckedIn).length;
+    return (checkedIn: checkedIn, checkedOut: _seed.length - checkedIn);
+  }
+
+  @override
+  Future<void> addKid(Kid kid) async {
+    _seed.add(KidSession(kid: kid, activeSession: null, planLabel: 'Not Assigned Yet'));
+  }
+
+  @override
+  Future<KidSession?> checkIn(String kidId) async {
+    final index = _seed.indexWhere((e) => e.kid.id == kidId);
+    if (index == -1 || _seed[index].isCheckedIn) return null;
+    final updated = _withSession(
+      _seed[index],
+      Session(
+        id: 'session-$kidId-${_now.millisecondsSinceEpoch}',
+        kidId: kidId,
+        requestedBy: 'admin',
+        requestedById: 'admin-1',
+        status: SessionStatus.confirmed,
+        checkedInAt: _now,
+        confirmedBy: 'admin-1',
+        checkedOutAt: null,
+        checkedOutConfirmedBy: null,
+        hoursDeducted: null,
+        subscriptionId: null,
+      ),
+    );
+    _seed[index] = updated;
+    return updated;
+  }
+
+  @override
+  Future<KidSession?> checkOut(String kidId) async {
+    final index = _seed.indexWhere((e) => e.kid.id == kidId);
+    if (index == -1 || !_seed[index].isCheckedIn) return null;
+    final session = _seed[index].activeSession!;
+    final updated = _withSession(
+      _seed[index],
+      Session(
+        id: session.id,
+        kidId: session.kidId,
+        requestedBy: session.requestedBy,
+        requestedById: session.requestedById,
+        status: session.status,
+        checkedInAt: session.checkedInAt,
+        confirmedBy: session.confirmedBy,
+        checkedOutAt: _now,
+        checkedOutConfirmedBy: 'admin-1',
+        hoursDeducted: session.hoursDeducted,
+        subscriptionId: session.subscriptionId,
+      ),
+    );
+    _seed[index] = updated;
+    return updated;
+  }
+
+  @override
+  Future<KidSession?> clockToggle(String kidId) async {
+    final index = _seed.indexWhere((e) => e.kid.id == kidId);
+    if (index == -1) return null;
+    return _seed[index].isCheckedIn ? checkOut(kidId) : checkIn(kidId);
+  }
+
+  KidSession _withSession(KidSession entry, Session session) =>
+      KidSession(kid: entry.kid, activeSession: session, planLabel: entry.planLabel);
 
   static DateTime get _now => DateTime.now();
 
@@ -70,6 +141,7 @@ class FakeSessionsRepository implements SessionsRepository {
         createdAt: DateTime(2026, 1, 1),
         approvedAt: DateTime(2026, 1, 2),
         approvedBy: 'admin-1',
+        qrPayload: QrCodeService.signKidId(id),
       ),
       activeSession: hoursIn == null
           ? null

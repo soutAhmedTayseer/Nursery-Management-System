@@ -13,6 +13,8 @@ class SessionsLoaded extends SessionsState {
     required this.currentPage,
     required this.totalPages,
     this.searchQuery = '',
+    this.checkedInCount = 0,
+    this.checkedOutCount = 0,
   });
 
   final List<KidSession> items;
@@ -20,6 +22,8 @@ class SessionsLoaded extends SessionsState {
   final String searchQuery;
   final int currentPage;
   final int totalPages;
+  final int checkedInCount;
+  final int checkedOutCount;
 }
 
 class SessionsError extends SessionsState {

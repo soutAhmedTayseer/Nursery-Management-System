@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nursery_shared/nursery_shared.dart';
 
+import '../../../../core/services/qr_code_service.dart';
 import '../../data/models/kid_session.dart';
 import '../../data/repositories/sessions_repository.dart';
 
@@ -32,6 +33,28 @@ class SessionsCubit extends Cubit<SessionsState> {
     return _fetch();
   }
 
+  Future<void> clockIn(String kidId) async {
+    await _repository.checkIn(kidId);
+    await _fetch();
+  }
+
+  Future<void> clockOut(String kidId) async {
+    await _repository.checkOut(kidId);
+    await _fetch();
+  }
+
+  /// Decodes a scanned QR payload and clocks that kid in or out, whichever
+  /// is the opposite of their current state. Returns the kid's display name
+  /// on success, or null if the payload didn't verify or matched no kid.
+  Future<String?> handleQrScan(String payload) async {
+    final kidId = QrCodeService.verify(payload);
+    if (kidId == null) return null;
+    final updated = await _repository.clockToggle(kidId);
+    if (updated == null) return null;
+    await _fetch();
+    return updated.kid.fullName;
+  }
+
   Future<void> _fetch() async {
     final requestId = ++_requestId;
     emit(SessionsLoading());
@@ -41,6 +64,7 @@ class SessionsCubit extends Cubit<SessionsState> {
         pageSize: _pageSize,
         query: _query,
       );
+      final counts = await _repository.fetchAttendanceCounts();
       if (requestId != _requestId) return; // a newer request superseded this one
       emit(SessionsLoaded(
         items: result.items,
@@ -48,6 +72,8 @@ class SessionsCubit extends Cubit<SessionsState> {
         currentPage: result.page,
         totalPages: result.totalPages,
         searchQuery: _query,
+        checkedInCount: counts.checkedIn,
+        checkedOutCount: counts.checkedOut,
       ));
     } on ApiException catch (exception) {
       if (requestId != _requestId) return; // a newer request superseded this one

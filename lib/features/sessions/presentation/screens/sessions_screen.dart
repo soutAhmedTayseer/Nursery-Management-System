@@ -4,15 +4,29 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/responsive_value.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/async_state_view.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../../../core/widgets/search_field.dart';
 import '../../../child_profile/presentation/screens/child_profile_details_screen.dart';
 import '../cubit/sessions_cubit.dart';
 import '../widgets/child_session_card.dart';
+import '../widgets/qr_scan_dialog.dart';
 
 class SessionsScreen extends StatelessWidget {
   const SessionsScreen({super.key});
+
+  Future<void> _scanQr(BuildContext context) async {
+    final payload = await QrScanDialog.show(context);
+    if (payload == null || !context.mounted) return;
+    final kidName = await context.read<SessionsCubit>().handleQrScan(payload);
+    if (!context.mounted) return;
+    if (kidName == null) {
+      AppSnackbar.showError(context, 'session_scan_qr_invalid'.tr());
+    } else {
+      AppSnackbar.showSuccess(context, 'session_scan_qr_success'.tr(namedArgs: {'name': kidName}));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +37,38 @@ class SessionsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SearchField(
-              hint: 'appbar_search_hint'.tr(),
-              onChanged: (query) => context.read<SessionsCubit>().search(query),
+            Row(
+              children: [
+                Expanded(
+                  child: SearchField(
+                    hint: 'appbar_search_hint'.tr(),
+                    onChanged: (query) => context.read<SessionsCubit>().search(query),
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                _ScanQrButton(onTap: () => _scanQr(context)),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            BlocBuilder<SessionsCubit, SessionsState>(
+              builder: (context, state) {
+                if (state is! SessionsLoaded) return const SizedBox();
+                return Row(
+                  children: [
+                    _CountPill(
+                      icon: Icons.login,
+                      color: AppColors.accentGreen,
+                      label: 'session_count_checked_in'.tr(namedArgs: {'count': '${state.checkedInCount}'}),
+                    ),
+                    SizedBox(width: 12.w),
+                    _CountPill(
+                      icon: Icons.logout,
+                      color: Colors.grey.shade500,
+                      label: 'session_count_checked_out'.tr(namedArgs: {'count': '${state.checkedOutCount}'}),
+                    ),
+                  ],
+                );
+              },
             ),
             SizedBox(height: 24.h),
             Expanded(
@@ -71,6 +114,8 @@ class SessionsScreen extends StatelessWidget {
                                 builder: (_) => ChildProfileDetailsScreen(childData: loaded.items[index]),
                               ),
                             ),
+                            onClockIn: () => cubit.clockIn(loaded.items[index].kid.id),
+                            onClockOut: () => cubit.clockOut(loaded.items[index].kid.id),
                           ),
                         ),
                       );
@@ -97,6 +142,63 @@ class SessionsScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ScanQrButton extends StatelessWidget {
+  const _ScanQrButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.amberTint,
+      borderRadius: BorderRadius.circular(9999),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(9999),
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 14.h),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.qr_code_scanner, size: 18.w, color: AppColors.brownDark),
+              SizedBox(width: 8.w),
+              Text('session_scan_qr_button'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.brownDark)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountPill extends StatelessWidget {
+  const _CountPill({required this.icon, required this.color, required this.label});
+
+  final IconData icon;
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.all(6.w),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+            child: Icon(icon, size: 14.w, color: color),
+          ),
+          SizedBox(width: 10.w),
+          Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        ],
       ),
     );
   }

@@ -48,6 +48,13 @@ dependencies:
   window_manager: ^0.5.1
   file_picker: ^8.1.7
   url_launcher: ^6.3.1
+  mobile_scanner: ^7.1.2
+  qr_flutter: ^4.1.0
+  crypto: ^3.0.6
+  # mobile_scanner has no Windows/Linux platform implementation at all — this
+  # pure-Dart decoder backs the "upload a QR photo" fallback there instead.
+  qr_code_vision: ^0.1.2
+  image: ^4.5.4
 
 dev_dependencies:
   flutter_test:

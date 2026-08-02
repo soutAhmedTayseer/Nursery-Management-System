@@ -18,4 +18,22 @@ abstract class SessionsRepository {
     required int pageSize,
     String query = '',
   });
+
+  /// Roster-wide checked-in/out counts, independent of the current page or
+  /// search filter — backs the Sessions screen's summary pills.
+  Future<({int checkedIn, int checkedOut})> fetchAttendanceCounts();
+
+  /// Adds a newly registered kid to the roster, not yet checked in.
+  Future<void> addKid(Kid kid);
+
+  /// Opens a new session for [kidId]. No-op if already checked in.
+  Future<KidSession?> checkIn(String kidId);
+
+  /// Closes [kidId]'s open session. No-op if already checked out.
+  Future<KidSession?> checkOut(String kidId);
+
+  /// Flips [kidId]'s current checked-in state — used by the QR scan flow,
+  /// which only knows a kid id, not their current state. Returns null if no
+  /// kid matches [kidId] (a malformed/unrecognized scan).
+  Future<KidSession?> clockToggle(String kidId);
 }
