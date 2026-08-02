@@ -2,6 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:nursery_shared/nursery_shared.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_fonts.dart';
 import '../../data/models/attendance_day.dart';
@@ -9,7 +11,9 @@ import '../cubit/attendance_cubit.dart';
 import '../cubit/attendance_state.dart';
 
 class AttendanceLogTab extends StatelessWidget {
-  const AttendanceLogTab({super.key});
+  const AttendanceLogTab({super.key, required this.kid});
+
+  final Kid kid;
 
   @override
   Widget build(BuildContext context) {
@@ -86,9 +90,44 @@ class AttendanceLogTab extends StatelessWidget {
                   ],
                 ),
               ),
+              SizedBox(height: 24.h),
+              _buildQrSection(),
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildQrSection() {
+    final payload = kid.qrPayload;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(color: AppColors.surfaceCream, borderRadius: BorderRadius.circular(24.r)),
+      child: Row(
+        children: [
+          Container(
+            width: 96.w,
+            height: 96.w,
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r)),
+            child: payload == null
+                ? Icon(Icons.qr_code_2, size: 48.w, color: Colors.grey.shade300)
+                : QrImageView(data: payload, backgroundColor: Colors.white),
+          ),
+          SizedBox(width: 20.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('child_profile_qr_title'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                SizedBox(height: 4.h),
+                Text('child_profile_qr_subtitle'.tr(), style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

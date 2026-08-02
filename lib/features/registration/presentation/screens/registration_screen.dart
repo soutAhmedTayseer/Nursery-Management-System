@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/responsive/responsive_value.dart';
 import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../sessions/data/repositories/sessions_repository.dart';
 import '../cubit/registration_cubit.dart';
 import '../cubit/registration_state.dart';
 import '../widgets/allergies_section.dart';
@@ -30,7 +32,7 @@ class RegistrationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => RegistrationCubit(),
+      create: (context) => RegistrationCubit(sl<SessionsRepository>()),
       child: const _RegistrationPager(),
     );
   }
@@ -48,12 +50,27 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
   int _currentStep = 0;
   int _formGeneration = 0;
 
+  var _childNameController = TextEditingController();
+  var _dobController = TextEditingController();
+
   static const _stepCount = 4;
 
   @override
   void dispose() {
     _pageController.dispose();
+    _childNameController.dispose();
+    _dobController.dispose();
     super.dispose();
+  }
+
+  DateTime? _parseDob() {
+    final parts = _dobController.text.split('/');
+    if (parts.length != 3) return null;
+    final day = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) return null;
+    return DateTime(year, month, day);
   }
 
   void _goToStep(int step) {
@@ -69,7 +86,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     if (_currentStep < _stepCount - 1) {
       _goToStep(_currentStep + 1);
     } else {
-      cubit.registerChild();
+      cubit.registerChild(fullName: _childNameController.text, dateOfBirth: _parseDob());
     }
   }
 
@@ -79,9 +96,13 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
 
   void _resetForNewChild() {
     _pageController.jumpToPage(0);
+    _childNameController.dispose();
+    _dobController.dispose();
     setState(() {
       _currentStep = 0;
       _formGeneration++; // forces fresh field widgets, clearing all input state
+      _childNameController = TextEditingController();
+      _dobController = TextEditingController();
     });
   }
 
@@ -139,10 +160,11 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_child_name'.tr(),
                 hint: 'registration_hint_child_name'.tr(),
                 inputType: RegistrationFieldInputType.letters,
+                controller: _childNameController,
               ),
             ),
             _FieldRow(
-              RegistrationInputField(label: 'registration_label_dob'.tr(), hint: 'registration_hint_date'.tr(), inputType: RegistrationFieldInputType.date),
+              RegistrationInputField(label: 'registration_label_dob'.tr(), hint: 'registration_hint_date'.tr(), inputType: RegistrationFieldInputType.date, controller: _dobController),
               RegistrationInputField(label: 'registration_label_enrol_date'.tr(), hint: 'registration_hint_date'.tr(), inputType: RegistrationFieldInputType.date),
             ),
             _FieldRow(

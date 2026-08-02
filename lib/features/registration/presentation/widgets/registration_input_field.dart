@@ -26,12 +26,18 @@ class RegistrationInputField extends StatefulWidget {
   final int maxLines;
   final RegistrationFieldInputType inputType;
 
+  /// Lets a caller read this field's value (e.g. child name/DOB, which the
+  /// registration flow needs to build the new Kid record). Fields that don't
+  /// pass one keep managing their own internal controller, unread.
+  final TextEditingController? controller;
+
   const RegistrationInputField({
     super.key,
     required this.label,
     required this.hint,
     this.maxLines = 1,
     this.inputType = RegistrationFieldInputType.text,
+    this.controller,
   });
 
   @override
@@ -39,7 +45,8 @@ class RegistrationInputField extends StatefulWidget {
 }
 
 class _RegistrationInputFieldState extends State<RegistrationInputField> {
-  final _controller = TextEditingController();
+  TextEditingController? _ownController;
+  TextEditingController get _controller => widget.controller ?? (_ownController ??= TextEditingController());
 
   bool get _isDate => widget.inputType == RegistrationFieldInputType.date;
   bool get _isTime => widget.inputType == RegistrationFieldInputType.time;
@@ -47,7 +54,7 @@ class _RegistrationInputFieldState extends State<RegistrationInputField> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _ownController?.dispose();
     super.dispose();
   }
 

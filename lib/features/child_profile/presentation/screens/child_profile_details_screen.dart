@@ -150,7 +150,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
         children: [
           ChildProfileCard(childData: widget.childData),
           SizedBox(height: 24.h),
-          const AttendanceLogTab(),
+          AttendanceLogTab(kid: widget.childData.kid),
         ],
       );
     }
@@ -159,7 +159,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
       children: [
         Expanded(flex: 4, child: ChildProfileCard(childData: widget.childData)),
         SizedBox(width: 32.w),
-        const Expanded(flex: 8, child: AttendanceLogTab()),
+        Expanded(flex: 8, child: AttendanceLogTab(kid: widget.childData.kid)),
       ],
     );
   }
