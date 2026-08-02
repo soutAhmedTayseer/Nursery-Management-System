@@ -23,60 +23,84 @@ class PlanCategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final featured = category.isFeatured;
-    return Container(
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: featured ? category.themeColor.withValues(alpha: 0.04) : Colors.white,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusXl.r * 1.5),
-        border: Border.all(
-          color: featured
-              ? category.themeColor.withValues(alpha: 0.2)
-              : Colors.black.withValues(alpha: 0.03),
-          width: featured ? 2 : 1,
+    final radius = BorderRadius.circular(AppSpacing.radiusXl.r * 1.5);
+    return ClipRRect(
+      borderRadius: radius,
+      child: Container(
+        decoration: BoxDecoration(
+          color: featured ? category.themeColor.withValues(alpha: 0.04) : Colors.white,
+          borderRadius: radius,
+          border: Border.all(
+            color: featured
+                ? category.themeColor.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.03),
+            width: featured ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: featured ? 0.06 : 0.03),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: featured ? 0.06 : 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Top brand stripe, matching the Figma "Monthly Packages"/"Daily
+            // Subscription" columns — featured cards use the border+wash
+            // treatment above instead, so they skip this bar.
+            if (!featured)
               Container(
-                width: 48.w,
-                height: 48.w,
+                height: 8.h,
                 decoration: BoxDecoration(
-                  color: category.themeColor.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(category.icon, color: category.themeColor, size: AppSpacing.iconMd.w),
-              ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: Text(
-                  category.name,
-                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  gradient: LinearGradient(
+                    colors: [category.themeColor, category.themeColor.withValues(alpha: 0.3)],
+                  ),
                 ),
               ),
-              InkWell(
-                onTap: onEdit,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSm.r),
-                child: Padding(
-                  padding: EdgeInsets.all(4.w),
-                  child: Icon(Icons.edit_outlined, size: AppSpacing.iconSm.w, color: AppColors.textSecondary),
-                ),
+            Padding(
+              padding: EdgeInsets.all(24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 48.w,
+                        height: 48.w,
+                        decoration: BoxDecoration(
+                          color: category.themeColor.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(category.icon, color: category.themeColor, size: AppSpacing.iconMd.w),
+                      ),
+                      SizedBox(width: 16.w),
+                      Expanded(
+                        child: Text(
+                          category.name,
+                          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: onEdit,
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm.r),
+                        child: Padding(
+                          padding: EdgeInsets.all(4.w),
+                          child: Icon(Icons.edit_outlined, size: AppSpacing.iconSm.w, color: AppColors.textSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20.h),
+                  for (final item in category.lineItems) _LineItemRow(item: item, themeColor: category.themeColor),
+                ],
               ),
-            ],
-          ),
-          SizedBox(height: 20.h),
-          for (final item in category.lineItems) _LineItemRow(item: item, themeColor: category.themeColor),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

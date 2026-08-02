@@ -9,25 +9,12 @@ import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../data/models/subscription_plan.dart';
 import '../cubit/plans_cubit.dart';
 
-const _kIconChoices = [
-  Icons.calendar_month,
-  Icons.calendar_today,
-  Icons.access_time,
-  Icons.star,
-  Icons.holiday_village,
-  Icons.event,
-  Icons.schedule,
-  Icons.local_offer,
-];
-
-const _kColorChoices = [
-  AppColors.darkGreen,
-  AppColors.subscriptionBrown,
-  AppColors.amberLabel,
-  AppColors.forestGreen,
-  AppColors.leafGreen,
-  AppColors.gold,
-];
+/// Fixed defaults for a newly created category — icon/color are no longer
+/// admin-editable (see design change: this dialog dropped the icon/color
+/// pickers), an existing category being edited keeps its current icon/color
+/// unchanged instead.
+const _kDefaultIcon = Icons.calendar_month;
+const _kDefaultColor = AppColors.darkGreen;
 
 int _idCounter = 0;
 
@@ -36,11 +23,16 @@ int _idCounter = 0;
 /// in the same microsecond.
 String _newId() => '${DateTime.now().microsecondsSinceEpoch}_${_idCounter++}';
 
+/// Strips a trailing "AED" the price field's own prefix already implies —
+/// used both to populate the field from stored data (`"600 AED"` → `"600"`)
+/// and to clean up anything the admin typed manually despite the prefix.
+String _stripAed(String price) => price.replaceAll(RegExp(r'\s*AED\s*$', caseSensitive: false), '').trim();
+
 class _LineItemDraft {
   _LineItemDraft({String? id, String label = '', String price = '', String? badgeText})
       : id = id ?? _newId(),
         labelController = TextEditingController(text: label),
-        priceController = TextEditingController(text: price),
+        priceController = TextEditingController(text: _stripAed(price)),
         badgeController = TextEditingController(text: badgeText ?? '');
 
   final String id;
@@ -48,12 +40,15 @@ class _LineItemDraft {
   final TextEditingController priceController;
   final TextEditingController badgeController;
 
-  PlanLineItem toLineItem() => PlanLineItem(
-        id: id,
-        label: labelController.text.trim(),
-        price: priceController.text.trim(),
-        badgeText: badgeController.text.trim().isEmpty ? null : badgeController.text.trim(),
-      );
+  PlanLineItem toLineItem() {
+    final rawPrice = _stripAed(priceController.text);
+    return PlanLineItem(
+      id: id,
+      label: labelController.text.trim(),
+      price: rawPrice.isEmpty ? '' : '$rawPrice AED',
+      badgeText: badgeController.text.trim().isEmpty ? null : badgeController.text.trim(),
+    );
+  }
 
   void dispose() {
     labelController.dispose();
@@ -63,6 +58,10 @@ class _LineItemDraft {
 }
 
 /// Add/edit dialog for a [PlanCategory]. `category == null` is create mode.
+/// Styled after the "Create Custom Plan" modal design — a rounded card
+/// with boxed, label-above-input fields instead of a default Material
+/// [AlertDialog] layout. Icon/color are fixed (no picker) — see
+/// [_kDefaultIcon]/[_kDefaultColor].
 class PlanCategoryEditDialog extends StatefulWidget {
   const PlanCategoryEditDialog({super.key, this.category});
 
@@ -84,8 +83,6 @@ class PlanCategoryEditDialog extends StatefulWidget {
 
 class _PlanCategoryEditDialogState extends State<PlanCategoryEditDialog> {
   late final TextEditingController _nameController;
-  late IconData _selectedIcon;
-  late Color _selectedColor;
   late bool _isFeatured;
   late List<_LineItemDraft> _items;
 
@@ -100,8 +97,6 @@ class _PlanCategoryEditDialogState extends State<PlanCategoryEditDialog> {
     super.initState();
     final category = widget.category;
     _nameController = TextEditingController(text: category?.name ?? '');
-    _selectedIcon = category?.icon ?? _kIconChoices.first;
-    _selectedColor = category?.themeColor ?? _kColorChoices.first;
     _isFeatured = category?.isFeatured ?? false;
     _items = (category?.lineItems ?? const <PlanLineItem>[])
         .map((i) => _LineItemDraft(id: i.id, label: i.label, price: i.price, badgeText: i.badgeText))
@@ -126,8 +121,8 @@ class _PlanCategoryEditDialogState extends State<PlanCategoryEditDialog> {
     final category = PlanCategory(
       id: widget.category?.id ?? _newId(),
       name: _nameController.text.trim(),
-      icon: _selectedIcon,
-      themeColor: _selectedColor,
+      icon: widget.category?.icon ?? _kDefaultIcon,
+      themeColor: widget.category?.themeColor ?? _kDefaultColor,
       isFeatured: _isFeatured,
       lineItems: validItems,
     );
@@ -155,125 +150,177 @@ class _PlanCategoryEditDialogState extends State<PlanCategoryEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusLg)),
-      title: Text(_isEditMode
-          ? 'subscriptions_category_dialog_title_edit'.tr()
-          : 'subscriptions_category_dialog_title_add'.tr()),
-      content: SizedBox(
-        width: 480.w,
-        child: SingleChildScrollView(
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.r)),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 560.w),
+        child: Padding(
+          padding: EdgeInsets.all(32.w),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'subscriptions_category_name_label'.tr(),
-                  hintText: 'subscriptions_category_name_hint'.tr(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      _isEditMode
+                          ? 'subscriptions_category_dialog_title_edit'.tr()
+                          : 'subscriptions_category_dialog_title_add'.tr(),
+                      style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => Navigator.of(context).pop(),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm.r),
+                    child: Icon(Icons.close, size: AppSpacing.iconMd.w, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'subscriptions_category_dialog_subtitle'.tr(),
+                style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
+              ),
+              SizedBox(height: 24.h),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _StyledField(
+                        label: 'subscriptions_category_name_label'.tr(),
+                        controller: _nameController,
+                        hint: 'subscriptions_category_name_hint'.tr(),
+                        onChanged: () => setState(() {}),
+                      ),
+                      SizedBox(height: 20.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceSand,
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd.r),
+                        ),
+                        child: SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text('subscriptions_category_featured_label'.tr(), style: TextStyle(fontSize: 14.sp)),
+                          value: _isFeatured,
+                          onChanged: (v) => setState(() => _isFeatured = v),
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
+                      Text(
+                        'subscriptions_line_items_label'.tr().toUpperCase(),
+                        style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 0.6),
+                      ),
+                      SizedBox(height: 8.h),
+                      for (final item in _items)
+                        _LineItemFields(
+                          key: ValueKey(item.id),
+                          draft: item,
+                          onChanged: () => setState(() {}),
+                          onRemove: _items.length == 1
+                              ? null
+                              : () => setState(() {
+                                    item.dispose();
+                                    _items.remove(item);
+                                  }),
+                        ),
+                      TextButton.icon(
+                        onPressed: () => setState(() => _items.add(_LineItemDraft())),
+                        icon: const Icon(Icons.add),
+                        label: Text('subscriptions_add_line_item'.tr()),
+                      ),
+                    ],
+                  ),
                 ),
-                onChanged: (_) => setState(() {}),
               ),
               SizedBox(height: 16.h),
-              Text('subscriptions_category_icon_label'.tr(), style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
-              SizedBox(height: 8.h),
-              Wrap(
-                spacing: 8.w,
-                children: [
-                  for (final icon in _kIconChoices)
-                    _PickerChip(
-                      selected: icon == _selectedIcon,
-                      color: _selectedColor,
-                      onTap: () => setState(() => _selectedIcon = icon),
-                      child: Icon(icon, size: AppSpacing.iconSm.w),
-                    ),
-                ],
-              ),
+              const Divider(height: 1),
               SizedBox(height: 16.h),
-              Text('subscriptions_category_color_label'.tr(), style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
-              SizedBox(height: 8.h),
-              Wrap(
-                spacing: 8.w,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  for (final color in _kColorChoices)
-                    _PickerChip(
-                      selected: color == _selectedColor,
-                      color: color,
-                      onTap: () => setState(() => _selectedColor = color),
-                      child: CircleAvatar(radius: 10.r, backgroundColor: color),
-                    ),
+                  if (_isEditMode)
+                    TextButton(
+                      onPressed: _deleteCategory,
+                      style: TextButton.styleFrom(foregroundColor: AppColors.dangerRed),
+                      child: Text('subscriptions_delete_category'.tr()),
+                    )
+                  else
+                    const SizedBox.shrink(),
+                  Row(
+                    children: [
+                      TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('action_cancel'.tr())),
+                      SizedBox(width: 8.w),
+                      ElevatedButton(
+                        onPressed: _canSave ? _save : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.darkGreen,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                        ),
+                        child: Text('subscriptions_save'.tr(), style: const TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
                 ],
-              ),
-              SizedBox(height: 12.h),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text('subscriptions_category_featured_label'.tr(), style: TextStyle(fontSize: 14.sp)),
-                value: _isFeatured,
-                onChanged: (v) => setState(() => _isFeatured = v),
-              ),
-              SizedBox(height: 8.h),
-              Text('subscriptions_line_items_label'.tr(), style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
-              SizedBox(height: 8.h),
-              for (final item in _items) _LineItemFields(
-                key: ValueKey(item.id),
-                draft: item,
-                onChanged: () => setState(() {}),
-                onRemove: _items.length == 1
-                    ? null
-                    : () => setState(() {
-                          item.dispose();
-                          _items.remove(item);
-                        }),
-              ),
-              TextButton.icon(
-                onPressed: () => setState(() => _items.add(_LineItemDraft())),
-                icon: const Icon(Icons.add),
-                label: Text('subscriptions_add_line_item'.tr()),
               ),
             ],
           ),
         ),
       ),
-      actions: [
-        if (_isEditMode)
-          TextButton(
-            onPressed: _deleteCategory,
-            style: TextButton.styleFrom(foregroundColor: AppColors.dangerRed),
-            child: Text('subscriptions_delete_category'.tr()),
-          ),
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('action_cancel'.tr())),
-        ElevatedButton(
-          onPressed: _canSave ? _save : null,
-          style: ElevatedButton.styleFrom(backgroundColor: AppColors.darkGreen),
-          child: Text('subscriptions_save'.tr()),
-        ),
-      ],
     );
   }
 }
 
-class _PickerChip extends StatelessWidget {
-  const _PickerChip({required this.selected, required this.color, required this.onTap, required this.child});
+/// A boxed input with an uppercase caption above it, matching the
+/// "Create Custom Plan" reference design's field style.
+class _StyledField extends StatelessWidget {
+  const _StyledField({
+    required this.label,
+    required this.controller,
+    required this.hint,
+    required this.onChanged,
+    this.prefixText,
+  });
 
-  final bool selected;
-  final Color color;
-  final VoidCallback onTap;
-  final Widget child;
+  final String label;
+  final TextEditingController controller;
+  final String hint;
+  final VoidCallback onChanged;
+  final String? prefixText;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusMd.r),
-      child: Container(
-        padding: EdgeInsets.all(8.w),
-        decoration: BoxDecoration(
-          border: Border.all(color: selected ? color : Colors.transparent, width: 2),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd.r),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 0.6),
         ),
-        child: child,
-      ),
+        SizedBox(height: 12.h),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceSand,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd.r),
+          ),
+          child: TextField(
+            controller: controller,
+            onChanged: (_) => onChanged(),
+            decoration: InputDecoration(
+              hintText: hint,
+              prefixText: prefixText,
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -287,38 +334,49 @@ class _LineItemFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: Row(
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceCream,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg.r),
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 2,
-            child: TextField(
-              controller: draft.labelController,
-              decoration: InputDecoration(hintText: 'subscriptions_line_item_label_hint'.tr()),
-              onChanged: (_) => onChanged(),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: _StyledField(
+                  label: 'subscriptions_line_item_label_hint'.tr(),
+                  controller: draft.labelController,
+                  hint: 'subscriptions_line_item_label_hint'.tr(),
+                  onChanged: onChanged,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StyledField(
+                  label: 'subscriptions_line_item_price_hint'.tr(),
+                  controller: draft.priceController,
+                  hint: 'subscriptions_line_item_price_hint'.tr(),
+                  prefixText: 'AED ',
+                  onChanged: onChanged,
+                ),
+              ),
+              IconButton(
+                onPressed: onRemove,
+                icon: const Icon(Icons.close),
+                iconSize: AppSpacing.iconSm.w,
+              ),
+            ],
           ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: TextField(
-              controller: draft.priceController,
-              decoration: InputDecoration(hintText: 'subscriptions_line_item_price_hint'.tr()),
-              onChanged: (_) => onChanged(),
-            ),
-          ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: TextField(
-              controller: draft.badgeController,
-              decoration: InputDecoration(hintText: 'subscriptions_line_item_badge_hint'.tr()),
-            ),
-          ),
-          IconButton(
-            onPressed: onRemove,
-            icon: const Icon(Icons.close),
-            iconSize: AppSpacing.iconSm.w,
+          SizedBox(height: 12.h),
+          _StyledField(
+            label: 'subscriptions_line_item_badge_hint'.tr(),
+            controller: draft.badgeController,
+            hint: 'subscriptions_line_item_badge_hint'.tr(),
+            onChanged: () {},
           ),
         ],
       ),

@@ -33,7 +33,6 @@ class AdminSidebar extends StatelessWidget {
       {'icon': Icons.calendar_month_outlined, 'title': 'sidebar_menu_sessions'.tr()},
       {'icon': Icons.card_membership, 'title': 'sidebar_menu_subscriptions'.tr()},
       {'icon': Icons.account_balance_wallet_outlined, 'title': 'sidebar_menu_finance'.tr()},
-      {'icon': Icons.people_outline, 'title': 'sidebar_menu_profiles'.tr()},
       {'icon': Icons.settings_outlined, 'title': 'sidebar_menu_settings'.tr()},
     ];
 

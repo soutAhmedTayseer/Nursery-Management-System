@@ -30,16 +30,6 @@ class SubscriptionPlansScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'subscriptions_screen_title'.tr(),
-              style: TextStyle(fontSize: 32.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'subscriptions_screen_subtitle'.tr(),
-              style: TextStyle(fontSize: 16.sp, color: AppColors.textSecondary),
-            ),
-            SizedBox(height: spacing.xxl),
             BlocBuilder<PlansCubit, PlansState>(
               builder: (context, state) {
                 final columns = _columnsFor(context);

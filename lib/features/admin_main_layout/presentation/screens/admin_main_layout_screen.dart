@@ -26,7 +26,6 @@ class AdminMainLayoutScreen extends StatelessWidget {
       const SessionsScreen(),
       const SubscriptionPlansScreen(),
       const FinanceScreen(),
-      Center(child: Text('layout_profiles_screen'.tr())),
       Center(child: Text('layout_settings_screen'.tr())),
     ];
 
