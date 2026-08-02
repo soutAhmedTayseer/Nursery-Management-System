@@ -33,12 +33,22 @@ class AdaptiveCollection<T> extends StatelessWidget {
     required this.columns,
     required this.cardBuilder,
     this.onRowTap,
+    this.rowBackgroundColor,
+    this.rowBorderColor,
   });
 
   final List<T> items;
   final List<AdaptiveColumn<T>> columns;
   final Widget Function(BuildContext context, T item) cardBuilder;
   final void Function(T item)? onRowTap;
+
+  /// Per-row background for the expanded-breakpoint table (e.g. highlighting
+  /// a flagged record). Null/no match falls back to the default white row.
+  final Color? Function(T item)? rowBackgroundColor;
+
+  /// Per-row left accent border for the expanded-breakpoint table, paired
+  /// with [rowBackgroundColor] for a highlighted-row treatment.
+  final Color? Function(T item)? rowBorderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -93,18 +103,24 @@ class AdaptiveCollection<T> extends StatelessWidget {
           ),
           const Divider(height: AppSpacing.hairline),
           for (final item in items) ...[
-            InkWell(
-              onTap: onRowTap == null ? null : () => onRowTap!(item),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.xl,
-                  vertical: spacing.lg,
-                ),
-                child: Row(
-                  children: [
-                    for (final column in columns)
-                      _cell(column.width, column.cell(item)),
-                  ],
+            Container(
+              decoration: BoxDecoration(
+                color: rowBackgroundColor?.call(item),
+                border: _leftBorder(rowBorderColor?.call(item)),
+              ),
+              child: InkWell(
+                onTap: onRowTap == null ? null : () => onRowTap!(item),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.xl,
+                    vertical: spacing.lg,
+                  ),
+                  child: Row(
+                    children: [
+                      for (final column in columns)
+                        _cell(column.width, column.cell(item)),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -114,6 +130,8 @@ class AdaptiveCollection<T> extends StatelessWidget {
       ),
     );
   }
+
+  Border? _leftBorder(Color? color) => color == null ? null : Border(left: BorderSide(color: color, width: 4));
 
   Widget _cell(double? width, Widget child) {
     return width == null
