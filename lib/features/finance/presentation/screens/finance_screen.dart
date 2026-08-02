@@ -10,7 +10,13 @@ import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/adaptive_collection.dart';
+import '../../../subscriptions/data/models/plan_assignment.dart';
+import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
+import '../../../subscriptions/presentation/cubit/plan_assignments_state.dart';
+import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
+import '../../../subscriptions/presentation/cubit/plans_state.dart';
 import '../../data/models/finance_model.dart';
+import '../../domain/payment_records.dart';
 import '../cubit/finance_cubit.dart';
 import '../cubit/finance_state.dart';
 import '../widgets/finance_stat_card.dart';
@@ -18,19 +24,37 @@ import '../utils/invoice_whatsapp.dart';
 import '../widgets/payment_card.dart';
 import '../widgets/revenue_chart.dart';
 
+List<PaymentRecord> _filterRecords(List<PaymentRecord> records, String query, PenaltyFilter penaltyFilter) {
+  return records.where((p) {
+    final matchesQuery = query.isEmpty ||
+        p.parentName.toLowerCase().contains(query.toLowerCase()) ||
+        p.childName.toLowerCase().contains(query.toLowerCase());
+    final matchesPenalty = switch (penaltyFilter) {
+      PenaltyFilter.all => true,
+      PenaltyFilter.withPenalty => p.penaltyAmount > 0,
+      PenaltyFilter.withoutPenalty => p.penaltyAmount == 0,
+    };
+    return matchesQuery && matchesPenalty;
+  }).toList();
+}
+
 class FinanceScreen extends StatelessWidget {
   const FinanceScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => FinanceCubit(),
-      // `context` above this point is FinanceScreen's own Element, which sits
-      // ABOVE this BlocProvider — reading FinanceCubit with it throws
-      // ProviderNotFoundError. `Builder` re-enters the tree just below the
-      // provider so every descendant context here can see it.
-      child: Builder(
-        builder: (context) => _buildScaffold(context),
+    // FinanceCubit/PlansCubit/PlanAssignmentsCubit are all provided at the
+    // app root (bootstrap.dart) so Finance and the dashboard read the same
+    // shared instances — no local BlocProvider needed here.
+    return BlocBuilder<PlanAssignmentsCubit, PlanAssignmentsState>(
+      builder: (context, assignments) => BlocBuilder<PlansCubit, PlansState>(
+        builder: (context, plans) => BlocBuilder<FinanceCubit, FinanceState>(
+          builder: (context, finance) {
+            final records = derivePaymentRecords(assignments, plans, finance);
+            final filtered = _filterRecords(records, finance.searchQuery, finance.penaltyFilter);
+            return _buildScaffold(context, records, filtered);
+          },
+        ),
       ),
     );
   }
@@ -43,18 +67,21 @@ class FinanceScreen extends StatelessWidget {
   static final _chartKey = GlobalKey();
   static final _statsKey = GlobalKey();
 
-  Widget _buildScaffold(BuildContext context) {
+  Widget _buildScaffold(BuildContext context, List<PaymentRecord> records, List<PaymentRecord> filtered) {
     final spacing = AppSpacing.of(context);
+    final totalOutstanding = records.fold<double>(0, (sum, r) => sum + r.totalDue);
+    final penaltyRevenue = records.fold<double>(0, (sum, r) => sum + r.penaltyAmount);
     final totalOutstandingCard = FinanceStatCard(
       title: 'finance_total_outstanding_title'.tr(),
-      value: '42,850',
+      value: totalOutstanding.toStringAsFixed(0),
       subtitle: 'finance_total_outstanding_subtitle'.tr(),
       color: AppColors.forestGreen,
       trendWidget: _buildTrendBadge(),
+      watermarkIcon: Icons.eco,
     );
     final penaltyRevenueCard = FinanceStatCard(
       title: 'finance_penalty_revenue_title'.tr(),
-      value: '3,125',
+      value: penaltyRevenue.toStringAsFixed(0),
       subtitle: 'finance_penalty_revenue_subtitle'.tr(),
       color: AppColors.penaltyOrange,
     );
@@ -113,7 +140,7 @@ class FinanceScreen extends StatelessWidget {
       backgroundColor: AppColors.surfaceIvory,
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.forestGreen,
-        onPressed: () => _showAddPaymentDialog(context),
+        onPressed: () => _showRecordExtrasDialog(context, records),
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: SingleChildScrollView(
@@ -145,30 +172,28 @@ class FinanceScreen extends StatelessWidget {
             SizedBox(height: spacing.xxl),
 
             // 2. Table Header and Actions
-            _buildTableActions(context),
+            _buildTableActions(context, filtered),
             SizedBox(height: spacing.md),
 
             // 3. Payments - table on desktop, cards below
-            BlocBuilder<FinanceCubit, FinanceState>(
-              builder: (context, state) {
-                return AdaptiveCollection<PaymentRecord>(
-                  items: state.filteredPayments,
-                  columns: [
-                    AdaptiveColumn(label: 'finance_header_parent_name'.tr(), cell: (r) => Text(r.parentName, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold))),
-                    AdaptiveColumn(label: 'finance_header_child_name'.tr(), cell: (r) => Text(r.childName, style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600))),
-                    AdaptiveColumn(label: 'finance_header_base_fee'.tr(), cell: (r) => Text('${r.baseFee.toInt()} AED', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold))),
-                    AdaptiveColumn(label: 'finance_header_overtime_hours'.tr(), cell: (r) => Text('${r.overtimeHours} hrs', style: TextStyle(fontSize: 13.sp))),
-                    AdaptiveColumn(label: 'finance_header_penalty_amount'.tr(), cell: (r) => Text('${r.penaltyAmount.toInt()} AED', style: TextStyle(fontSize: 13.sp))),
-                    AdaptiveColumn(label: 'finance_header_total_due'.tr(), cell: (r) => Text('${r.totalDue.toInt()} AED', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900))),
-                    AdaptiveColumn(
-                      label: 'finance_header_action'.tr(),
-                      width: 140.w,
-                      cell: (r) => _buildInvoiceBtn(context, r),
-                    ),
-                  ],
-                  cardBuilder: (context, record) => PaymentCard(record: record),
-                );
-              },
+            AdaptiveCollection<PaymentRecord>(
+              items: filtered,
+              rowBackgroundColor: (r) => r.penaltyAmount > 0 ? AppColors.penaltyOrange.withValues(alpha: 0.08) : null,
+              rowBorderColor: (r) => r.penaltyAmount > 0 ? AppColors.penaltyOrange : null,
+              columns: [
+                AdaptiveColumn(label: 'finance_header_parent_name'.tr(), cell: (r) => Text(r.parentName, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold))),
+                AdaptiveColumn(label: 'finance_header_child_name'.tr(), cell: (r) => Text(r.childName, style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600))),
+                AdaptiveColumn(label: 'finance_header_base_fee'.tr(), cell: (r) => Text('${r.baseFee.toInt()} AED', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold))),
+                AdaptiveColumn(label: 'finance_header_overtime_hours'.tr(), cell: (r) => Text('${r.overtimeHours} hrs', style: TextStyle(fontSize: 13.sp))),
+                AdaptiveColumn(label: 'finance_header_penalty_amount'.tr(), cell: (r) => Text('${r.penaltyAmount.toInt()} AED', style: TextStyle(fontSize: 13.sp))),
+                AdaptiveColumn(label: 'finance_header_total_due'.tr(), cell: (r) => Text('${r.totalDue.toInt()} AED', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900))),
+                AdaptiveColumn(
+                  label: 'finance_header_action'.tr(),
+                  width: 140.w,
+                  cell: (r) => _buildInvoiceBtn(context, r),
+                ),
+              ],
+              cardBuilder: (context, record) => PaymentCard(record: record),
             ),
           ],
         ),
@@ -180,7 +205,7 @@ class FinanceScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: Colors.white24, 
+        color: Colors.white24,
         borderRadius: BorderRadius.circular(8.r)
       ),
       child: Row(
@@ -191,8 +216,8 @@ class FinanceScreen extends StatelessWidget {
           Text(
             'finance_trend_vs_last_month'.tr(),
             style: TextStyle(
-              color: Colors.white, 
-              fontSize: 10.sp, 
+              color: Colors.white,
+              fontSize: 10.sp,
               fontWeight: FontWeight.bold
             )
           ),
@@ -202,31 +227,27 @@ class FinanceScreen extends StatelessWidget {
   }
 
   Widget _buildInvoiceBtn(BuildContext context, PaymentRecord record) {
+    final hasPenalty = record.penaltyAmount > 0;
+    final color = hasPenalty ? AppColors.penaltyOrange : Colors.grey.shade400;
     return InkWell(
       onTap: () => sendInvoiceViaWhatsapp(context, record),
-      borderRadius: BorderRadius.circular(20.r),
+      borderRadius: BorderRadius.circular(999),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
-        decoration: BoxDecoration(color: AppColors.whatsappGreen, borderRadius: BorderRadius.circular(20.r)),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.chat_bubble_rounded, size: 13.w, color: Colors.white),
-            SizedBox(width: 6.w),
-            Flexible(
-              child: Text(
-                'finance_export_invoice'.tr(),
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 11.sp, color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
+        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 18.w),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: color.withValues(alpha: hasPenalty ? 0.3 : 1)),
+        ),
+        child: Text(
+          'finance_export_invoice_table'.tr(),
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 11.sp, color: color, fontWeight: FontWeight.bold, height: 1.3),
         ),
       ),
     );
   }
 
-  Widget _buildTableActions(BuildContext context) {
+  Widget _buildTableActions(BuildContext context, List<PaymentRecord> filtered) {
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       crossAxisAlignment: WrapCrossAlignment.center,
@@ -255,7 +276,7 @@ class FinanceScreen extends StatelessWidget {
               'finance_batch_export'.tr(),
               AppColors.forestGreen,
               Colors.white,
-              onTap: () => _exportPayments(context),
+              onTap: () => _exportPayments(context, filtered),
             ),
           ],
         )
@@ -316,8 +337,7 @@ class FinanceScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _exportPayments(BuildContext context) async {
-    final payments = context.read<FinanceCubit>().state.filteredPayments;
+  Future<void> _exportPayments(BuildContext context, List<PaymentRecord> payments) async {
     final buffer = StringBuffer()
       ..writeln('Parent,Child,Base Fee (AED),Overtime Hours,Penalty (AED),Total Due (AED)');
     for (final p in payments) {
@@ -355,66 +375,75 @@ class FinanceScreen extends StatelessWidget {
     return '"${value.replaceAll('"', '""')}"';
   }
 
-  void _showAddPaymentDialog(BuildContext context) {
+  /// Records overtime/penalty for an already-subscribed kid — base fee is no
+  /// longer typed here, it comes from the kid's real assigned plan.
+  void _showRecordExtrasDialog(BuildContext context, List<PaymentRecord> records) {
     final cubit = context.read<FinanceCubit>();
-    final parentNameCtrl = TextEditingController();
-    final childNameCtrl = TextEditingController();
-    final phoneCtrl = TextEditingController();
-    final baseFeeCtrl = TextEditingController();
+    final assignments = context.read<PlanAssignmentsCubit>().state.byKidId.values.toList();
     final overtimeCtrl = TextEditingController(text: '0');
     final penaltyCtrl = TextEditingController(text: '0');
     final formKey = GlobalKey<FormState>();
+    PlanAssignment? selected = assignments.isEmpty ? null : assignments.first;
 
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: Text('finance_add_payment_title'.tr(), style: TextStyle(fontWeight: FontWeight.w900)),
-        content: Form(
-          key: formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _dialogField(parentNameCtrl, 'finance_header_parent_name'.tr()),
-                SizedBox(height: 12.h),
-                _dialogField(childNameCtrl, 'finance_header_child_name'.tr()),
-                SizedBox(height: 12.h),
-                _dialogField(phoneCtrl, 'finance_dialog_phone_label'.tr(), isNumber: true, isRequired: false),
-                SizedBox(height: 12.h),
-                _dialogField(baseFeeCtrl, 'finance_header_base_fee'.tr(), isNumber: true),
-                SizedBox(height: 12.h),
-                _dialogField(overtimeCtrl, 'finance_header_overtime_hours'.tr(), isNumber: true),
-                SizedBox(height: 12.h),
-                _dialogField(penaltyCtrl, 'finance_header_penalty_amount'.tr(), isNumber: true),
-              ],
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+          title: Text('finance_add_payment_title'.tr(), style: TextStyle(fontWeight: FontWeight.w900)),
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (assignments.isEmpty)
+                    Text('finance_no_assigned_children'.tr())
+                  else
+                    DropdownButtonFormField<PlanAssignment>(
+                      initialValue: selected,
+                      decoration: InputDecoration(
+                        labelText: 'finance_dialog_child_label'.tr(),
+                        filled: true,
+                        fillColor: AppColors.surfaceSmoke,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
+                      ),
+                      items: [
+                        for (final a in assignments)
+                          DropdownMenuItem(value: a, child: Text('${a.kidName} (${a.parentName})')),
+                      ],
+                      onChanged: (value) => setDialogState(() => selected = value),
+                    ),
+                  SizedBox(height: 12.h),
+                  _dialogField(overtimeCtrl, 'finance_header_overtime_hours'.tr(), isNumber: true),
+                  SizedBox(height: 12.h),
+                  _dialogField(penaltyCtrl, 'finance_header_penalty_amount'.tr(), isNumber: true),
+                ],
+              ),
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text('finance_cancel_button'.tr()),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.forestGreen),
+              onPressed: selected == null
+                  ? null
+                  : () {
+                      if (!formKey.currentState!.validate()) return;
+                      cubit.setExtras(
+                        selected!.kidId,
+                        overtimeHours: double.tryParse(overtimeCtrl.text) ?? 0,
+                        penaltyAmount: double.tryParse(penaltyCtrl.text) ?? 0,
+                      );
+                      Navigator.pop(dialogContext);
+                    },
+              child: Text('finance_add_button'.tr(), style: const TextStyle(color: Colors.white)),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text('finance_cancel_button'.tr()),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.forestGreen),
-            onPressed: () {
-              if (!formKey.currentState!.validate()) return;
-              cubit.addPayment(PaymentRecord(
-                id: DateTime.now().toString(),
-                parentName: parentNameCtrl.text.trim(),
-                childName: childNameCtrl.text.trim(),
-                baseFee: double.tryParse(baseFeeCtrl.text) ?? 0,
-                overtimeHours: double.tryParse(overtimeCtrl.text) ?? 0,
-                penaltyAmount: double.tryParse(penaltyCtrl.text) ?? 0,
-                avatarColor: Colors.blue.shade100,
-                parentPhone: phoneCtrl.text.trim(),
-              ));
-              Navigator.pop(dialogContext);
-            },
-            child: Text('finance_add_button'.tr(), style: const TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
     );
   }

@@ -1,29 +1,22 @@
-import '../../data/models/finance_model.dart';
-
 enum PenaltyFilter { all, withPenalty, withoutPenalty }
 
-enum RevenuePeriod { daily, weekly, monthly }
+/// Finance-only figures for one kid — overtime/penalty have no equivalent in
+/// the subscription catalog, so they're recorded here rather than derived.
+class FinanceExtras {
+  const FinanceExtras({this.overtimeHours = 0, this.penaltyAmount = 0});
+
+  final double overtimeHours;
+  final double penaltyAmount;
+}
 
 class FinanceState {
-  final List<PaymentRecord> payments;
-  final List<PaymentRecord> filteredPayments;
-  final String searchQuery;
-  final PenaltyFilter penaltyFilter;
-  final RevenuePeriod revenuePeriod;
-
-  FinanceState({
-    required this.payments,
-    required this.filteredPayments,
-    this.searchQuery = "",
+  const FinanceState({
+    this.extrasByKidId = const {},
+    this.searchQuery = '',
     this.penaltyFilter = PenaltyFilter.all,
-    this.revenuePeriod = RevenuePeriod.weekly,
   });
 
-  FinanceState copyWith({RevenuePeriod? revenuePeriod}) => FinanceState(
-        payments: payments,
-        filteredPayments: filteredPayments,
-        searchQuery: searchQuery,
-        penaltyFilter: penaltyFilter,
-        revenuePeriod: revenuePeriod ?? this.revenuePeriod,
-      );
+  final Map<String, FinanceExtras> extrasByKidId;
+  final String searchQuery;
+  final PenaltyFilter penaltyFilter;
 }

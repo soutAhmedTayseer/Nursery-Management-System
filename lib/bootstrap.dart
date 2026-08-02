@@ -10,6 +10,8 @@ import 'core/di/injection.dart';
 import 'core/routes/app_router.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'features/finance/presentation/cubit/finance_cubit.dart';
+import 'features/subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import 'features/subscriptions/presentation/cubit/plans_cubit.dart';
 
 const _minWindowSize = Size(1280, 800);
@@ -52,8 +54,12 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return BlocProvider(
-          create: (_) => PlansCubit(),
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => PlansCubit()),
+            BlocProvider(create: (_) => PlanAssignmentsCubit()),
+            BlocProvider(create: (_) => FinanceCubit()),
+          ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'app_title'.tr(),

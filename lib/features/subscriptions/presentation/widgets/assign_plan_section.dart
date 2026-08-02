@@ -7,7 +7,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../sessions/data/models/kid_session.dart';
+import '../../data/models/plan_assignment.dart';
 import '../../data/models/subscription_plan.dart';
+import '../cubit/plan_assignments_cubit.dart';
 import '../cubit/plans_cubit.dart';
 import '../cubit/plans_state.dart';
 
@@ -43,6 +45,17 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
     final result = context.read<PlansCubit>().findLineItem(parts[0], parts[1]);
     if (result == null) return;
     final (category, item) = result;
+    final kid = widget.child.kid;
+    final parentName = kid.emergencyContactName.isNotEmpty ? kid.emergencyContactName : widget.child.planLabel;
+    context.read<PlanAssignmentsCubit>().assign(PlanAssignment(
+          kidId: kid.id,
+          kidName: kid.fullName,
+          parentName: parentName,
+          parentPhone: kid.emergencyContactPhone,
+          categoryId: category.id,
+          lineItemId: item.id,
+          assignedAt: DateTime.now(),
+        ));
     widget.onPlanUpdated(category, item);
     setState(() => _selectedCompositeId = null);
     ScaffoldMessenger.of(context).showSnackBar(

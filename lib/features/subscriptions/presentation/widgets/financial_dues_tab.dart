@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../../data/models/subscription_plan.dart';
+import '../cubit/plan_assignments_cubit.dart';
 import '../cubit/plans_cubit.dart';
 import '../cubit/plans_state.dart';
 import 'assign_plan_section.dart';
@@ -47,15 +48,27 @@ int _columnsFor(BuildContext context) => switch (context.breakpoint) {
     };
 
 class _FinancialDuesTabState extends State<FinancialDuesTab> {
-  // No backend endpoint for plan assignment yet — plan + history live only
-  // in this widget's state and reset if the admin navigates away.
-  late String _currentPlanTitle = widget.childData.planLabel;
-  String _currentPlanPrice = '—';
+  // Seeded from PlanAssignmentsCubit (app-root, persists across navigation)
+  // in initState below — the change *history* stays local to this widget
+  // instance since there's no backend endpoint to persist it yet, but the
+  // current plan itself no longer resets when the admin leaves the tab.
+  late String _currentPlanTitle;
+  late String _currentPlanPrice;
   final List<PlanChangeEntry> _history = [];
 
   @override
   void initState() {
     super.initState();
+    _currentPlanTitle = widget.childData.planLabel;
+    _currentPlanPrice = '—';
+    final assignment = context.read<PlanAssignmentsCubit>().forKid(widget.childData.kid.id);
+    if (assignment != null) {
+      final result = context.read<PlansCubit>().findLineItem(assignment.categoryId, assignment.lineItemId);
+      if (result != null) {
+        _currentPlanTitle = result.$2.label;
+        _currentPlanPrice = result.$2.price;
+      }
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onPlanChanged?.call(_currentPlanTitle, _currentPlanPrice);
     });
