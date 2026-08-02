@@ -4,15 +4,18 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../../data/models/subscription_plan.dart';
+import '../cubit/plans_cubit.dart';
+import '../cubit/plans_state.dart';
 
 class AssignPlanSection extends StatefulWidget {
   final KidSession child;
   final String currentPlanTitle;
   final String currentPlanPrice;
-  final ValueChanged<SubscriptionPlan> onPlanUpdated;
+  final void Function(PlanCategory category, PlanLineItem item) onPlanUpdated;
 
   /// Set false when embedded where the child's photo/name/parent are
   /// already shown elsewhere (e.g. ChildProfileDetailsScreen's left card).
@@ -32,15 +35,18 @@ class AssignPlanSection extends StatefulWidget {
 }
 
 class _AssignPlanSectionState extends State<AssignPlanSection> {
-  String? _selectedPlanId;
+  String? _selectedCompositeId; // "<categoryId>:<lineItemId>"
 
   void _applyUpdate() {
-    final plan = findPlanById(_selectedPlanId);
-    if (plan == null) return;
-    widget.onPlanUpdated(plan);
-    setState(() => _selectedPlanId = null);
+    final parts = _selectedCompositeId?.split(':');
+    if (parts == null || parts.length != 2) return;
+    final result = context.read<PlansCubit>().findLineItem(parts[0], parts[1]);
+    if (result == null) return;
+    final (category, item) = result;
+    widget.onPlanUpdated(category, item);
+    setState(() => _selectedCompositeId = null);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('assign_plan_updated_snackbar'.tr(namedArgs: {'plan': plan.titleKey.tr()}))),
+      SnackBar(content: Text('assign_plan_updated_snackbar'.tr(namedArgs: {'plan': item.label}))),
     );
   }
 
@@ -122,33 +128,39 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 4.w),
                 decoration: BoxDecoration(color: AppColors.neutralChip, borderRadius: BorderRadius.circular(48.r)),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedPlanId,
-                    isExpanded: true,
-                    hint: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w),
-                      child: Text('assign_plan_select_new'.tr(), style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary)),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-                    icon: Padding(
-                      padding: EdgeInsets.only(right: 8.w),
-                      child: SvgPicture.asset('assets/icons/subscriptions/dropdown_chevron.svg', width: 21.w, height: 21.w),
-                    ),
-                    items: kSubscriptionPlans
-                        .map((plan) => DropdownMenuItem(
-                              value: plan.id,
-                              child: Text('${plan.titleKey.tr()} — ${plan.price}', style: TextStyle(fontSize: 14.sp)),
-                            ))
-                        .toList(),
-                    onChanged: (value) => setState(() => _selectedPlanId = value),
-                  ),
+                child: BlocBuilder<PlansCubit, PlansState>(
+                  builder: (context, state) {
+                    return DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedCompositeId,
+                        isExpanded: true,
+                        hint: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          child: Text('assign_plan_select_new'.tr(), style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary)),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                        icon: Padding(
+                          padding: EdgeInsets.only(right: 8.w),
+                          child: SvgPicture.asset('assets/icons/subscriptions/dropdown_chevron.svg', width: 21.w, height: 21.w),
+                        ),
+                        items: [
+                          for (final category in state.categories)
+                            for (final item in category.lineItems)
+                              DropdownMenuItem(
+                                value: '${category.id}:${item.id}',
+                                child: Text('${category.name} · ${item.label} — ${item.price}', style: TextStyle(fontSize: 14.sp)),
+                              ),
+                        ],
+                        onChanged: (value) => setState(() => _selectedCompositeId = value),
+                      ),
+                    );
+                  },
                 ),
               ),
 
               SizedBox(height: 32.h),
               InkWell(
-                onTap: _selectedPlanId == null ? null : _applyUpdate,
+                onTap: _selectedCompositeId == null ? null : _applyUpdate,
                 borderRadius: BorderRadius.circular(999),
                 child: Container(
                   width: double.infinity,
@@ -156,7 +168,7 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(999),
                     gradient: LinearGradient(
-                      colors: _selectedPlanId == null
+                      colors: _selectedCompositeId == null
                           ? [AppColors.darkGreen.withValues(alpha: 0.4), AppColors.brandGradientLight.withValues(alpha: 0.4)]
                           : [AppColors.darkGreen, AppColors.brandGradientLight],
                     ),
