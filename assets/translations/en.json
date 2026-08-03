@@ -109,6 +109,9 @@
   "finance_series_monthly_plans": "Monthly Plans",
   "finance_series_daily_sessions": "Daily Sessions",
   "finance_series_winter_camp": "Winter Camp",
+  "finance_period_daily": "Daily",
+  "finance_period_weekly": "Weekly",
+  "finance_period_monthly": "Monthly",
   "finance_total_outstanding_title": "Total Outstanding",
   "finance_total_outstanding_subtitle": "Total fees expected but not yet collected this month.",
   "finance_penalty_revenue_title": "Penalty Revenue",
@@ -271,6 +274,10 @@
   "assign_plan_select_new": "Select new plan...",
   "assign_plan_update_button": "Update Plan & Notify Parent",
   "subscription_card_plan_label": "PLAN",
+
+  "global_plan_per_month_suffix": " /mo",
+  "global_plan_per_hour_suffix": " /hr",
+  "global_plan_per_package_suffix": " /pkg",
 
   "plan_history_title": "Plan History: {childName}",
   "plan_history_title_generic": "Plan History",

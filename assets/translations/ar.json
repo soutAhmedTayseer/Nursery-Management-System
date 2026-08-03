@@ -109,6 +109,9 @@
   "finance_series_monthly_plans": "خطط شهرية",
   "finance_series_daily_sessions": "حصص يومية",
   "finance_series_winter_camp": "معسكر الشتاء",
+  "finance_period_daily": "يومي",
+  "finance_period_weekly": "أسبوعي",
+  "finance_period_monthly": "شهري",
   "finance_total_outstanding_title": "إجمالي المستحقات",
   "finance_total_outstanding_subtitle": "إجمالي الرسوم المتوقعة التي لم يتم تحصيلها هذا الشهر بعد.",
   "finance_penalty_revenue_title": "إيرادات الغرامات",
@@ -271,6 +274,10 @@
   "assign_plan_select_new": "اختر خطة جديدة...",
   "assign_plan_update_button": "تحديث الخطة وإبلاغ ولي الأمر",
   "subscription_card_plan_label": "الخطة",
+
+  "global_plan_per_month_suffix": " / شهرياً",
+  "global_plan_per_hour_suffix": " / ساعة",
+  "global_plan_per_package_suffix": " / باقة",
 
   "plan_history_title": "سجل الخطط: {childName}",
   "plan_history_title_generic": "سجل الخطط",
