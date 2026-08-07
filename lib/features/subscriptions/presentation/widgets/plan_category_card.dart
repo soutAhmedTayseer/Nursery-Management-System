@@ -86,6 +86,8 @@ class PlanCategoryCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           category.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: palette.textPrimary),
                         ),
                       ),
@@ -127,7 +129,16 @@ class _LineItemRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(item.label, style: TextStyle(fontSize: 15.sp, color: palette.textSecondary)),
+            // No maxLines here previously — squeezed by the badge next to
+            // it, a long label wrapped one character per line instead of
+            // reading as text at all. 2 lines is enough for the longest
+            // seeded label ("15 Days Full Day"); anything longer ellipsizes.
+            child: Text(
+              item.label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 15.sp, color: palette.textSecondary),
+            ),
           ),
           if (item.badgeText != null) ...[
             Container(

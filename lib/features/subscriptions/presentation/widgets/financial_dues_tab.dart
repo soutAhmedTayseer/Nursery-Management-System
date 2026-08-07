@@ -147,14 +147,22 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
                 // line items to need more room.
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    // Dividing by a flat 3.3 had no floor, so on a narrow
-                    // viewport (a phone-width window, or this tab split
-                    // beside the assign/history panels) the card shrank
-                    // toward zero and every line item's words wrapped onto
-                    // their own line instead of the row scrolling. 260 is
-                    // the width a "days / hours — AED" line still reads on
-                    // one line at the smallest text scale Settings allows.
-                    final cardWidth = ((constraints.maxWidth - spacing.gutter * 2) / 3.3).clamp(260.w, double.infinity);
+                    // A fixed comfortable width rather than dividing the
+                    // available space by "however many should be visible" —
+                    // that division is what squeezed the card down to single
+                    // letters wrapping one per line whenever this tab is
+                    // narrow (a phone-width window, or split beside the
+                    // assign/history panels). This is a carousel: the row
+                    // already scrolls, so the card can just be as wide as it
+                    // needs to read comfortably and let scrolling handle the
+                    // rest, rather than shrinking to force 3 into view.
+                    final available = constraints.maxWidth - spacing.gutter * 2;
+                    // Never wider than 340 (no point stretching past a
+                    // comfortable reading width) and never narrower than 260
+                    // (below that a "days / hours — AED" line stops fitting
+                    // on one line even at the smallest text scale) —
+                    // anything past either edge scrolls instead of squeezing.
+                    final cardWidth = available.clamp(260.w, 340.w);
                     return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: IntrinsicHeight(
