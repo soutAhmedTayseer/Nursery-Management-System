@@ -6,6 +6,9 @@ import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_fonts.dart';
 import '../../../sessions/data/models/kid_session.dart';
+import '../../../subscriptions/data/models/subscription_plan.dart';
+import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
+import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
 import '../../../subscriptions/presentation/widgets/financial_dues_tab.dart';
 import '../cubit/attendance_cubit.dart';
 import '../utils/child_profile_export.dart';
@@ -25,14 +28,22 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
   int _tabIndex = 0;
   late String _currentPlanTitle = widget.childData.planLabel;
   String _currentPlanPrice = '—';
+  List<PlanChangeEntry> _planHistory = [];
 
   @override
   Widget build(BuildContext context) {
+    // The calendar needs the child's contracted hours/day to flag overtime
+    // days, and that lives on their assigned plan line item.
+    final assignment = context.read<PlanAssignmentsCubit>().forKid(widget.childData.kid.id);
+    final lineItem = assignment == null
+        ? null
+        : context.read<PlansCubit>().findLineItem(assignment.categoryId, assignment.lineItemId);
+
     return BlocProvider(
-      create: (_) => AttendanceCubit(widget.childData.kid.id),
+      create: (_) => AttendanceCubit(widget.childData.kid.id, allowedHours: lineItem?.$2.hoursPerDay),
       child: Builder(
         builder: (context) => Scaffold(
-          backgroundColor: AppColors.surfaceCream,
+          backgroundColor: AppColors.surfacePage,
           body: SafeArea(
             child: SingleChildScrollView(
               padding: EdgeInsets.all(32.w),
@@ -51,9 +62,10 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
                       FinancialDuesTab(
                         childData: widget.childData,
                         showChildIdentity: false,
-                        onPlanChanged: (title, price) => setState(() {
+                        onPlanChanged: (title, price, history) => setState(() {
                           _currentPlanTitle = title;
                           _currentPlanPrice = price;
+                          _planHistory = history;
                         }),
                       ),
                     ],
@@ -100,6 +112,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
             childData: widget.childData,
             currentPlanTitle: _currentPlanTitle,
             currentPlanPrice: _currentPlanPrice,
+            planHistory: _planHistory,
             attendance: context.read<AttendanceCubit>().state,
           ),
           borderRadius: BorderRadius.circular(999),
