@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
+import '../../../sessions/presentation/widgets/qr_scan_dialog.dart';
 
 class AdminAppBar extends StatefulWidget {
   const AdminAppBar({super.key});
@@ -22,6 +24,20 @@ class _AdminAppBarState extends State<AdminAppBar> {
   void dispose() {
     _debounce?.cancel();
     super.dispose();
+  }
+
+  /// Same clock-in/out scan the Sessions screen offers, reachable from any
+  /// tab — this button used to be inert.
+  Future<void> _scanQr() async {
+    final payload = await QrScanDialog.show(context);
+    if (payload == null || !mounted) return;
+    final kidName = await context.read<SessionsCubit>().handleQrScan(payload);
+    if (!mounted) return;
+    if (kidName == null) {
+      AppSnackbar.showError(context, 'session_scan_qr_invalid'.tr());
+    } else {
+      AppSnackbar.showSuccess(context, 'session_scan_qr_success'.tr(namedArgs: {'name': kidName}));
+    }
   }
 
   void _onSearchChanged(String value) {
@@ -73,7 +89,7 @@ class _AdminAppBarState extends State<AdminAppBar> {
           
           // Scan QR Button
           ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: _scanQr,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.amberTint, // لون برتقالي فاتح
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),

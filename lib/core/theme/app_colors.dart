@@ -54,6 +54,13 @@ class AppColors {
   static const Color textTertiary = Color(0xFF8A8A8A);
 
   // --- Surfaces ---
+
+  /// The single page background for every admin screen. Screens used to each
+  /// pick their own near-white (ivory/bone/linen/cream), which read as
+  /// mismatched panels when navigating between them — route new screens
+  /// through this rather than adding another off-white.
+  static const Color surfacePage = surfaceCream;
+
   static const Color background = Color(0xFFF8F9FA);
   static const Color lightGrey = Color(0xFFFDFDFD);
   static const Color surfaceWhite = Color(0xFFFBFBFB);

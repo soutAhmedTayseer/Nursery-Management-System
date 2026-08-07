@@ -50,7 +50,7 @@ class _AdminSplashScreenState extends State<AdminSplashScreen> with SingleTicker
           }
         },
         child: Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.surfacePage,
           body: Center(
             child: FadeTransition(
               opacity: _fade,

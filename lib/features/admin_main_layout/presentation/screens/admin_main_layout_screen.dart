@@ -41,7 +41,7 @@ class AdminMainLayoutScreen extends StatelessWidget {
           final isCompact = context.isCompact;
 
           return Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: AppColors.surfacePage,
             drawer: isCompact ? Drawer(child: SafeArea(child: AdminSidebar(forceFull: true))) : null,
             body: SafeArea(
               child: Row(

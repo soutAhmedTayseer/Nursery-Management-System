@@ -8,6 +8,7 @@ import '../../../../core/responsive/responsive_value.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../cubit/admin_login_cubit.dart';
 import '../widgets/admin_text_field.dart';
 import '../widgets/login_background_decor.dart';
@@ -54,7 +55,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           }
         },
         child: Scaffold(
-          backgroundColor: AppColors.surfaceBone,
+          backgroundColor: AppColors.surfacePage,
           body: Stack(
             children: [
               const LoginBackgroundDecor(),
@@ -161,7 +162,13 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                             SizedBox(height: 32.h),
 
                             TextButton(
-                              onPressed: () {},
+                              // No password-reset endpoint exists yet, so
+                              // point the admin at the desk that can do it
+                              // manually instead of leaving a dead button.
+                              onPressed: () => AppSnackbar.showSuccess(
+                                context,
+                                'login_forgot_password_hint'.tr(),
+                              ),
                               child: Text(
                                 'login_forgot_password'.tr(),
                                 style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.brownDark),

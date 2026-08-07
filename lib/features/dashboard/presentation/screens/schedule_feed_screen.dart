@@ -44,7 +44,7 @@ class ScheduleFeedScreen extends StatelessWidget {
     final spacing = AppSpacing.of(context);
     final scale = context.uiScale;
     return Scaffold(
-      backgroundColor: AppColors.surfaceCream,
+      backgroundColor: AppColors.surfacePage,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: spacing.pagePadding, vertical: spacing.xxl),
