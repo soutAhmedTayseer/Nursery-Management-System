@@ -1,6 +1,8 @@
 import 'package:nursery_shared/nursery_shared.dart';
 
-import '../../../../core/services/qr_code_service.dart';
+import '../../../../core/testing/attendance_store.dart';
+import '../../../../core/testing/demo_photo_store.dart';
+import '../../../../core/testing/demo_seed.dart';
 import '../../../../core/testing/fake_failure_switch.dart';
 import '../models/kid_session.dart';
 import 'sessions_repository.dart';
@@ -26,14 +28,24 @@ class FakeSessionsRepository implements SessionsRepository {
     required int page,
     required int pageSize,
     String query = '',
+    AttendanceFilter filter = AttendanceFilter.all,
   }) async {
     await Future<void>.delayed(latency);
     failureSwitch.maybeThrow();
 
     final needle = query.trim().toLowerCase();
-    final matches = needle.isEmpty
-        ? _seed
-        : _seed.where((e) => e.kid.fullName.toLowerCase().contains(needle)).toList(growable: false);
+    final matches = _seed.where((e) {
+      final matchesQuery = needle.isEmpty || e.kid.fullName.toLowerCase().contains(needle);
+      final matchesFilter = switch (filter) {
+        AttendanceFilter.all => true,
+        AttendanceFilter.checkedIn => e.isCheckedIn,
+        AttendanceFilter.checkedOut => !e.isCheckedIn,
+      };
+      return matchesQuery && matchesFilter;
+    }).toList()
+      // Alphabetical so a child sits in the same place every visit, instead
+      // of wherever they happen to fall in insertion order.
+      ..sort((a, b) => a.kid.fullName.toLowerCase().compareTo(b.kid.fullName.toLowerCase()));
 
     final start = (page - 1) * pageSize;
     final items = start >= matches.length
@@ -63,6 +75,10 @@ class FakeSessionsRepository implements SessionsRepository {
   Future<KidSession?> checkIn(String kidId) async {
     final index = _seed.indexWhere((e) => e.kid.id == kidId);
     if (index == -1 || _seed[index].isCheckedIn) return null;
+    // Mirror into the attendance ledger so the child's calendar, their
+    // overtime, and the dashboard's per-day figures all reflect this
+    // clock-in immediately.
+    AttendanceStore.instance.checkIn(kidId, _now);
     final updated = _withSession(
       _seed[index],
       Session(
@@ -87,6 +103,7 @@ class FakeSessionsRepository implements SessionsRepository {
   Future<KidSession?> checkOut(String kidId) async {
     final index = _seed.indexWhere((e) => e.kid.id == kidId);
     if (index == -1 || !_seed[index].isCheckedIn) return null;
+    AttendanceStore.instance.checkOut(kidId, _now);
     final session = _seed[index].activeSession!;
     final updated = _withSession(
       _seed[index],
@@ -115,67 +132,25 @@ class FakeSessionsRepository implements SessionsRepository {
     return _seed[index].isCheckedIn ? checkOut(kidId) : checkIn(kidId);
   }
 
+  @override
+  Future<void> updateKidPhoto(String kidId, String photoUrl) async {
+    final index = _seed.indexWhere((e) => e.kid.id == kidId);
+    if (index == -1) return;
+    final entry = _seed[index];
+    _seed[index] = KidSession(kid: entry.kid.copyWith(photoUrl: photoUrl), activeSession: entry.activeSession, planLabel: entry.planLabel);
+    // Written to disk so the photo is still there next launch — see
+    // DemoPhotoStore for why this one thing outlives the in-memory demo.
+    await DemoPhotoStore.save(kidId, photoUrl);
+  }
+
   KidSession _withSession(KidSession entry, Session session) =>
       KidSession(kid: entry.kid, activeSession: session, planLabel: entry.planLabel);
 
   static DateTime get _now => DateTime.now();
 
-  static KidSession _entry(
-    String id,
-    String name,
-    String plan, {
-    double? hoursIn,
-  }) {
-    return KidSession(
-      kid: Kid(
-        id: id,
-        fullName: name,
-        dateOfBirth: DateTime(2021, 5, 12),
-        photoUrl: '',
-        status: KidStatus.active,
-        allergies: null,
-        medicalNotes: null,
-        emergencyContactName: 'Emergency Contact',
-        emergencyContactPhone: '+971500000000',
-        createdBy: 'admin',
-        createdAt: DateTime(2026, 1, 1),
-        approvedAt: DateTime(2026, 1, 2),
-        approvedBy: 'admin-1',
-        qrPayload: QrCodeService.signKidId(id),
-      ),
-      activeSession: hoursIn == null
-          ? null
-          : Session(
-              id: 'session-$id',
-              kidId: id,
-              requestedBy: 'guardian',
-              requestedById: 'guardian-$id',
-              status: SessionStatus.confirmed,
-              checkedInAt: _now.subtract(
-                Duration(minutes: (hoursIn * 60).round()),
-              ),
-              confirmedBy: 'admin-1',
-              checkedOutAt: null,
-              checkedOutConfirmedBy: null,
-              hoursDeducted: null,
-              subscriptionId: 'sub-$id',
-            ),
-      planLabel: plan,
-    );
-  }
-
+  /// Shared demo roster — same children (same ids) that PlanAssignmentsCubit
+  /// seeds, so Sessions and Finance agree on who's enrolled.
   static final List<KidSession> _seed = [
-    _entry('1', 'Leo Maxwell', 'Full-time', hoursIn: 3.7),
-    _entry('2', 'Amira Khalid', '3 Days/Week'),
-    _entry('3', 'Noah James', 'Full-time', hoursIn: 1.25),
-    _entry('4', 'Sophie Liam', 'Full-time', hoursIn: 4.83),
-    _entry('5', 'Ethan Wright', 'Mornings Only'),
-    _entry('6', 'Maya Rose', 'Full-time', hoursIn: 2.17),
-    _entry('7', 'Oliver Smith', 'Full-time', hoursIn: 1.0),
-    _entry('8', 'Emma Davis', '3 Days/Week'),
-    _entry('9', 'Lucas Brown', 'Mornings Only', hoursIn: 2.5),
-    _entry('10', 'Mia Wilson', 'Full-time'),
-    _entry('11', 'Aiden Taylor', 'Full-time', hoursIn: 4.17),
-    _entry('12', 'Isabella Moore', '3 Days/Week'),
+    for (final child in kDemoChildren) child.toSession(),
   ];
 }
