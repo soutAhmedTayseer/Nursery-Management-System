@@ -54,8 +54,8 @@ void main() {
       penaltyAmount: 100,
       avatarColor: const Color(0xFF000000),
     );
-    expect(record.overtimeAmount, 2 * kOvertimeHourlyRate);
-    expect(record.totalDue, 600 + 2 * kOvertimeHourlyRate + 100);
+    expect(record.overtimeAmount, 2 * kDefaultOvertimeHourlyRate);
+    expect(record.totalDue, 600 + 2 * kDefaultOvertimeHourlyRate + 100);
   });
 
   test('a paid invoice owes nothing even though the total stands', () {
