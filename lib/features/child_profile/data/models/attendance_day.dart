@@ -1,17 +1,32 @@
+import '../../../../core/testing/attendance_store.dart';
+
 /// One calendar day in the Attendance Log tab.
 ///
-/// `hours == null` means the kid was not checked in that day (weekend,
+/// `record == null` means the kid was not checked in that day (weekend,
 /// absence, or a day outside the loaded month shown for grid alignment).
 class AttendanceDay {
   const AttendanceDay({
     required this.date,
     required this.inCurrentMonth,
-    this.hours,
+    required this.allowedHours,
+    this.record,
   });
 
   final DateTime date;
   final bool inCurrentMonth;
-  final double? hours;
+
+  /// The child's contracted hours per day — null for full-day plans, which
+  /// never accrue overtime.
+  final int? allowedHours;
+
+  /// The real check-in/out stamps for this day, if the child attended.
+  final AttendanceRecord? record;
+
+  double? get hours => record?.hours;
+
+  double get overtimeHours => record?.overtimeHours(allowedHours) ?? 0;
+
+  bool get hasOvertime => overtimeHours > 0;
 
   bool get isToday {
     final now = DateTime.now();
