@@ -53,11 +53,37 @@ void main() {
       const dark = AppPalette.dark;
       expect(dark.page, isNot(light.page));
       expect(dark.card, isNot(light.card));
+      expect(dark.sand, isNot(light.sand));
       expect(dark.cardMuted, isNot(light.cardMuted));
       expect(dark.textPrimary, isNot(light.textPrimary));
       expect(dark.textSecondary, isNot(light.textSecondary));
       expect(dark.divider, isNot(light.divider));
       expect(dark.isDark, isTrue);
+    });
+
+    test('sand sits between page and card so nesting keeps its depth', () {
+      // The registration form paints a sand panel and puts card-coloured
+      // inputs inside it. If sand collapses onto either neighbour, that
+      // nesting goes flat and the inputs vanish into their own section.
+      for (final p in [AppPalette.light, AppPalette.dark]) {
+        expect(p.sand, isNot(p.page));
+        expect(p.sand, isNot(p.card));
+      }
+    });
+
+    test('state tints are heavier in dark, where a 10% wash disappears', () {
+      expect(AppPalette.dark.stateTint, greaterThan(AppPalette.light.stateTint));
+      expect(
+        AppPalette.dark.stateBorderTint,
+        greaterThan(AppPalette.light.stateBorderTint),
+      );
+    });
+
+    test('accent foregrounds are lifted for dark', () {
+      expect(AppPalette.dark.brandText, isNot(AppPalette.light.brandText));
+      expect(AppPalette.dark.dangerText, isNot(AppPalette.light.dangerText));
+      expect(AppPalette.dark.warningText, isNot(AppPalette.light.warningText));
+      expect(AppPalette.dark.amberText, isNot(AppPalette.light.amberText));
     });
   });
 
