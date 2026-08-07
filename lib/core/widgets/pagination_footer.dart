@@ -55,7 +55,7 @@ class PaginationFooter extends StatelessWidget {
               SizedBox(width: 8.w),
               ...List.generate(totalPages, (index) {
                 final pageNum = index + 1;
-                return _pageNumber(pageNum.toString(), isActive: pageNum == currentPage, onTap: () => onPageChanged(pageNum));
+                return _pageNumber(context, pageNum.toString(), isActive: pageNum == currentPage, onTap: () => onPageChanged(pageNum));
               }),
               SizedBox(width: 8.w),
               _arrowBtn(context, Icons.chevron_right, isActive: currentPage < totalPages, onTap: () {
@@ -68,14 +68,15 @@ class PaginationFooter extends StatelessWidget {
     );
   }
 
-  Widget _pageNumber(String n, {required bool isActive, required VoidCallback onTap}) {
+  Widget _pageNumber(BuildContext context, String n, {required bool isActive, required VoidCallback onTap}) {
+    final palette = context.palette;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 36.w,
         height: 36.w,
         margin: EdgeInsets.symmetric(horizontal: 4.w),
-        decoration: BoxDecoration(color: isActive ? AppColors.accentGreen : Colors.grey.shade200, shape: BoxShape.circle),
+        decoration: BoxDecoration(color: isActive ? AppColors.accentGreen : palette.chip, shape: BoxShape.circle),
         child: Center(child: Text(n, style: TextStyle(color: isActive ? Colors.white : Colors.black, fontWeight: FontWeight.bold))),
       ),
     );
@@ -88,8 +89,8 @@ class PaginationFooter extends StatelessWidget {
       child: Container(
         width: 36.w,
         height: 36.w,
-        decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
-        child: Icon(icon, size: 20.w, color: isActive ? Colors.black87 : palette.textTertiary),
+        decoration: BoxDecoration(color: palette.chip, shape: BoxShape.circle),
+        child: Icon(icon, size: 20.w, color: isActive ? palette.textPrimary : palette.textTertiary),
       ),
     );
   }

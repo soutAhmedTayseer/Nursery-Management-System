@@ -203,7 +203,7 @@ class _PlanCategoryEditDialogState extends State<PlanCategoryEditDialog> {
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
                         decoration: BoxDecoration(
-                          color: AppColors.surfaceSand,
+                          color: palette.sand,
                           borderRadius: BorderRadius.circular(AppSpacing.radiusMd.r),
                         ),
                         child: SwitchListTile(
@@ -249,7 +249,7 @@ class _PlanCategoryEditDialogState extends State<PlanCategoryEditDialog> {
                   if (_isEditMode)
                     TextButton(
                       onPressed: _deleteCategory,
-                      style: TextButton.styleFrom(foregroundColor: AppColors.dangerRed),
+                      style: TextButton.styleFrom(foregroundColor: palette.dangerText),
                       child: Text('subscriptions_delete_category'.tr()),
                     )
                   else
@@ -309,7 +309,7 @@ class _StyledField extends StatelessWidget {
         SizedBox(height: 12.h),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surfaceSand,
+            color: palette.sand,
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd.r),
           ),
           child: TextField(

@@ -51,7 +51,7 @@ class AdminTextField extends StatelessWidget {
             contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h), // تم تكبير الـ Padding الداخلي (كان 16)
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+              borderSide: BorderSide(color: palette.divider, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),

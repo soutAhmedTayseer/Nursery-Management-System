@@ -143,7 +143,7 @@ class _StyledField extends StatelessWidget {
           maxLines: maxLines,
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.surfaceSand,
+            fillColor: palette.sand,
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
           ),
@@ -173,7 +173,7 @@ class _TimeField extends StatelessWidget {
           onTap: onTap,
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-            decoration: BoxDecoration(color: AppColors.surfaceSand, borderRadius: BorderRadius.circular(16.r)),
+            decoration: BoxDecoration(color: palette.sand, borderRadius: BorderRadius.circular(16.r)),
             child: Text(time.format(context), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
           ),
         ),

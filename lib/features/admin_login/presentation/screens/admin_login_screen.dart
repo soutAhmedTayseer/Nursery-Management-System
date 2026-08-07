@@ -69,11 +69,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Logo Section (أكبر وأوضح)
-                      Icon(Icons.park, color: AppColors.darkGreen, size: 70.w),
+                      Icon(Icons.park, color: palette.brandText, size: 70.w),
                       SizedBox(height: 16.h),
                       Text(
                         'login_logo_title'.tr(),
-                        style: TextStyle(fontSize: 32.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen, letterSpacing: 1.5),
+                        style: TextStyle(fontSize: 32.sp, fontWeight: FontWeight.bold, color: palette.brandText, letterSpacing: 1.5),
                       ),
                       Text(
                         'login_portal_subtitle'.tr(),

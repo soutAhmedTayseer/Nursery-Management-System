@@ -332,6 +332,7 @@ class _DataSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return SettingsSection(
       title: 'settings_data_title'.tr(),
       icon: Icons.storage_outlined,
@@ -351,7 +352,7 @@ class _DataSection extends StatelessWidget {
           description: 'settings_reset_description'.tr(),
           child: OutlinedButton.icon(
             onPressed: () => _reset(context),
-            style: OutlinedButton.styleFrom(foregroundColor: AppColors.dangerRed),
+            style: OutlinedButton.styleFrom(foregroundColor: palette.dangerText),
             icon: Icon(Icons.restart_alt, size: 16.w),
             label: Text('settings_reset_action'.tr()),
           ),

@@ -36,7 +36,7 @@ class AlertsNotificationsSection extends StatelessWidget {
                 decoration: BoxDecoration(color: AppColors.dangerRed.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999)),
                 child: Text(
                   '${alerts.length}',
-                  style: TextStyle(fontSize: (12 * scale).sp, fontWeight: FontWeight.w900, color: AppColors.dangerRed),
+                  style: TextStyle(fontSize: (12 * scale).sp, fontWeight: FontWeight.w900, color: palette.dangerText),
                 ),
               ),
           ],

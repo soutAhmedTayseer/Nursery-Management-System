@@ -40,7 +40,7 @@ class AdminSidebar extends StatelessWidget {
 
     return Container(
       width: showFull ? _fullWidth : _railWidth,
-      color: Colors.white,
+      color: palette.card,
       padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +59,7 @@ class AdminSidebar extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('sidebar_brand_name'.tr(), overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
+                          Text('sidebar_brand_name'.tr(), overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: palette.brandText)),
                           Text('sidebar_brand_subtitle'.tr(), overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10.sp, color: palette.textSecondary)),
                         ],
                       ),

@@ -246,7 +246,7 @@ class OverviewScreen extends StatelessWidget {
         subtitle: 'overview_capacity_subtitle'.tr(),
         icon: Icons.tag_faces_rounded,
         themeColor: AppColors.successGreen,
-        bottomWidget: _buildProgressBar(
+        bottomWidget: _buildProgressBar(context, 
           occupancyFraction,
           AppColors.successGreen,
         ),
@@ -323,7 +323,7 @@ class OverviewScreen extends StatelessWidget {
         subtitle: 'overview_attendance_today_subtitle'.tr(),
         icon: Icons.fact_check_outlined,
         themeColor: AppColors.accentGreen,
-        bottomWidget: _buildProgressBar(attendanceRate, AppColors.accentGreen),
+        bottomWidget: _buildProgressBar(context, attendanceRate, AppColors.accentGreen),
       ),
       DashboardStatCard(
         title: 'overview_unpaid_title'.tr(),
@@ -369,12 +369,13 @@ class OverviewScreen extends StatelessWidget {
     if (newCapacity != null && newCapacity > 0) cubit.updateNursery(capacity: newCapacity);
   }
 
-  Widget _buildProgressBar(double percentage, Color color) {
+  Widget _buildProgressBar(BuildContext context, double percentage, Color color) {
+    final palette = context.palette;
     return Container(
       height: 5.h,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: palette.chip,
         borderRadius: BorderRadius.circular(2.r),
       ),
       child: FractionallySizedBox(

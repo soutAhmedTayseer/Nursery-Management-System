@@ -26,7 +26,7 @@ class PaymentCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: hasPenalty ? AppColors.creamTint : Colors.white,
+        color: hasPenalty ? Color.alphaBlend(AppColors.penaltyOrange.withValues(alpha: palette.isDark ? 0.14 : 0.06), palette.card) : palette.card,
         borderRadius: BorderRadius.circular(20.r),
         border: hasPenalty ? Border.all(color: AppColors.penaltyOrange.withValues(alpha: 0.3)) : null,
       ),

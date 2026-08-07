@@ -48,7 +48,7 @@ class LiveActivityFeed extends StatelessWidget {
                   children: [
                     Container(width: 8.w, height: 8.w, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.darkGreen)),
                     SizedBox(width: 8.w),
-                    Text('feed_live_now'.tr(), style: TextStyle(fontSize: (12 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen, letterSpacing: 1.2)),
+                    Text('feed_live_now'.tr(), style: TextStyle(fontSize: (12 * scale).sp, fontWeight: FontWeight.bold, color: palette.brandText, letterSpacing: 1.2)),
                   ],
                 ),
               ],

@@ -68,7 +68,7 @@ class PlanHistorySection extends StatelessWidget {
                       history: history,
                     ),
                     icon: SvgPicture.asset('assets/icons/subscriptions/export_icon.svg', width: 9.3.w, height: 9.3.w),
-                    label: Text('plan_history_export_report'.tr(), style: TextStyle(color: AppColors.darkGreen, fontSize: 12.sp, fontWeight: FontWeight.bold)),
+                    label: Text('plan_history_export_report'.tr(), style: TextStyle(color: palette.brandText, fontSize: 12.sp, fontWeight: FontWeight.bold)),
                   ),
                   TextButton.icon(
                     onPressed: () => sendSubscriptionReportViaWhatsapp(
@@ -139,7 +139,7 @@ class PlanHistorySection extends StatelessWidget {
               children: [
                 SvgPicture.asset('assets/icons/subscriptions/history_dot.svg', width: 8.w, height: 8.w),
                 SizedBox(width: 4.w),
-                Flexible(child: Text(entry.newPlanLabel, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen))),
+                Flexible(child: Text(entry.newPlanLabel, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.brandText))),
               ],
             ),
           ),

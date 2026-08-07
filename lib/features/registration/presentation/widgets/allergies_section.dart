@@ -64,7 +64,7 @@ class _AllergiesSectionState extends State<AllergiesSection> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceSand,
+        color: palette.sand,
         borderRadius: BorderRadius.circular(32.r),
       ),
       child: IntrinsicHeight(
@@ -116,7 +116,7 @@ class _AllergiesSectionState extends State<AllergiesSection> {
                             selectedColor: AppColors.accentGreen.withValues(alpha: 0.15),
                             checkmarkColor: AppColors.accentGreen,
                             backgroundColor: palette.card,
-                            side: BorderSide(color: Colors.grey.shade300),
+                            side: BorderSide(color: palette.divider),
                           ),
                         for (final custom in _customAllergies)
                           InputChip(
@@ -136,7 +136,7 @@ class _AllergiesSectionState extends State<AllergiesSection> {
                           selectedColor: AppColors.accentGreen.withValues(alpha: 0.15),
                           checkmarkColor: AppColors.accentGreen,
                           backgroundColor: palette.card,
-                          side: BorderSide(color: Colors.grey.shade300),
+                          side: BorderSide(color: palette.divider),
                         ),
                       ],
                     ),
@@ -162,7 +162,7 @@ class _AllergiesSectionState extends State<AllergiesSection> {
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8.r),
-                                  borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+                                  borderSide: BorderSide(color: palette.divider, width: 1),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8.r),
@@ -174,7 +174,7 @@ class _AllergiesSectionState extends State<AllergiesSection> {
                           SizedBox(width: 8.w),
                           IconButton(
                             onPressed: _addCustomAllergy,
-                            icon: const Icon(Icons.add_circle, color: AppColors.accentGreen),
+                            icon: Icon(Icons.add_circle, color: palette.brandText),
                             iconSize: (28 * scale).w,
                             tooltip: 'allergy_add'.tr(),
                           ),

@@ -149,7 +149,7 @@ class _RegistrationInputFieldState extends State<RegistrationInputField> {
           onTap: _isDate ? _pickDate : (_isTime ? _pickTime : null),
           validator: _validate,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          style: TextStyle(fontSize: (14 * scale).sp, color: Colors.black87),
+          style: TextStyle(fontSize: (14 * scale).sp, color: palette.textPrimary),
           decoration: InputDecoration(
             hintText: widget.hint,
             hintStyle: TextStyle(color: palette.textTertiary, fontSize: (14 * scale).sp),
@@ -163,7 +163,7 @@ class _RegistrationInputFieldState extends State<RegistrationInputField> {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+              borderSide: BorderSide(color: palette.divider, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),

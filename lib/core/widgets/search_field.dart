@@ -57,7 +57,7 @@ class _SearchFieldState extends State<SearchField> {
         decoration: InputDecoration(
           hintText: widget.hint,
           hintStyle: TextStyle(color: palette.textTertiary, fontSize: 14.sp),
-          prefixIcon: Icon(Icons.search_rounded, color: AppColors.accentGreen, size: 22.w),
+          prefixIcon: Icon(Icons.search_rounded, color: palette.brandText, size: 22.w),
           suffixIcon: _controller.text.isEmpty
               ? null
               : IconButton(

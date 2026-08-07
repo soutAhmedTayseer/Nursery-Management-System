@@ -130,7 +130,7 @@ class _Header extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(
-                  color: activeTitle != null ? AppColors.brandGradientLight.withValues(alpha: 0.3) : AppColors.surfaceSand,
+                  color: activeTitle != null ? AppColors.brandGradientLight.withValues(alpha: 0.3) : palette.sand,
                   borderRadius: BorderRadius.circular(9999),
                 ),
                 child: Row(
@@ -152,7 +152,7 @@ class _Header extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 8.h),
-              Text('schedule_screen_title'.tr(), style: TextStyle(fontSize: (30 * scale).sp, fontWeight: FontWeight.w800, letterSpacing: -0.6, color: AppColors.darkGreen)),
+              Text('schedule_screen_title'.tr(), style: TextStyle(fontSize: (30 * scale).sp, fontWeight: FontWeight.w800, letterSpacing: -0.6, color: palette.brandText)),
               SizedBox(height: 8.h),
               Text('schedule_screen_subtitle'.tr(), style: TextStyle(fontSize: (15 * scale).sp, color: palette.textSecondary)),
             ],
@@ -230,8 +230,8 @@ class _ScheduleTimelineCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_formatStart(item), style: TextStyle(fontSize: (18 * scale).sp, fontWeight: FontWeight.bold, color: isActive ? AppColors.darkGreen : palette.textPrimary)),
-                        Text('schedule_to_time'.tr(namedArgs: {'time': _formatEnd(item)}), style: TextStyle(fontSize: (14 * scale).sp, color: isActive ? AppColors.darkGreen.withValues(alpha: 0.8) : palette.textSecondary)),
+                        Text(_formatStart(item), style: TextStyle(fontSize: (18 * scale).sp, fontWeight: FontWeight.bold, color: isActive ? palette.brandText : palette.textPrimary)),
+                        Text('schedule_to_time'.tr(namedArgs: {'time': _formatEnd(item)}), style: TextStyle(fontSize: (14 * scale).sp, color: isActive ? palette.brandText.withValues(alpha: 0.8) : palette.textSecondary)),
                       ],
                     ),
                   ),
@@ -304,8 +304,9 @@ class _RowIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Material(
-      color: AppColors.surfaceSand,
+      color: palette.sand,
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),

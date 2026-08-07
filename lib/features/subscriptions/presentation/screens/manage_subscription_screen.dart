@@ -33,7 +33,7 @@ class ManageSubscriptionScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))],
               ),
-              child: Icon(Icons.arrow_back_rounded, color: AppColors.accentGreen, size: 20.w),
+              child: Icon(Icons.arrow_back_rounded, color: palette.brandText, size: 20.w),
             ),
           ),
         ),

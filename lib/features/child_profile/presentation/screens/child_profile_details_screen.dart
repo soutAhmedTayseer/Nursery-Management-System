@@ -54,7 +54,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
                 children: [
                   _buildHeader(context),
                   SizedBox(height: 32.h),
-                  _buildTabSwitcher(),
+                  _buildTabSwitcher(context),
                   SizedBox(height: 24.h),
                   IndexedStack(
                     index: _tabIndex,
@@ -96,7 +96,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))],
             ),
-            child: Icon(Icons.arrow_back_rounded, color: AppColors.accentGreen, size: 20.w),
+            child: Icon(Icons.arrow_back_rounded, color: palette.brandText, size: 20.w),
           ),
         ),
         SizedBox(width: 16.w),
@@ -139,10 +139,11 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
     );
   }
 
-  Widget _buildTabSwitcher() {
+  Widget _buildTabSwitcher(BuildContext context) {
+    final palette = context.palette;
     return Container(
       padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(color: AppColors.surfaceSand.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(color: palette.sand.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(999)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

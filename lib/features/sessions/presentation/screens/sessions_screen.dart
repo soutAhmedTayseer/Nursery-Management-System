@@ -233,7 +233,7 @@ class _CountPill extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.14) : Colors.white,
+          color: isSelected ? color.withValues(alpha: palette.stateTint) : palette.card,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isSelected ? color : Colors.transparent,

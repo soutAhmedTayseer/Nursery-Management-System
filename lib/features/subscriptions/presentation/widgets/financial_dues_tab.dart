@@ -133,7 +133,7 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
                       decoration: BoxDecoration(color: AppColors.activePlansBadgeBg, borderRadius: BorderRadius.circular(999)),
                       child: Text(
                         'subscriptions_active_plans_badge'.tr(namedArgs: {'count': '${state.categories.length}'}),
-                        style: TextStyle(fontSize: 12.sp, color: AppColors.amberLabel, fontWeight: FontWeight.w500),
+                        style: TextStyle(fontSize: 12.sp, color: palette.amberText, fontWeight: FontWeight.w500),
                       ),
                     )
                   ],

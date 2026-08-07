@@ -123,7 +123,7 @@ class _QrScanDialogState extends State<QrScanDialog> {
           Container(
             width: 360.w,
             height: 220.w,
-            decoration: BoxDecoration(color: AppColors.surfaceSand, borderRadius: BorderRadius.circular(24.r)),
+            decoration: BoxDecoration(color: palette.sand, borderRadius: BorderRadius.circular(24.r)),
             alignment: Alignment.center,
             child: _decoding
                 ? const CircularProgressIndicator()
@@ -131,7 +131,7 @@ class _QrScanDialogState extends State<QrScanDialog> {
           ),
           if (_uploadFailed) ...[
             SizedBox(height: 12.h),
-            Text('session_scan_qr_invalid'.tr(), style: TextStyle(fontSize: 12.sp, color: AppColors.errorRed)),
+            Text('session_scan_qr_invalid'.tr(), style: TextStyle(fontSize: 12.sp, color: palette.dangerText)),
           ],
           SizedBox(height: 16.h),
           ElevatedButton.icon(

@@ -724,6 +724,7 @@ class _StepIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Row(
       children: [
         for (int i = 0; i < labels.length; i++) ...[
@@ -734,7 +735,7 @@ class _StepIndicator extends StatelessWidget {
                 margin: EdgeInsets.symmetric(horizontal: 8.w),
                 color: i <= currentStep
                     ? AppColors.leafGreen
-                    : Colors.grey.shade300,
+                    : palette.divider,
               ),
             ),
           _StepDot(
@@ -780,7 +781,7 @@ class _StepDot extends StatelessWidget {
                 ? AppColors.leafGreen
                 : (isDone
                       ? AppColors.leafGreen.withValues(alpha: 0.15)
-                      : Colors.grey.shade200),
+                      : palette.chip),
             child: isDone
                 ? Icon(
                     Icons.check,

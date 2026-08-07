@@ -221,7 +221,7 @@ class FinanceScreen extends StatelessWidget {
                     children: [
                       Text('${r.overtimeHours.toStringAsFixed(1)} hrs', style: TextStyle(fontSize: 13.sp)),
                       if (r.overtimeHours > 0)
-                        Text('${r.overtimeAmount.toInt()} AED', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: AppColors.penaltyOrange)),
+                        Text('${r.overtimeAmount.toInt()} AED', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: palette.warningText)),
                     ],
                   ),
                 ),
@@ -257,8 +257,6 @@ class FinanceScreen extends StatelessWidget {
   }
 
   Widget _buildTrendBadge(BuildContext context) {
-
-  final palette = context.palette;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
@@ -268,12 +266,12 @@ class FinanceScreen extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.trending_up, color: palette.card, size: 12.w),
+          Icon(Icons.trending_up, color: Colors.white, size: 12.w),
           SizedBox(width: 4.w),
           Text(
             'finance_trend_vs_last_month'.tr(),
             style: TextStyle(
-              color: palette.card,
+              color: Colors.white,
               fontSize: 10.sp,
               fontWeight: FontWeight.bold
             )
@@ -393,8 +391,8 @@ class FinanceScreen extends StatelessWidget {
         _buildActionBtn(
           Icons.history,
           'audit_log_open'.tr(),
-          Colors.grey.shade200,
-          Colors.black,
+          context.palette.chip,
+          context.palette.textPrimary,
           onTap: () => AuditLogDialog.show(context),
         ),
         _buildActionBtn(
@@ -426,6 +424,7 @@ class FinanceScreen extends StatelessWidget {
     return BlocBuilder<FinanceCubit, FinanceState>(
       builder: (context, state) {
         final isActive = state.penaltyFilter != PenaltyFilter.all;
+        final palette = context.palette;
         return PopupMenuButton<PenaltyFilter>(
           onSelected: (filter) => context.read<FinanceCubit>().setPenaltyFilter(filter),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
@@ -439,8 +438,8 @@ class FinanceScreen extends StatelessWidget {
           child: _actionBtnDecoration(
             Icons.filter_list,
             'finance_filter'.tr(),
-            isActive ? AppColors.penaltyOrange : Colors.grey.shade200,
-            isActive ? Colors.white : Colors.black,
+            isActive ? AppColors.penaltyOrange : palette.chip,
+            isActive ? Colors.white : palette.textPrimary,
           ),
         );
       },
@@ -585,7 +584,7 @@ class FinanceScreen extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           '${item.$2.label} · ${item.$2.price}',
-                          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen),
+                          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: palette.brandText),
                         ),
                       ),
                     ],

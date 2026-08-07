@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/theme/app_palette.dart';
+
 class LoginBackgroundDecor extends StatelessWidget {
   const LoginBackgroundDecor({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Stack(
       children: [
         // 1. Leaf image on the bottom left
@@ -21,7 +24,7 @@ class LoginBackgroundDecor extends StatelessWidget {
               errorBuilder: (c, e, s) => SizedBox(
                 width: 250.w,
                 height: 250.h,
-                child: Placeholder(color: Colors.grey.shade200),
+                child: Placeholder(color: palette.divider),
               ),
             ),
           ),
@@ -40,7 +43,7 @@ class LoginBackgroundDecor extends StatelessWidget {
               errorBuilder: (c, e, s) => SizedBox(
                 width: 200.w,
                 height: 200.h,
-                child: Placeholder(color: Colors.grey.shade200),
+                child: Placeholder(color: palette.divider),
               ),
             ),
           ),

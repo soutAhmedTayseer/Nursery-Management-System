@@ -33,7 +33,7 @@ class PlanCategoryCard extends StatelessWidget {
       borderRadius: radius,
       child: Container(
         decoration: BoxDecoration(
-          color: featured ? category.themeColor.withValues(alpha: 0.04) : Colors.white,
+          color: featured ? category.themeColor.withValues(alpha: palette.isDark ? 0.10 : 0.04) : palette.card,
           borderRadius: radius,
           border: Border.all(
             color: featured

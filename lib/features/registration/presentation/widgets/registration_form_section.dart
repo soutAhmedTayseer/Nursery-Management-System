@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/ui_scale.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class RegistrationFormSection extends StatelessWidget {
   final String title;
@@ -16,10 +16,11 @@ class RegistrationFormSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scale = context.uiScale;
+    final palette = context.palette;
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: AppColors.surfaceSand, // Off-white/beige color for cards
+        color: palette.sand, // Off-white/beige color for cards
         borderRadius: BorderRadius.circular(32.r),
       ),
       child: Column(

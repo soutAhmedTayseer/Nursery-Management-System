@@ -127,12 +127,12 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
               SizedBox(height: 8.h),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                decoration: BoxDecoration(color: AppColors.surfaceSand, borderRadius: BorderRadius.circular(48.r)),
+                decoration: BoxDecoration(color: palette.sand, borderRadius: BorderRadius.circular(48.r)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(widget.currentPlanTitle, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500, color: palette.textPrimary)),
-                    Text(widget.currentPlanPrice, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
+                    Text(widget.currentPlanPrice, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: palette.brandText)),
                   ],
                 ),
               ),

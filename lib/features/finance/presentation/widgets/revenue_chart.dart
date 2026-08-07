@@ -144,7 +144,7 @@ class _RevenueChartState extends State<RevenueChart> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.darkGreen : Colors.grey.shade100,
+          color: isActive ? AppColors.darkGreen : palette.chip,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(

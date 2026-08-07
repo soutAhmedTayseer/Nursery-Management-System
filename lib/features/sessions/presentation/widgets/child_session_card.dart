@@ -62,7 +62,7 @@ class ChildSessionCard extends StatelessWidget {
                     ),
                     image: photoUrl.isEmpty ? null : DecorationImage(image: kidPhotoProvider(photoUrl), fit: BoxFit.cover),
                   ),
-                  child: photoUrl.isEmpty ? Icon(Icons.person, color: AppColors.accentGreen, size: 24.w * scale) : null,
+                  child: photoUrl.isEmpty ? Icon(Icons.person, color: palette.brandText, size: 24.w * scale) : null,
                 ),
                 _buildStatusBadge(context, scale),
               ],
@@ -87,9 +87,9 @@ class ChildSessionCard extends StatelessWidget {
             const Spacer(),
             Row(
               children: [
-                _buildActionButton(context, Icons.login, 'session_clock_in'.tr(), isCheckedIn ? Colors.grey.shade200 : AppColors.mintTint, !isCheckedIn, scale, isCheckedIn ? null : onClockIn),
+                _buildActionButton(context, Icons.login, 'session_clock_in'.tr(), isCheckedIn ? palette.chip : AppColors.mintTint, !isCheckedIn, scale, isCheckedIn ? null : onClockIn),
                 SizedBox(width: 8.w * scale),
-                _buildActionButton(context, Icons.logout, 'session_clock_out'.tr(), !isCheckedIn ? Colors.grey.shade200 : AppColors.peachTint, isCheckedIn, scale, isCheckedIn ? onClockOut : null),
+                _buildActionButton(context, Icons.logout, 'session_clock_out'.tr(), !isCheckedIn ? palette.chip : AppColors.peachTint, isCheckedIn, scale, isCheckedIn ? onClockOut : null),
               ],
             ),
           ],
@@ -113,7 +113,7 @@ class ChildSessionCard extends StatelessWidget {
           Text(isCheckedIn ? 'session_checked_in'.tr() : 'session_checked_out'.tr(), style: TextStyle(fontSize: 9.sp * scale, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
           if (isCheckedIn && elapsed != null) ...[
             SizedBox(height: 4.h * scale),
-            Row(children: [Icon(Icons.timer_outlined, size: 10.w * scale, color: AppColors.amberLabel), SizedBox(width: 4.w * scale), Text(_formatElapsed(elapsed), style: TextStyle(fontSize: 11.sp * scale, fontWeight: FontWeight.bold, color: AppColors.amberLabel))]),
+            Row(children: [Icon(Icons.timer_outlined, size: 10.w * scale, color: palette.amberText), SizedBox(width: 4.w * scale), Text(_formatElapsed(elapsed), style: TextStyle(fontSize: 11.sp * scale, fontWeight: FontWeight.bold, color: palette.amberText))]),
           ] else if (!isCheckedIn) ...[
             SizedBox(height: 4.h * scale),
             Text('--h --m', style: TextStyle(fontSize: 11.sp * scale, fontWeight: FontWeight.bold, color: palette.textTertiary)),
@@ -136,12 +136,12 @@ class ChildSessionCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 14.w * scale, color: isActive ? Colors.black87 : palette.textTertiary),
+              Icon(icon, size: 14.w * scale, color: isActive ? palette.textPrimary : palette.textTertiary),
               SizedBox(width: 4.w * scale),
               Flexible(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 10.sp * scale, fontWeight: FontWeight.bold, color: isActive ? Colors.black87 : palette.textTertiary),
+                  style: TextStyle(fontSize: 10.sp * scale, fontWeight: FontWeight.bold, color: isActive ? palette.textPrimary : palette.textTertiary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

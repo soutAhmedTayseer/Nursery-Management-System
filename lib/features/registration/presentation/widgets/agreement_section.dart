@@ -20,7 +20,7 @@ class AgreementSection extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: AppColors.surfaceSand,
+        color: palette.sand,
         borderRadius: BorderRadius.circular(32.r),
       ),
       child: Column(
@@ -58,7 +58,7 @@ class AgreementSection extends StatelessWidget {
             decoration: BoxDecoration(
               color: palette.card,
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: palette.divider),
             ),
             child: Scrollbar(
               child: SingleChildScrollView(

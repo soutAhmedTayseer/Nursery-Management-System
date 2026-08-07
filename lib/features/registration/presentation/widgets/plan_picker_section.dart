@@ -29,7 +29,7 @@ class PlanPickerSection extends StatelessWidget {
         final selected = _findSelected(state.categories, selectedCompositeId);
         return Container(
           padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(color: AppColors.surfaceSand, borderRadius: BorderRadius.circular(24.r)),
+          decoration: BoxDecoration(color: palette.sand, borderRadius: BorderRadius.circular(24.r)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -118,7 +118,7 @@ class _DerivedStat extends StatelessWidget {
       children: [
         Text(label, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: palette.textTertiary, letterSpacing: 0.6)),
         SizedBox(height: 4.h),
-        Text(value, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
+        Text(value, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.brandText)),
       ],
     );
   }

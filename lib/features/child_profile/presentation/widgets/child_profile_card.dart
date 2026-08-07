@@ -82,14 +82,14 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
                       child: _pickedPhoto != null
                           ? Image.file(_pickedPhoto!, fit: BoxFit.cover)
                           : kid.photoUrl.isEmpty
-                          ? Container(color: AppColors.surfaceSage, child: Icon(Icons.person, size: 64.w, color: AppColors.accentGreen))
+                          ? Container(color: AppColors.surfaceSage, child: Icon(Icons.person, size: 64.w, color: palette.brandText))
                           : Image(
                               // Saved photos may be a local file path (no
                               // upload endpoint yet), not just a URL.
                               image: kidPhotoProvider(kid.photoUrl),
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
-                                  Container(color: AppColors.surfaceSage, child: Icon(Icons.person, size: 64.w, color: AppColors.accentGreen)),
+                                  Container(color: AppColors.surfaceSage, child: Icon(Icons.person, size: 64.w, color: palette.brandText)),
                             ),
                     ),
                   ),
@@ -153,11 +153,11 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(20.w),
-            decoration: BoxDecoration(color: AppColors.surfaceSand, borderRadius: BorderRadius.circular(28.r)),
+            decoration: BoxDecoration(color: palette.sand, borderRadius: BorderRadius.circular(28.r)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('child_profile_emergency_contact_label'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColors.amberLabel, letterSpacing: 1)),
+                Text('child_profile_emergency_contact_label'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: palette.amberText, letterSpacing: 1)),
                 SizedBox(height: 14.h),
                 Row(
                   children: [
@@ -216,7 +216,7 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(color: palette.card, borderRadius: BorderRadius.circular(16.r)),
             child: payload == null
-                ? Icon(Icons.qr_code_2, size: 48.w, color: Colors.grey.shade300)
+                ? Icon(Icons.qr_code_2, size: 48.w, color: palette.divider)
                 : QrImageView(data: payload, backgroundColor: Colors.white),
           ),
           SizedBox(width: 20.w),

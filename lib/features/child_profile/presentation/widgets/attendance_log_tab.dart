@@ -87,7 +87,7 @@ class AttendanceLogTab extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Text('${state.averageDailyStay.toStringAsFixed(1)}h', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
+                    Text('${state.averageDailyStay.toStringAsFixed(1)}h', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: palette.brandText)),
                   ],
                 ),
               ),
@@ -107,7 +107,7 @@ class AttendanceLogTab extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.warning_amber_rounded, size: 20.w, color: AppColors.dangerRed),
+                          Icon(Icons.warning_amber_rounded, size: 20.w, color: palette.dangerText),
                           SizedBox(width: 16.w),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,7 +121,7 @@ class AttendanceLogTab extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Text('${state.totalOvertimeHours.toStringAsFixed(1)}h', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.dangerRed)),
+                      Text('${state.totalOvertimeHours.toStringAsFixed(1)}h', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: palette.dangerText)),
                     ],
                   ),
                 ),
@@ -142,7 +142,7 @@ class AttendanceLogTab extends StatelessWidget {
       child: Container(
         width: 40.w,
         height: 40.w,
-        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: palette.divider)),
         child: Icon(icon, size: 18.w, color: palette.textPrimary),
       ),
     );
@@ -194,6 +194,7 @@ class AttendanceLogTab extends StatelessWidget {
   /// win over the "today" and plain-attended styles and are tappable for
   /// the exact window the child overran.
   Widget _overtimeCell(BuildContext context, AttendanceDay day) {
+    final palette = context.palette;
     return InkWell(
       onTap: () => _showOvertimeDetails(context, day),
       borderRadius: BorderRadius.circular(32.r),
@@ -201,21 +202,21 @@ class AttendanceLogTab extends StatelessWidget {
         height: 96.h,
         padding: EdgeInsets.all(2.w),
         decoration: BoxDecoration(
-          color: AppColors.dangerRed.withValues(alpha: 0.12),
-          border: Border.all(color: AppColors.dangerRed.withValues(alpha: 0.5), width: 2),
+          color: AppColors.dangerRed.withValues(alpha: palette.stateTint),
+          border: Border.all(color: AppColors.dangerRed.withValues(alpha: palette.stateBorderTint), width: 2),
           borderRadius: BorderRadius.circular(32.r),
         ),
         alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('${day.date.day}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.dangerRed)),
+            Text('${day.date.day}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.dangerText)),
             SizedBox(height: 2.h),
-            Text('${_formatHours(day.hours!)}h', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColors.dangerRed)),
+            Text('${_formatHours(day.hours!)}h', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: palette.dangerText)),
             SizedBox(height: 2.h),
             Text(
               'child_profile_overtime_marker'.tr(namedArgs: {'hours': _formatHours(day.overtimeHours)}),
-              style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: AppColors.dangerRed),
+              style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: palette.dangerText),
             ),
           ],
         ),
@@ -227,6 +228,7 @@ class AttendanceLogTab extends StatelessWidget {
     final record = day.record!;
     final window = record.overtimeWindow(day.allowedHours);
     final locale = context.locale.languageCode;
+    final palette = context.palette;
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -257,7 +259,7 @@ class AttendanceLogTab extends StatelessWidget {
                   children: [
                     Text(
                       'child_profile_overtime_window_title'.tr(),
-                      style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: AppColors.dangerRed, letterSpacing: 1),
+                      style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: palette.dangerText, letterSpacing: 1),
                     ),
                     SizedBox(height: 6.h),
                     Text(
@@ -266,7 +268,7 @@ class AttendanceLogTab extends StatelessWidget {
                         'to': _formatTime(window.to, locale),
                         'hours': _formatHours(day.overtimeHours),
                       }),
-                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.dangerRed),
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.dangerText),
                     ),
                   ],
                 ),
@@ -332,7 +334,7 @@ class AttendanceLogTab extends StatelessWidget {
         opacity: 0.2,
         child: Container(
           height: 96.h,
-          decoration: BoxDecoration(color: palette.cardMuted.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(32.r)),
+          decoration: BoxDecoration(color: palette.cardMuted.withValues(alpha: palette.isDark ? 0.5 : 0.3), borderRadius: BorderRadius.circular(32.r)),
           alignment: Alignment.center,
           child: Text('${day.date.day}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
         ),
@@ -344,15 +346,15 @@ class AttendanceLogTab extends StatelessWidget {
         height: 96.h,
         padding: EdgeInsets.all(2.w),
         decoration: BoxDecoration(
-          color: AppColors.darkGreen.withValues(alpha: 0.1),
-          border: Border.all(color: AppColors.darkGreen.withValues(alpha: 0.2), width: 2),
+          color: AppColors.accentGreen.withValues(alpha: palette.stateTint),
+          border: Border.all(color: AppColors.accentGreen.withValues(alpha: palette.stateBorderTint), width: 2),
           borderRadius: BorderRadius.circular(32.r),
         ),
         alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('${day.date.day}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
+            Text('${day.date.day}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.brandText)),
             SizedBox(height: 4.h),
             Text('${_formatHours(day.hours!)}h', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColors.brandGradientLight)),
           ],
@@ -363,7 +365,7 @@ class AttendanceLogTab extends StatelessWidget {
     // In-month, weekday or weekend with no recorded attendance.
     return Container(
       height: 96.h,
-      decoration: BoxDecoration(color: AppColors.calendarMuted, borderRadius: BorderRadius.circular(32.r)),
+      decoration: BoxDecoration(color: palette.cardMuted, borderRadius: BorderRadius.circular(32.r)),
       alignment: Alignment.center,
       child: Column(
         mainAxisSize: MainAxisSize.min,
