@@ -17,6 +17,7 @@ import 'app_colors.dart';
 class AppPalette extends ThemeExtension<AppPalette> {
   const AppPalette({
     required this.page,
+    required this.sand,
     required this.card,
     required this.cardMuted,
     required this.chip,
@@ -31,6 +32,15 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   /// Page background behind every screen.
   final Color page;
+
+  /// Sectioning panel that groups other surfaces — the beige blocks on the
+  /// registration form, the inset panels around a plan or a QR upload.
+  ///
+  /// Sits *between* [page] and [card] in depth: a panel painted with it reads
+  /// as a group, and a [card] nested inside still reads as recessed against
+  /// it. Collapsing this into [card] is what made the registration form's
+  /// inputs disappear into their own section.
+  final Color sand;
 
   /// Raised surface: cards, tables, dialogs, sheets.
   final Color card;
@@ -58,8 +68,35 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// (e.g. swapping an illustration), instead of guessing from luminance.
   final bool isDark;
 
+  /// Accents as *foreground* — label text, icons, chart strokes.
+  ///
+  /// The [AppColors] constants are tuned to sit on white. Reused unchanged as
+  /// text on a #1E2125 card, `darkGreen` lands around 1.9:1 contrast, which is
+  /// illegible. These lift each accent for dark and pass it through untouched
+  /// for light.
+  ///
+  /// Only for foreground. An accent used as a *fill* under white text
+  /// (a primary button, the "today" gradient) is correct in either theme and
+  /// should keep using the [AppColors] constant directly.
+  Color get brandText => isDark ? AppColors.leafGreen : AppColors.darkGreen;
+  Color get dangerText => isDark ? const Color(0xFFF2695E) : AppColors.dangerRed;
+  Color get warningText => isDark ? const Color(0xFFF0975A) : AppColors.penaltyOrange;
+  Color get amberText => isDark ? const Color(0xFFE0A44A) : AppColors.amberLabel;
+
+  /// How strongly a semantic state (present / overtime / selected) tints the
+  /// surface under it.
+  ///
+  /// A 10% green over white is a clear shift; the same 10% over a #272B30
+  /// cell is almost nothing, which is why the dark calendar's present and
+  /// absent days were indistinguishable. Dark needs the heavier wash.
+  double get stateTint => isDark ? 0.18 : 0.1;
+
+  /// The border that accompanies a [stateTint] fill.
+  double get stateBorderTint => isDark ? 0.55 : 0.2;
+
   static const light = AppPalette(
     page: AppColors.surfaceCream,
+    sand: AppColors.surfaceSand,
     card: Colors.white,
     cardMuted: AppColors.surfaceCream,
     chip: AppColors.neutralChip,
@@ -77,6 +114,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// on large surfaces is fatiguing.
   static const dark = AppPalette(
     page: Color(0xFF15171A),
+    sand: Color(0xFF22262B),
     card: Color(0xFF1E2125),
     cardMuted: Color(0xFF272B30),
     chip: Color(0xFF33383E),
@@ -92,6 +130,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
   @override
   AppPalette copyWith({
     Color? page,
+    Color? sand,
     Color? card,
     Color? cardMuted,
     Color? chip,
@@ -105,6 +144,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
   }) {
     return AppPalette(
       page: page ?? this.page,
+      sand: sand ?? this.sand,
       card: card ?? this.card,
       cardMuted: cardMuted ?? this.cardMuted,
       chip: chip ?? this.chip,
@@ -123,6 +163,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     if (other == null) return this;
     return AppPalette(
       page: Color.lerp(page, other.page, t)!,
+      sand: Color.lerp(sand, other.sand, t)!,
       card: Color.lerp(card, other.card, t)!,
       cardMuted: Color.lerp(cardMuted, other.cardMuted, t)!,
       chip: Color.lerp(chip, other.chip, t)!,
