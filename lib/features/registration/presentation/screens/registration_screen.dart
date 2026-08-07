@@ -12,6 +12,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../sessions/data/repositories/sessions_repository.dart';
 import '../../../subscriptions/data/models/subscription_plan.dart';
+import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
 import '../cubit/registration_cubit.dart';
 import '../cubit/registration_state.dart';
@@ -56,7 +57,9 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
 
   var _childNameController = TextEditingController();
   var _dobController = TextEditingController();
+  var _motherNameController = TextEditingController();
   var _motherPhoneController = TextEditingController();
+  var _fatherNameController = TextEditingController();
   var _fatherPhoneController = TextEditingController();
   var _signatureController = TextEditingController();
   String? _selectedPlanId;
@@ -72,7 +75,9 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     _pageController.dispose();
     _childNameController.dispose();
     _dobController.dispose();
+    _motherNameController.dispose();
     _motherPhoneController.dispose();
+    _fatherNameController.dispose();
     _fatherPhoneController.dispose();
     _signatureController.dispose();
     super.dispose();
@@ -146,11 +151,24 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
       _goToStep(0);
       return;
     }
+    // Invoices go to the father's WhatsApp number when there is one, and
+    // fall back to the mother's — the step-4 validator already guarantees
+    // at least one of the two is filled in. The billing name follows
+    // whichever number we picked, so the invoice greets the person who
+    // actually receives it.
+    final fatherPhone = _fatherPhoneController.text.trim();
+    final motherPhone = _motherPhoneController.text.trim();
+    final useFather = fatherPhone.isNotEmpty;
+    final parentName = (useFather ? _fatherNameController.text : _motherNameController.text).trim();
     cubit.registerChild(
       fullName: _childNameController.text,
       dateOfBirth: _parseDob(),
       planCategory: selected.$1,
       planItem: selected.$2,
+      // Names are optional on the form, so fall back rather than showing a
+      // blank parent on the invoice.
+      parentName: parentName.isNotEmpty ? parentName : 'registration_guardian_fallback'.tr(),
+      parentPhone: useFather ? fatherPhone : motherPhone,
       allergies: _allergies.isEmpty ? null : _allergies.join(', '),
     );
   }
@@ -171,7 +189,9 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     _pageController.jumpToPage(0);
     _childNameController.dispose();
     _dobController.dispose();
+    _motherNameController.dispose();
     _motherPhoneController.dispose();
+    _fatherNameController.dispose();
     _fatherPhoneController.dispose();
     _signatureController.dispose();
     setState(() {
@@ -179,7 +199,9 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
       _formGeneration++; // forces fresh field widgets, clearing all input state
       _childNameController = TextEditingController();
       _dobController = TextEditingController();
+      _motherNameController = TextEditingController();
       _motherPhoneController = TextEditingController();
+      _fatherNameController = TextEditingController();
       _fatherPhoneController = TextEditingController();
       _signatureController = TextEditingController();
       _selectedPlanId = null;
@@ -307,11 +329,19 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
           _fieldRows(context, spacing, [
             _FieldRow(
               RegistrationInputField(
+                label: 'registration_label_mother_name'.tr(),
+                hint: 'registration_hint_parent_name'.tr(),
+                inputType: RegistrationFieldInputType.letters,
+                controller: _motherNameController,
+              ),
+              RegistrationInputField(
                 label: 'registration_label_mother_phone'.tr(),
                 hint: 'registration_hint_phone'.tr(),
                 inputType: RegistrationFieldInputType.digits,
                 controller: _motherPhoneController,
               ),
+            ),
+            _FieldRow(
               RegistrationInputField(
                 label: 'registration_label_contact_email'.tr(),
                 hint: 'registration_hint_email'.tr(),
@@ -361,11 +391,19 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
           _fieldRows(context, spacing, [
             _FieldRow(
               RegistrationInputField(
+                label: 'registration_label_father_name'.tr(),
+                hint: 'registration_hint_parent_name'.tr(),
+                inputType: RegistrationFieldInputType.letters,
+                controller: _fatherNameController,
+              ),
+              RegistrationInputField(
                 label: 'registration_label_father_phone'.tr(),
                 hint: 'registration_hint_phone'.tr(),
                 inputType: RegistrationFieldInputType.digits,
                 controller: _fatherPhoneController,
               ),
+            ),
+            _FieldRow(
               RegistrationInputField(
                 label: 'registration_label_contact_email'.tr(),
                 hint: 'registration_hint_email'.tr(),
@@ -513,6 +551,9 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     return BlocListener<RegistrationCubit, RegistrationState>(
       listener: (context, state) {
         if (state is RegistrationSuccess) {
+          // Subscribe the new child so they appear in Finance's payments
+          // table and Add Invoice, not just the Sessions roster.
+          context.read<PlanAssignmentsCubit>().assign(state.assignment);
           AppSnackbar.showSuccess(context, 'registration_success_message'.tr());
           _resetForNewChild();
         } else if (state is RegistrationError) {
@@ -520,7 +561,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.surfaceLinen,
+        backgroundColor: AppColors.surfacePage,
         // Default keyboard behavior: Scaffold resizes the body so the
         // focused field stays above the keyboard instead of being covered by
         // it, and the per-page SingleChildScrollView auto-scrolls the
