@@ -22,6 +22,11 @@ class AppColors {
   static const Color successDark = Color(0xFF2E7D32);
   static const Color successTint = Color(0xFFE8F5E9);
   static const Color mintTint = Color(0xFFC8F6C2);
+
+  /// The sidebar's light-theme selected-item wash. Dark mode doesn't use it
+  /// — see [AppPalette] — this pale green would read as a stray light box
+  /// on a dark sidebar rather than a selection state.
+  static const Color sidebarSelectedLight = Color(0xFFE6F4E3);
   static const Color dangerRed = Color(0xFFC72424);
   static const Color errorRed = Color(0xFFD32F2F);
   static const Color peachTint = Color(0xFFFFDAD6);

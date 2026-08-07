@@ -80,7 +80,7 @@ class PlanCategoryCard extends StatelessWidget {
                           color: category.themeColor.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(category.icon, color: category.themeColor, size: AppSpacing.iconMd.w),
+                        child: Icon(category.icon, color: palette.liftAccent(category.themeColor), size: AppSpacing.iconMd.w),
                       ),
                       SizedBox(width: 16.w),
                       Expanded(
@@ -127,7 +127,7 @@ class _LineItemRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(item.label, style: TextStyle(fontSize: 15.sp, color: palette.textPrimary)),
+            child: Text(item.label, style: TextStyle(fontSize: 15.sp, color: palette.textSecondary)),
           ),
           if (item.badgeText != null) ...[
             Container(
@@ -140,7 +140,7 @@ class _LineItemRow extends StatelessWidget {
               ),
             ),
           ],
-          Text(item.price, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: themeColor)),
+          Text(item.price, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: palette.liftAccent(themeColor))),
         ],
       ),
     );

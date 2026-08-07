@@ -83,6 +83,20 @@ class AppPalette extends ThemeExtension<AppPalette> {
   Color get warningText => isDark ? const Color(0xFFF0975A) : AppColors.penaltyOrange;
   Color get amberText => isDark ? const Color(0xFFE0A44A) : AppColors.amberLabel;
 
+  /// Lifts a raw accent used as a *foreground* when the caller only has the
+  /// [Color] itself, not the semantic name — e.g. [PlanCategory.themeColor],
+  /// which is baked into plan data as `AppColors.darkGreen` /
+  /// `AppColors.amberLabel` and gets reused as both a fill (icon circle,
+  /// stripe — fine unlifted) and a foreground (price text, icon glyph —
+  /// needs lifting). Unknown colours pass through unchanged.
+  Color liftAccent(Color raw) {
+    if (raw == AppColors.darkGreen) return brandText;
+    if (raw == AppColors.amberLabel) return amberText;
+    if (raw == AppColors.dangerRed) return dangerText;
+    if (raw == AppColors.penaltyOrange) return warningText;
+    return raw;
+  }
+
   /// How strongly a semantic state (present / overtime / selected) tints the
   /// surface under it.
   ///

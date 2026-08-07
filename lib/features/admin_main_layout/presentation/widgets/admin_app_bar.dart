@@ -98,10 +98,10 @@ class _AdminAppBarState extends State<AdminAppBar> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
               elevation: 0,
             ),
-            icon: Icon(Icons.qr_code_scanner, color: Colors.orange.shade800, size: 20.w),
+            icon: Icon(Icons.qr_code_scanner, color: AppColors.amberLabel, size: 20.w),
             label: Text(
               'appbar_scan_qr'.tr(),
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.orange.shade800),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.amberLabel),
             ),
           ),
         ],

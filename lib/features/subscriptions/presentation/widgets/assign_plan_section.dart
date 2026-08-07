@@ -114,8 +114,8 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
                   ),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    decoration: BoxDecoration(color: Colors.green.shade100, borderRadius: BorderRadius.circular(8.r)),
-                    child: Text('subscription_active_badge'.tr(), style: TextStyle(fontSize: 9.sp, color: Colors.green.shade800, fontWeight: FontWeight.bold)),
+                    decoration: BoxDecoration(color: AppColors.mintTint, borderRadius: BorderRadius.circular(8.r)),
+                    child: Text('subscription_active_badge'.tr(), style: TextStyle(fontSize: 9.sp, color: AppColors.darkGreen, fontWeight: FontWeight.bold)),
                   )
                 ],
               ),

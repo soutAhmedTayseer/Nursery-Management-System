@@ -53,7 +53,7 @@ class PaymentCard extends StatelessWidget {
               SizedBox(width: 8.w),
               Text(
                 '${record.totalDue.toInt()} AED',
-                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: hasPenalty ? Colors.black : AppColors.forestGreen),
+                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: hasPenalty ? palette.warningText : palette.brandText),
               ),
             ],
           ),
@@ -66,9 +66,9 @@ class PaymentCard extends StatelessWidget {
               _stat(context, 
                 'finance_header_overtime_hours'.tr(),
                 '${record.overtimeHours.toStringAsFixed(1)} hrs',
-                color: record.overtimeHours > 0 ? AppColors.penaltyOrange : null,
+                color: record.overtimeHours > 0 ? palette.warningText : null,
               ),
-              _stat(context, 'finance_header_penalty_amount'.tr(), '${record.penaltyAmount.toInt()} AED', color: hasPenalty ? AppColors.penaltyOrange : null),
+              _stat(context, 'finance_header_penalty_amount'.tr(), '${record.penaltyAmount.toInt()} AED', color: hasPenalty ? palette.warningText : null),
             ],
           ),
           SizedBox(height: 12.h),
@@ -153,7 +153,7 @@ class PaymentCard extends StatelessWidget {
         children: [
           Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold, color: palette.textTertiary)),
           SizedBox(height: 2.h),
-          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: color ?? Colors.black)),
+          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: color ?? palette.textPrimary)),
         ],
       ),
     );

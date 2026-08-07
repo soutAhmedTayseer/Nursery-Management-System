@@ -19,8 +19,18 @@ void main() {
     r'AppColors\.(surfaceCream|surfaceSand|surfaceSmoke|surfacePage|calendarMuted|creamTint|neutralChip)\b',
   );
 
-  /// Material greys have no dark counterpart.
-  final materialGrey = RegExp(r'Colors\.grey(\.shade\d+)?\b');
+  /// Material swatches have no dark counterpart — grey most often (it stands
+  /// in for a palette token), but any of them reaching the tree ungated by
+  /// the palette is the same bug: fixed in both themes when the surface or
+  /// text under it is supposed to flip.
+  // (?<!App) so this doesn't match inside `AppColors.brown` etc — "AppColors"
+  // ends in "Colors" too, and a plain `Colors\.` with no boundary in front
+  // matches right through the "App" prefix.
+  final materialSwatch = RegExp(
+    r'(?<!App)Colors\.(grey|red|pink|purple|deepPurple|indigo|blue|lightBlue|cyan|teal|'
+    r'green|lightGreen|lime|yellow|amber|orange|deepOrange|brown|blueGrey)'
+    r'(\.shade\d+)?\b',
+  );
 
   /// `Colors.white` / `Colors.black` in a *surface* slot. The same constant
   /// in a foreground slot is fine and common — white text on a brand-filled
@@ -72,6 +82,13 @@ void main() {
     // as a colour swatch rather than a surface, and stay legible on a dark
     // card because the text on them is always dark.
     if (line.contains('_kAvatarPalette')) return true;
+    // A status badge or button built from a fixed pastel fill
+    // (mintTint/peachTint/amberTint) paired with a fixed dark foreground —
+    // same pattern as an avatar tint, and for the same reason the pair
+    // doesn't flip with the theme.
+    if (preceding.any((l) => l.contains('mintTint') || l.contains('peachTint') || l.contains('amberTint'))) {
+      return true;
+    }
     return false;
   }
 
@@ -91,7 +108,7 @@ void main() {
       for (var i = 0; i < lines.length; i++) {
         final line = lines[i];
         if (line.trimLeft().startsWith('//')) continue;
-        final preceding = lines.sublist(i < 4 ? 0 : i - 4, i);
+        final preceding = lines.sublist(i < 10 ? 0 : i - 10, i);
         if (isAllowed(path, line, preceding)) continue;
         if (isViolation(path, line, preceding)) {
           hits.add('$path:${i + 1}\n    ${line.trim()}');
@@ -112,14 +129,14 @@ void main() {
 
   test('no screen paints a surface with a light-only constant', () {
     expectClean(
-      scan((_, line, __) => paletteOnlyColors.hasMatch(line)),
+      scan((_, line, _) => paletteOnlyColors.hasMatch(line)),
       'Use context.palette (page / sand / card / cardMuted / chip / divider).',
     );
   });
 
-  test('no screen uses a Material grey', () {
+  test('no screen uses a Material colour swatch', () {
     expectClean(
-      scan((_, line, __) => materialGrey.hasMatch(line)),
+      scan((_, line, _) => materialSwatch.hasMatch(line)),
       'Use palette.chip for neutral fills, palette.divider for borders, '
       'palette.textTertiary for de-emphasised text.',
     );
@@ -142,7 +159,7 @@ void main() {
 
   test('accent constants are not used as text or icon colour', () {
     expectClean(
-      scan((_, line, __) => accentForeground.hasMatch(line)),
+      scan((_, line, _) => accentForeground.hasMatch(line)),
       'Use palette.brandText / dangerText / warningText / amberText, which '
       'lift the accent so it stays legible on a dark card.',
     );
@@ -150,7 +167,7 @@ void main() {
 
   test('no raw hex outside the theme layer', () {
     expectClean(
-      scan((_, line, __) => rawHex.hasMatch(line)),
+      scan((_, line, _) => rawHex.hasMatch(line)),
       'Add the colour to AppColors, then expose it through AppPalette if it '
       'differs between themes.',
     );

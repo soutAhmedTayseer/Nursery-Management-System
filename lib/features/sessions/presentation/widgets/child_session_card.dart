@@ -102,8 +102,8 @@ class ChildSessionCard extends StatelessWidget {
 
   final palette = context.palette;
     final isCheckedIn = entry.isCheckedIn;
-    final color = isCheckedIn ? AppColors.accentGreen : palette.textTertiary;
-    final bgColor = isCheckedIn ? AppColors.accentGreen.withValues(alpha: 0.1) : palette.chip;
+    final color = isCheckedIn ? palette.brandText : palette.textTertiary;
+    final bgColor = isCheckedIn ? AppColors.accentGreen.withValues(alpha: palette.stateTint) : palette.chip;
     final elapsed = entry.elapsed;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w * scale, vertical: 6.h * scale),
@@ -136,12 +136,16 @@ class ChildSessionCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 14.w * scale, color: isActive ? palette.textPrimary : palette.textTertiary),
+              // The active fill is a pastel tint (mintTint/peachTint) that
+              // stays light in both themes, so its foreground is a fixed
+              // dark colour rather than palette.textPrimary — which flips to
+              // near-white in dark and disappears on a light pill.
+              Icon(icon, size: 14.w * scale, color: isActive ? AppColors.textPrimary : palette.textTertiary),
               SizedBox(width: 4.w * scale),
               Flexible(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 10.sp * scale, fontWeight: FontWeight.bold, color: isActive ? palette.textPrimary : palette.textTertiary),
+                  style: TextStyle(fontSize: 10.sp * scale, fontWeight: FontWeight.bold, color: isActive ? AppColors.textPrimary : palette.textTertiary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
