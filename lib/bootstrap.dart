@@ -9,11 +9,14 @@ import 'package:window_manager/window_manager.dart';
 import 'core/di/injection.dart';
 import 'core/routes/app_router.dart';
 import 'core/routes/app_routes.dart';
+import 'core/testing/demo_seed.dart';
 import 'core/theme/app_theme.dart';
 import 'features/dashboard/presentation/cubit/schedule_cubit.dart';
+import 'features/finance/presentation/cubit/audit_log_cubit.dart';
 import 'features/finance/presentation/cubit/finance_cubit.dart';
 import 'features/settings/presentation/cubit/nursery_settings_cubit.dart';
 import 'features/subscriptions/presentation/cubit/plan_assignments_cubit.dart';
+import 'features/subscriptions/presentation/cubit/plan_history_cubit.dart';
 import 'features/subscriptions/presentation/cubit/plans_cubit.dart';
 
 const _minWindowSize = Size(1280, 800);
@@ -22,6 +25,12 @@ Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   await setupLocator(baseUrl: AppEnv.apiBaseUrl);
+
+  // No backend yet: fabricate the demo roster's attendance history and
+  // restore any photos the admin picked in an earlier run, so the app opens
+  // with a coherent, self-consistent dataset.
+  seedDemoAttendance();
+  await restoreDemoPhotos();
 
   if (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
     await windowManager.ensureInitialized();
@@ -62,7 +71,9 @@ class MyApp extends StatelessWidget {
           providers: [
             BlocProvider(create: (_) => PlansCubit()),
             BlocProvider(create: (_) => PlanAssignmentsCubit()),
+            BlocProvider(create: (_) => PlanHistoryCubit()),
             BlocProvider(create: (_) => FinanceCubit()),
+            BlocProvider(create: (_) => AuditLogCubit()),
             BlocProvider(create: (_) => ScheduleCubit()),
             BlocProvider(create: (_) => NurserySettingsCubit()),
           ],
