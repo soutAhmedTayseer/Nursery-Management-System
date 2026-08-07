@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/responsive/ui_scale.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../subscriptions/data/models/subscription_plan.dart';
 import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plans_state.dart';

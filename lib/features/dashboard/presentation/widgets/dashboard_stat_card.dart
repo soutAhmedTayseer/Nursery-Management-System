@@ -6,13 +6,15 @@ import '../../../../core/theme/app_palette.dart';
 /// Design height of every dashboard stat card, before `.h` scaling. Sized
 /// for the tallest content a card carries (two-line subtitle + a footer);
 /// keeping it a single constant is what makes the whole strip uniform.
-const double kDashboardStatCardHeight = 244;
+const double kDashboardStatCardHeight = 256;
 
 /// Width bounds for a dashboard stat card, before `uiScale`. The floor is
 /// wide enough that a long title and a large figure both sit comfortably
-/// instead of being squeezed toward overflow.
-const double kDashboardStatCardMinWidth = 300;
-const double kDashboardStatCardMaxWidth = 440;
+/// instead of being squeezed toward overflow. Widened over the original
+/// 300/440 — the Arabic subtitle at 2 lines was tight enough to overflow the
+/// fixed card height by a couple of pixels at some scale factors.
+const double kDashboardStatCardMinWidth = 320;
+const double kDashboardStatCardMaxWidth = 460;
 
 /// One figure on the dashboard's stats strip.
 ///

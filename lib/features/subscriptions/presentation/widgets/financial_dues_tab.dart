@@ -147,7 +147,14 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
                 // line items to need more room.
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final cardWidth = (constraints.maxWidth - spacing.gutter * 2) / 3.3;
+                    // Dividing by a flat 3.3 had no floor, so on a narrow
+                    // viewport (a phone-width window, or this tab split
+                    // beside the assign/history panels) the card shrank
+                    // toward zero and every line item's words wrapped onto
+                    // their own line instead of the row scrolling. 260 is
+                    // the width a "days / hours — AED" line still reads on
+                    // one line at the smallest text scale Settings allows.
+                    final cardWidth = ((constraints.maxWidth - spacing.gutter * 2) / 3.3).clamp(260.w, double.infinity);
                     return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: IntrinsicHeight(
