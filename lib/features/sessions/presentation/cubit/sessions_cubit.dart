@@ -19,12 +19,19 @@ class SessionsCubit extends Cubit<SessionsState> {
   String _query = '';
   int _page = 1;
   int _requestId = 0;
+  AttendanceFilter _filter = AttendanceFilter.all;
 
   Future<void> loadSessions() => _fetch();
 
   Future<void> search(String query) {
     _query = query;
     _page = 1; // a new query invalidates the current page
+    return _fetch();
+  }
+
+  Future<void> setFilter(AttendanceFilter filter) {
+    _filter = filter;
+    _page = 1; // the filtered roster is a different, shorter list
     return _fetch();
   }
 
@@ -55,6 +62,14 @@ class SessionsCubit extends Cubit<SessionsState> {
     return updated.kid.fullName;
   }
 
+  /// Persists a locally-picked photo for [kidId] and refreshes so every
+  /// screen backed by this cubit's repository (Sessions grid included)
+  /// picks it up.
+  Future<void> updateKidPhoto(String kidId, String photoUrl) async {
+    await _repository.updateKidPhoto(kidId, photoUrl);
+    await _fetch();
+  }
+
   Future<void> _fetch() async {
     final requestId = ++_requestId;
     emit(SessionsLoading());
@@ -63,6 +78,7 @@ class SessionsCubit extends Cubit<SessionsState> {
         page: _page,
         pageSize: _pageSize,
         query: _query,
+        filter: _filter,
       );
       final counts = await _repository.fetchAttendanceCounts();
       if (requestId != _requestId) return; // a newer request superseded this one
@@ -72,6 +88,7 @@ class SessionsCubit extends Cubit<SessionsState> {
         currentPage: result.page,
         totalPages: result.totalPages,
         searchQuery: _query,
+        filter: _filter,
         checkedInCount: counts.checkedIn,
         checkedOutCount: counts.checkedOut,
       ));

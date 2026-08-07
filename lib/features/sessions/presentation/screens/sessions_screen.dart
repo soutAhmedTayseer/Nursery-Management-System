@@ -9,6 +9,7 @@ import '../../../../core/widgets/async_state_view.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../../../core/widgets/search_field.dart';
 import '../../../child_profile/presentation/screens/child_profile_details_screen.dart';
+import '../../data/repositories/sessions_repository.dart';
 import '../cubit/sessions_cubit.dart';
 import '../widgets/child_session_card.dart';
 import '../widgets/qr_scan_dialog.dart';
@@ -31,7 +32,7 @@ class SessionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceCream,
+      backgroundColor: AppColors.surfacePage,
       body: Padding(
         padding: EdgeInsets.all(32.w),
         child: Column(
@@ -53,19 +54,38 @@ class SessionsScreen extends StatelessWidget {
             BlocBuilder<SessionsCubit, SessionsState>(
               builder: (context, state) {
                 if (state is! SessionsLoaded) return const SizedBox();
-                return Row(
+                final cubit = context.read<SessionsCubit>();
+                // The counts double as the filter: tapping one narrows the
+                // roster to those children, tapping it again clears it.
+                return Wrap(
+                  spacing: 12.w,
+                  runSpacing: 8.h,
                   children: [
                     _CountPill(
                       icon: Icons.login,
                       color: AppColors.accentGreen,
                       label: 'session_count_checked_in'.tr(namedArgs: {'count': '${state.checkedInCount}'}),
+                      isSelected: state.filter == AttendanceFilter.checkedIn,
+                      onTap: () => cubit.setFilter(
+                        state.filter == AttendanceFilter.checkedIn ? AttendanceFilter.all : AttendanceFilter.checkedIn,
+                      ),
                     ),
-                    SizedBox(width: 12.w),
                     _CountPill(
                       icon: Icons.logout,
-                      color: Colors.grey.shade500,
+                      color: Colors.grey.shade600,
                       label: 'session_count_checked_out'.tr(namedArgs: {'count': '${state.checkedOutCount}'}),
+                      isSelected: state.filter == AttendanceFilter.checkedOut,
+                      onTap: () => cubit.setFilter(
+                        state.filter == AttendanceFilter.checkedOut ? AttendanceFilter.all : AttendanceFilter.checkedOut,
+                      ),
                     ),
+                    if (state.filter != AttendanceFilter.all)
+                      _CountPill(
+                        icon: Icons.close,
+                        color: AppColors.textSecondary,
+                        label: 'session_filter_clear'.tr(),
+                        onTap: () => cubit.setFilter(AttendanceFilter.all),
+                      ),
                   ],
                 );
               },
@@ -108,10 +128,19 @@ class SessionsScreen extends StatelessWidget {
                           itemCount: loaded.items.length,
                           itemBuilder: (context, index) => ChildSessionCard(
                             entry: loaded.items[index],
+                            // The pushed route is built by the root
+                            // Navigator, which sits ABOVE the layout's
+                            // BlocProvider — without re-providing it here,
+                            // the details screen can't reach SessionsCubit
+                            // (that's what silently broke saving a picked
+                            // child photo back to the roster).
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ChildProfileDetailsScreen(childData: loaded.items[index]),
+                                builder: (_) => BlocProvider.value(
+                                  value: cubit,
+                                  child: ChildProfileDetailsScreen(childData: loaded.items[index]),
+                                ),
                               ),
                             ),
                             onClockIn: () => cubit.clockIn(loaded.items[index].kid.id),
@@ -176,29 +205,50 @@ class _ScanQrButton extends StatelessWidget {
   }
 }
 
+/// A roster count that doubles as a filter toggle. Selected state is carried
+/// by a tinted fill and border so it reads as "active filter", not just hover.
 class _CountPill extends StatelessWidget {
-  const _CountPill({required this.icon, required this.color, required this.label});
+  const _CountPill({
+    required this.icon,
+    required this.color,
+    required this.label,
+    this.isSelected = false,
+    this.onTap,
+  });
 
   final IconData icon;
   final Color color;
   final String label;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: EdgeInsets.all(6.w),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
-            child: Icon(icon, size: 14.w, color: color),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withValues(alpha: 0.14) : Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: isSelected ? color : Colors.transparent,
+            width: 1.5,
           ),
-          SizedBox(width: 10.w),
-          Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-        ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: EdgeInsets.all(6.w),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(icon, size: 14.w, color: color),
+            ),
+            SizedBox(width: 10.w),
+            Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+          ],
+        ),
       ),
     );
   }

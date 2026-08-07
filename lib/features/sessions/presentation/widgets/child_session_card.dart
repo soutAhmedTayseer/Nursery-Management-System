@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/kid_photo_provider.dart';
 import '../../data/models/kid_session.dart';
 
 /// Matches Figma node 1:807's child card: photo with one squared corner,
@@ -57,7 +58,7 @@ class ChildSessionCard extends StatelessWidget {
                       bottomRight: Radius.circular(24.r),
                       bottomLeft: Radius.circular(6.r),
                     ),
-                    image: photoUrl.isEmpty ? null : DecorationImage(image: NetworkImage(photoUrl), fit: BoxFit.cover),
+                    image: photoUrl.isEmpty ? null : DecorationImage(image: kidPhotoProvider(photoUrl), fit: BoxFit.cover),
                   ),
                   child: photoUrl.isEmpty ? Icon(Icons.person, color: AppColors.accentGreen, size: 24.w * scale) : null,
                 ),
@@ -72,10 +73,13 @@ class ChildSessionCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             SizedBox(height: 2.h * scale),
+            // Plan names run long ("Monthly Packages · 3 hours / 5 Days") and
+            // a single ellipsized line hid the part that actually
+            // distinguishes them, so let it wrap.
             Text(
               'session_subscribed_label'.tr(namedArgs: {'plan': entry.planLabel}),
-              style: TextStyle(fontSize: 12.sp * scale, color: Colors.grey.shade500, fontWeight: FontWeight.w500),
-              maxLines: 1,
+              style: TextStyle(fontSize: 12.sp * scale, color: Colors.grey.shade500, fontWeight: FontWeight.w500, height: 1.35),
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
             const Spacer(),

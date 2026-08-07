@@ -7,16 +7,22 @@ import '../models/kid_session.dart';
 /// Implementations throw [ApiException] on failure — nothing else. The fake
 /// implementation backs the UI today; `ApiSessionsRepository` replaces it at
 /// integration by changing one registration line in `core/di/injection.dart`.
+/// Narrows the roster to who is currently on site. Applied server-side
+/// alongside paging, so a filtered page is still a full page.
+enum AttendanceFilter { all, checkedIn, checkedOut }
+
 abstract class SessionsRepository {
-  /// One page of kids with their current session state.
+  /// One page of kids with their current session state, ordered by name.
   ///
-  /// [query] filters on the kid's full name, case-insensitively. [page] is
-  /// 1-based. Paging and filtering happen server-side in the API
-  /// implementation, so callers must not re-filter the returned items.
+  /// [query] filters on the kid's full name, case-insensitively; [filter]
+  /// narrows by checked-in state. [page] is 1-based. Sorting, paging and
+  /// filtering all happen server-side in the API implementation, so callers
+  /// must not re-sort or re-filter the returned items.
   Future<PaginatedResult<KidSession>> fetchKidSessions({
     required int page,
     required int pageSize,
     String query = '',
+    AttendanceFilter filter = AttendanceFilter.all,
   });
 
   /// Roster-wide checked-in/out counts, independent of the current page or
@@ -38,4 +44,8 @@ abstract class SessionsRepository {
   /// which only knows a kid id, not their current state. Returns null if no
   /// kid matches [kidId] (a malformed/unrecognized scan).
   Future<KidSession?> clockToggle(String kidId);
+
+  /// Updates [kidId]'s photo (local file path or URL). No-op if no kid
+  /// matches.
+  Future<void> updateKidPhoto(String kidId, String photoUrl);
 }

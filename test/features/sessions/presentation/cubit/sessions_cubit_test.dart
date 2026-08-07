@@ -31,7 +31,13 @@ KidSession _kidSession(String id, String name) => KidSession(
 void main() {
   late _MockSessionsRepository repository;
 
-  setUp(() => repository = _MockSessionsRepository());
+  setUp(() {
+    repository = _MockSessionsRepository();
+    // Every _fetch() also reads the roster-wide counts; without this stub
+    // mocktail returns null and each fetch blows up before emitting Loaded.
+    when(() => repository.fetchAttendanceCounts())
+        .thenAnswer((_) async => (checkedIn: 0, checkedOut: 0));
+  });
 
   SessionsCubit build() => SessionsCubit(repository);
 
@@ -149,6 +155,34 @@ void main() {
       isA<SessionsLoaded>()
           .having((s) => s.searchQuery, 'searchQuery', 'noah'),
     ],
+  );
+
+  blocTest<SessionsCubit, SessionsState>(
+    'updateKidPhoto writes through to the repository and refetches',
+    setUp: () {
+      when(() => repository.updateKidPhoto(any(), any())).thenAnswer((_) async {});
+      when(() => repository.fetchKidSessions(
+            page: any(named: 'page'),
+            pageSize: any(named: 'pageSize'),
+            query: any(named: 'query'),
+          )).thenAnswer((_) async => PaginatedResult<KidSession>(
+            items: [_kidSession('1', 'Leo Maxwell')],
+            total: 1,
+            page: 1,
+            pageSize: 8,
+          ));
+    },
+    build: build,
+    act: (cubit) => cubit.updateKidPhoto('1', 'C:/tmp/leo.png'),
+    verify: (_) {
+      verify(() => repository.updateKidPhoto('1', 'C:/tmp/leo.png')).called(1);
+      verify(() => repository.fetchKidSessions(
+            page: any(named: 'page'),
+            pageSize: any(named: 'pageSize'),
+            query: any(named: 'query'),
+          )).called(1);
+    },
+    expect: () => [isA<SessionsLoading>(), isA<SessionsLoaded>()],
   );
 
   blocTest<SessionsCubit, SessionsState>(
