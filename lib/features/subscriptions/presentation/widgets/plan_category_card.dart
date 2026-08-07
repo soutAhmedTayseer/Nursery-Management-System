@@ -14,11 +14,14 @@ class PlanCategoryCard extends StatelessWidget {
   const PlanCategoryCard({
     super.key,
     required this.category,
-    required this.onEdit,
+    this.onEdit,
   });
 
   final PlanCategory category;
-  final VoidCallback onEdit;
+
+  /// Null renders the card display-only (no edit pencil) — e.g. the
+  /// Financial Dues tab's read-only carousel.
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -84,14 +87,15 @@ class PlanCategoryCard extends StatelessWidget {
                           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                         ),
                       ),
-                      InkWell(
-                        onTap: onEdit,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm.r),
-                        child: Padding(
-                          padding: EdgeInsets.all(4.w),
-                          child: Icon(Icons.edit_outlined, size: AppSpacing.iconSm.w, color: AppColors.textSecondary),
+                      if (onEdit != null)
+                        InkWell(
+                          onTap: onEdit,
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusSm.r),
+                          child: Padding(
+                            padding: EdgeInsets.all(4.w),
+                            child: Icon(Icons.edit_outlined, size: AppSpacing.iconSm.w, color: AppColors.textSecondary),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                   SizedBox(height: 20.h),

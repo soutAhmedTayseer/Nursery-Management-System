@@ -9,11 +9,11 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../../data/models/subscription_plan.dart';
 import '../cubit/plan_assignments_cubit.dart';
+import '../cubit/plan_history_cubit.dart';
 import '../cubit/plans_cubit.dart';
 import '../cubit/plans_state.dart';
 import 'assign_plan_section.dart';
 import 'plan_category_card.dart';
-import 'plan_category_edit_dialog.dart';
 import 'plan_history_section.dart';
 
 /// Body content of subscription management — global plans, assign-plan
@@ -26,10 +26,10 @@ class FinancialDuesTab extends StatefulWidget {
 
   final KidSession childData;
 
-  /// Fired with the current plan (title, price) on load and after every
-  /// update, so an ancestor (e.g. a profile-export button) can include it
-  /// without duplicating the plan state.
-  final void Function(String title, String price)? onPlanChanged;
+  /// Fired with the current plan (title, price) and full display history on
+  /// load and after every update, so an ancestor (e.g. a profile-export
+  /// button) can include them without duplicating the plan state.
+  final void Function(String title, String price, List<PlanChangeEntry> history)? onPlanChanged;
 
   /// Set false when embedded where the child's name/photo are already
   /// shown elsewhere (e.g. ChildProfileDetailsScreen's header). Standalone
@@ -41,20 +41,14 @@ class FinancialDuesTab extends StatefulWidget {
   State<FinancialDuesTab> createState() => _FinancialDuesTabState();
 }
 
-int _columnsFor(BuildContext context) => switch (context.breakpoint) {
-      Breakpoint.compact => 1,
-      Breakpoint.medium => 2,
-      Breakpoint.expanded => 3,
-    };
-
 class _FinancialDuesTabState extends State<FinancialDuesTab> {
-  // Seeded from PlanAssignmentsCubit (app-root, persists across navigation)
-  // in initState below — the change *history* stays local to this widget
-  // instance since there's no backend endpoint to persist it yet, but the
-  // current plan itself no longer resets when the admin leaves the tab.
+  // Both the current plan (PlanAssignmentsCubit) and its change history
+  // (PlanHistoryCubit) live at app root, so neither resets when the admin
+  // leaves this tab.
   late String _currentPlanTitle;
   late String _currentPlanPrice;
-  final List<PlanChangeEntry> _history = [];
+
+  List<PlanChangeEntry> get _history => context.read<PlanHistoryCubit>().forKid(widget.childData.kid.id);
 
   @override
   void initState() {
@@ -70,22 +64,41 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
       }
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.onPlanChanged?.call(_currentPlanTitle, _currentPlanPrice);
+      widget.onPlanChanged?.call(_currentPlanTitle, _currentPlanPrice, _displayHistory);
     });
   }
 
+  /// [_history] already carries an entry for every real plan change — its
+  /// top row's `newPlanLabel` IS the current plan, with a real
+  /// `oldPlanLabel` (not a placeholder). Only when the child has never
+  /// changed plans do we synthesize one row for the initial assignment, so
+  /// Plan History isn't empty for a child on their first plan.
+  List<PlanChangeEntry> get _displayHistory => _history.isNotEmpty
+      ? _history
+      : [
+          PlanChangeEntry(
+            date: widget.childData.kid.createdAt,
+            oldPlanLabel: 'plan_history_initial_assignment'.tr(),
+            newPlanLabel: _currentPlanTitle,
+            changedBy: 'Admin',
+          ),
+        ];
+
   void _applyPlan(PlanCategory category, PlanLineItem item) {
+    context.read<PlanHistoryCubit>().record(
+          widget.childData.kid.id,
+          PlanChangeEntry(
+            date: DateTime.now(),
+            oldPlanLabel: _currentPlanTitle,
+            newPlanLabel: item.label,
+            changedBy: 'Admin',
+          ),
+        );
     setState(() {
-      _history.insert(0, PlanChangeEntry(
-        date: DateTime.now(),
-        oldPlanLabel: _currentPlanTitle,
-        newPlanLabel: item.label,
-        changedBy: 'Admin',
-      ));
       _currentPlanTitle = item.label;
       _currentPlanPrice = item.price;
     });
-    widget.onPlanChanged?.call(_currentPlanTitle, _currentPlanPrice);
+    widget.onPlanChanged?.call(_currentPlanTitle, _currentPlanPrice, _displayHistory);
   }
 
   @override
@@ -100,7 +113,6 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
         // 1. Global Plans (Bento Grid — matches Figma "Manage Subscriptions", node 4:1111)
         BlocBuilder<PlansCubit, PlansState>(
           builder: (context, state) {
-            final columns = _columnsFor(context);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -125,22 +137,29 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
                   ],
                 ),
                 SizedBox(height: 20.h),
+                // Read-only carousel: 3 cards visible + a sliver of the 4th so
+                // the admin knows to swipe, instead of an unbounded stack of
+                // editable cards. IntrinsicHeight (not a fixed SizedBox) so
+                // the row's height matches the tallest card's real content —
+                // a fixed height overflowed whenever a category had enough
+                // line items to need more room.
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final cardWidth = (constraints.maxWidth - spacing.gutter * (columns - 1)) / columns;
-                    return Wrap(
-                      spacing: spacing.gutter,
-                      runSpacing: spacing.gutter,
-                      children: [
-                        for (final category in state.categories)
-                          SizedBox(
-                            width: cardWidth,
-                            child: PlanCategoryCard(
-                              category: category,
-                              onEdit: () => PlanCategoryEditDialog.show(context, category: category),
-                            ),
-                          ),
-                      ],
+                    final cardWidth = (constraints.maxWidth - spacing.gutter * 2) / 3.3;
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (final category in state.categories)
+                              Padding(
+                                padding: EdgeInsets.only(right: spacing.gutter),
+                                child: SizedBox(width: cardWidth, child: PlanCategoryCard(category: category)),
+                              ),
+                          ],
+                        ),
+                      ),
                     );
                   },
                 ),
@@ -167,7 +186,7 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
             currentPlanTitle: _currentPlanTitle,
             currentPlanPrice: _currentPlanPrice,
             startDate: kid.createdAt,
-            history: _history,
+            history: _displayHistory,
             showChildName: widget.showChildIdentity,
           ),
         ] else ...[
@@ -194,7 +213,7 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
                   currentPlanTitle: _currentPlanTitle,
                   currentPlanPrice: _currentPlanPrice,
                   startDate: kid.createdAt,
-                  history: _history,
+                  history: _displayHistory,
                   showChildName: widget.showChildIdentity,
                 ),
               ),
