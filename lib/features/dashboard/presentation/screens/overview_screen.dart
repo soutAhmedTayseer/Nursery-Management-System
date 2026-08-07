@@ -6,14 +6,18 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/responsive/ui_scale.dart';
+import '../../../../core/testing/attendance_store.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/mouse_wheel_horizontal_scroll.dart';
 import '../../../admin_main_layout/presentation/cubit/admin_main_layout_cubit.dart';
+import '../../../finance/data/models/finance_model.dart';
 import '../../../finance/domain/payment_records.dart';
+import '../../domain/nursery_alerts.dart';
 import '../../../finance/presentation/cubit/finance_cubit.dart';
 import '../../../finance/presentation/cubit/finance_state.dart';
 import '../../../sessions/data/repositories/sessions_repository.dart';
+import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 import '../../../settings/presentation/cubit/nursery_settings_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_state.dart';
@@ -43,7 +47,13 @@ class OverviewScreen extends StatelessWidget {
       create: (_) =>
           OverviewCubit(sl<SessionsRepository>())..fetchDashboardData(),
       child: Builder(
-        builder: (context) => BlocBuilder<OverviewCubit, OverviewState>(
+        // Clocking a child in/out anywhere (Sessions grid, QR scan, or the
+        // "Check Out" action on an alert right here) changes today's
+        // occupancy and hours, so re-pull the dashboard figures whenever the
+        // roster moves instead of showing a stale snapshot.
+        builder: (context) => BlocListener<SessionsCubit, SessionsState>(
+          listener: (context, _) => context.read<OverviewCubit>().fetchDashboardData(),
+          child: BlocBuilder<OverviewCubit, OverviewState>(
           builder: (context, overview) => BlocBuilder<NurserySettingsCubit, int>(
             builder: (context, capacity) =>
                 BlocBuilder<PlanAssignmentsCubit, PlanAssignmentsState>(
@@ -57,24 +67,33 @@ class OverviewScreen extends StatelessWidget {
                                   plans,
                                   finance,
                                 );
+                                // Settled invoices are no longer owed.
                                 final pendingDues = records.fold<double>(
                                   0,
-                                  (sum, r) => sum + r.totalDue,
+                                  (sum, r) => sum + r.outstanding,
                                 );
-                                final overtimeAlerts = [
-                                  for (final r in records)
-                                    if (r.overtimeHours > 0)
-                                      OvertimeAlert(
-                                        kidName: r.childName,
-                                        overtimeHours: r.overtimeHours,
-                                      ),
-                                ];
+                                final allowedHoursByKidId = {
+                                  for (final assignment in assignments.byKidId.values)
+                                    assignment.kidId: plans
+                                        .categories
+                                        .expand((c) => c.lineItems)
+                                        .where((i) => i.id == assignment.lineItemId)
+                                        .firstOrNull
+                                        ?.hoursPerDay,
+                                };
+                                final alertList = buildNurseryAlerts(
+                                  records: records,
+                                  allowedHoursByKidId: allowedHoursByKidId,
+                                );
 
                                 final statCards = _buildStatCards(
                                   context,
                                   overview,
+                                  records,
                                   pendingDues,
                                   capacity,
+                                  assignments,
+                                  plans,
                                 );
                                 final availableWidth =
                                     MediaQuery.sizeOf(context).width -
@@ -85,30 +104,43 @@ class OverviewScreen extends StatelessWidget {
                                                 spacing.gutter *
                                                     (statCards.length - 1)) /
                                             statCards.length)
-                                        .clamp(240.0 * scale, 400.0 * scale);
+                                        .clamp(
+                                          kDashboardStatCardMinWidth * scale,
+                                          kDashboardStatCardMaxWidth * scale,
+                                        );
+                                // Every card gets the identical box. The row
+                                // scrolls horizontally, so with more cards
+                                // than fit they shrink to the 240 floor and
+                                // scroll rather than squeezing out of shape.
+                                final cardHeight =
+                                    (kDashboardStatCardHeight * scale).h;
 
-                                final statsRow = MouseWheelHorizontalScroll(
-                                  child: Row(
-                                    children: [
-                                      for (
-                                        int i = 0;
-                                        i < statCards.length;
-                                        i++
-                                      ) ...[
-                                        if (i > 0)
-                                          SizedBox(width: spacing.gutter),
-                                        SizedBox(
-                                          width: cardWidth,
-                                          child: statCards[i],
-                                        ),
+                                final statsRow = SizedBox(
+                                  height: cardHeight,
+                                  child: MouseWheelHorizontalScroll(
+                                    child: Row(
+                                      children: [
+                                        for (
+                                          int i = 0;
+                                          i < statCards.length;
+                                          i++
+                                        ) ...[
+                                          if (i > 0)
+                                            SizedBox(width: spacing.gutter),
+                                          SizedBox(
+                                            width: cardWidth,
+                                            height: cardHeight,
+                                            child: statCards[i],
+                                          ),
+                                        ],
                                       ],
-                                    ],
+                                    ),
                                   ),
                                 );
 
                                 const feed = LiveActivityFeed();
                                 final alerts = AlertsNotificationsSection(
-                                  alerts: overtimeAlerts,
+                                  alerts: alertList,
                                 );
 
                                 // Feed and alerts panels each pin their own header and scroll
@@ -135,7 +167,7 @@ class OverviewScreen extends StatelessWidget {
                                       );
 
                                 return Scaffold(
-                                  backgroundColor: AppColors.surfaceCream,
+                                  backgroundColor: AppColors.surfacePage,
                                   body: Padding(
                                     padding: EdgeInsets.all(
                                       spacing.pagePadding,
@@ -156,6 +188,7 @@ class OverviewScreen extends StatelessWidget {
                       ),
                 ),
           ),
+          ),
         ),
       ),
     );
@@ -164,8 +197,11 @@ class OverviewScreen extends StatelessWidget {
   List<Widget> _buildStatCards(
     BuildContext context,
     OverviewState overview,
+    List<PaymentRecord> records,
     double pendingDues,
     int capacity,
+    PlanAssignmentsState assignments,
+    PlansState plans,
   ) {
     final scale = context.uiScale;
     final loaded = overview is OverviewLoaded ? overview : null;
@@ -173,6 +209,29 @@ class OverviewScreen extends StatelessWidget {
     final occupancyFraction = capacity == 0
         ? 0.0
         : (checkedIn / capacity).clamp(0, 1).toDouble();
+
+    // Everything below is today's real data, read from the shared
+    // attendance ledger and the derived payment records.
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final todayRecords = AttendanceStore.instance.allOn(today);
+    final enrolled = assignments.byKidId.length;
+    final attendedToday = todayRecords.length;
+    final attendanceRate = enrolled == 0 ? 0.0 : (attendedToday / enrolled).clamp(0, 1).toDouble();
+    final revenueToday = revenueForDay(assignments, plans, today);
+
+    var overtimeHoursToday = 0.0;
+    for (final entry in todayRecords.entries) {
+      final assignment = assignments.byKidId[entry.key];
+      if (assignment == null) continue;
+      final item = plans.categories
+          .expand((c) => c.lineItems)
+          .where((i) => i.id == assignment.lineItemId)
+          .firstOrNull;
+      overtimeHoursToday += entry.value.overtimeHours(item?.hoursPerDay);
+    }
+    final unpaidCount = records.where((record) => !record.isPaid && record.totalDue > 0).length;
+
     return [
       DashboardStatCard(
         title: 'overview_capacity_title'.tr(),
@@ -234,6 +293,40 @@ class OverviewScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+      DashboardStatCard(
+        title: 'overview_revenue_today_title'.tr(),
+        value: revenueToday.toStringAsFixed(0),
+        unit: 'finance_currency_aed'.tr(),
+        subtitle: 'overview_revenue_today_subtitle'.tr(),
+        icon: Icons.trending_up_rounded,
+        themeColor: AppColors.darkGreen,
+      ),
+      DashboardStatCard(
+        title: 'overview_overtime_today_title'.tr(),
+        value: overtimeHoursToday.toStringAsFixed(1),
+        unit: 'overview_hours_unit'.tr(),
+        subtitle: 'overview_overtime_today_subtitle'.tr(),
+        icon: Icons.more_time_rounded,
+        themeColor: AppColors.penaltyOrange,
+      ),
+      DashboardStatCard(
+        title: 'overview_attendance_today_title'.tr(),
+        value: '$attendedToday',
+        unit: 'overview_of_enrolled_unit'.tr(namedArgs: {'total': '$enrolled'}),
+        subtitle: 'overview_attendance_today_subtitle'.tr(),
+        icon: Icons.fact_check_outlined,
+        themeColor: AppColors.accentGreen,
+        bottomWidget: _buildProgressBar(attendanceRate, AppColors.accentGreen),
+      ),
+      DashboardStatCard(
+        title: 'overview_unpaid_title'.tr(),
+        value: '$unpaidCount',
+        unit: 'overview_invoices_unit'.tr(),
+        subtitle: 'overview_unpaid_subtitle'.tr(),
+        icon: Icons.receipt_long_outlined,
+        themeColor: AppColors.amberLabel,
+        onTap: () => context.read<AdminMainLayoutCubit>().changeScreen(_financeTabIndex),
       ),
     ];
   }
