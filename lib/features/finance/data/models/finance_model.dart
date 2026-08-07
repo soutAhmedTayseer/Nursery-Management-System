@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 /// `AppSettings.overtimeHourlyRate`.
 const double kDefaultOvertimeHourlyRate = 25;
 
+/// Fallback late-pickup policy, same story as the rate above — the live
+/// figures come from `AppSettings.latePickupGraceMinutes` / `latePickupFine`.
+const int kDefaultLatePickupGraceMinutes = 15;
+const double kDefaultLatePickupFine = 50;
+
 class PaymentRecord {
   final String id;
   final String parentName;

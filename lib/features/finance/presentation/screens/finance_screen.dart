@@ -62,7 +62,7 @@ class FinanceScreen extends StatelessWidget {
               assignments,
               plans,
               finance,
-              overtimeRate: context.watch<AppSettingsCubit>().state.overtimeHourlyRate,
+              settings: context.watch<AppSettingsCubit>().state,
             );
             final filtered = _filterRecords(records, finance.searchQuery, finance.penaltyFilter);
             return _buildScaffold(context, records, filtered, assignments, plans);
@@ -371,14 +371,19 @@ class FinanceScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('finance_pending_title'.tr(), style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w900)),
+        Text(
+          'finance_pending_title'.tr(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w900),
+        ),
         Text('finance_pending_subtitle'.tr(), style: TextStyle(fontSize: 13.sp, color: palette.textTertiary)),
       ],
     );
     final actions = Wrap(
       alignment: WrapAlignment.end,
-      spacing: 12.w,
-      runSpacing: 12.h,
+      spacing: 10.w,
+      runSpacing: 10.h,
       children: [
         _buildFilterBtn(context),
         _buildActionBtn(
@@ -388,12 +393,17 @@ class FinanceScreen extends StatelessWidget {
           Colors.white,
           onTap: () => _exportPayments(context, filtered),
         ),
+        // The one button in this row that opens a history rather than
+        // acting on the ledger — kept a size step above the others so its
+        // two-word label ("Payment History" / "سجل الدفعات") has room to
+        // sit on one line instead of wrapping mid-phrase.
         _buildActionBtn(
           Icons.history,
           'audit_log_open'.tr(),
           context.palette.chip,
           context.palette.textPrimary,
           onTap: () => AuditLogDialog.show(context),
+          compact: false,
         ),
         _buildActionBtn(
           Icons.receipt_long_outlined,
@@ -414,9 +424,16 @@ class FinanceScreen extends StatelessWidget {
         children: [title, SizedBox(height: 12.h), Align(alignment: Alignment.centerRight, child: actions)],
       );
     }
+    // Both sides are wrapped rather than given raw Row slots — an
+    // unconstrained title next to an unconstrained action row is exactly
+    // what let a long Arabic title push past the edge instead of shrinking.
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: [title, const Spacer(), actions],
+      children: [
+        Expanded(child: title),
+        SizedBox(width: 12.w),
+        Flexible(child: actions),
+      ],
     );
   }
 
@@ -446,31 +463,38 @@ class FinanceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionBtn(IconData icon, String label, Color bg, Color text, {required VoidCallback onTap}) {
+  /// [compact] shaves padding, icon size and font down a step — the default
+  /// for the filter/export/invoice trio so their row leaves the title room
+  /// to breathe. The history button opts out ([compact]: false) because its
+  /// two-word label is the one that was wrapping mid-phrase at the smaller size.
+  Widget _buildActionBtn(IconData icon, String label, Color bg, Color text, {required VoidCallback onTap, bool compact = true}) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(24.r),
-      child: _actionBtnDecoration(icon, label, bg, text),
+      child: _actionBtnDecoration(icon, label, bg, text, compact: compact),
     );
   }
 
-  Widget _actionBtnDecoration(IconData icon, String label, Color bg, Color text) {
+  Widget _actionBtnDecoration(IconData icon, String label, Color bg, Color text, {bool compact = true}) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: (compact ? 15 : 20).w, vertical: (compact ? 10 : 12).h),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(24.r)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18.w, color: text),
-          SizedBox(width: 8.w),
+          Icon(icon, size: (compact ? 15 : 18).w, color: text),
+          SizedBox(width: 6.w),
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            softWrap: false,
             style: TextStyle(
               color: text,
               fontWeight: FontWeight.bold,
-              fontSize: 13.sp
-            )
-          )
+              fontSize: (compact ? 12 : 13).sp,
+            ),
+          ),
         ]
       ),
     );

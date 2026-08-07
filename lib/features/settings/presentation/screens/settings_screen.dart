@@ -66,6 +66,11 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
+/// A SegmentedButton label that ellipsizes instead of wrapping — its default
+/// Text wraps to a second line under pressure, which on a single Arabic word
+/// ("النظام") reads as the word breaking apart rather than an overflow.
+Widget _segmentLabel(String text) => Text(text, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis);
+
 class _AppearanceSection extends StatelessWidget {
   const _AppearanceSection({required this.settings});
 
@@ -81,27 +86,36 @@ class _AppearanceSection extends StatelessWidget {
         SettingsTile(
           label: 'settings_theme_label'.tr(),
           description: 'settings_theme_description'.tr(),
-          child: SegmentedButton<ThemeMode>(
-            segments: [
-              ButtonSegment(
-                value: ThemeMode.light,
-                icon: const Icon(Icons.light_mode_outlined),
-                label: Text('settings_theme_light'.tr()),
-              ),
-              ButtonSegment(
-                value: ThemeMode.dark,
-                icon: const Icon(Icons.dark_mode_outlined),
-                label: Text('settings_theme_dark'.tr()),
-              ),
-              ButtonSegment(
-                value: ThemeMode.system,
-                icon: const Icon(Icons.brightness_auto_outlined),
-                label: Text('settings_theme_system'.tr()),
-              ),
-            ],
-            selected: {settings.themeMode},
-            showSelectedIcon: false,
-            onSelectionChanged: (selection) => cubit.setThemeMode(selection.first),
+          // A SegmentedButton doesn't shrink its own labels — squeezed into
+          // three icon+text segments on a narrow settings pane, "النظام"
+          // (System) was wrapping across two lines instead of ellipsizing.
+          // Scrollable so a truly tight width scrolls the control rather
+          // than compressing it, and each label is forced to one line so a
+          // long Arabic word breaks to "…" instead of splitting mid-word.
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SegmentedButton<ThemeMode>(
+              segments: [
+                ButtonSegment(
+                  value: ThemeMode.light,
+                  icon: const Icon(Icons.light_mode_outlined),
+                  label: _segmentLabel('settings_theme_light'.tr()),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.dark,
+                  icon: const Icon(Icons.dark_mode_outlined),
+                  label: _segmentLabel('settings_theme_dark'.tr()),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.system,
+                  icon: const Icon(Icons.brightness_auto_outlined),
+                  label: _segmentLabel('settings_theme_system'.tr()),
+                ),
+              ],
+              selected: {settings.themeMode},
+              showSelectedIcon: false,
+              onSelectionChanged: (selection) => cubit.setThemeMode(selection.first),
+            ),
           ),
         ),
         SettingsTile(
@@ -109,8 +123,8 @@ class _AppearanceSection extends StatelessWidget {
           description: 'settings_language_description'.tr(),
           child: SegmentedButton<String>(
             segments: [
-              ButtonSegment(value: 'en', label: Text('settings_language_en'.tr())),
-              ButtonSegment(value: 'ar', label: Text('settings_language_ar'.tr())),
+              ButtonSegment(value: 'en', label: _segmentLabel('settings_language_en'.tr())),
+              ButtonSegment(value: 'ar', label: _segmentLabel('settings_language_ar'.tr())),
             ],
             selected: {context.locale.languageCode},
             showSelectedIcon: false,
@@ -273,6 +287,32 @@ class _NurserySection extends StatelessWidget {
             onSubmitted: (value) {
               final parsed = double.tryParse(value);
               if (parsed != null && parsed >= 0) cubit.updateNursery(overtimeHourlyRate: parsed);
+            },
+          ),
+        ),
+        SettingsTile(
+          label: 'settings_late_fine_label'.tr(),
+          description: 'settings_late_fine_description'.tr(),
+          child: _InlineTextField(
+            value: settings.latePickupFine.toStringAsFixed(0),
+            keyboardType: TextInputType.number,
+            suffixText: settings.currency,
+            onSubmitted: (value) {
+              final parsed = double.tryParse(value);
+              if (parsed != null && parsed >= 0) cubit.updateNursery(latePickupFine: parsed);
+            },
+          ),
+        ),
+        SettingsTile(
+          label: 'settings_late_grace_label'.tr(),
+          description: 'settings_late_grace_description'.tr(),
+          child: _InlineTextField(
+            value: settings.latePickupGraceMinutes.toString(),
+            keyboardType: TextInputType.number,
+            suffixText: 'settings_minutes_suffix'.tr(),
+            onSubmitted: (value) {
+              final parsed = int.tryParse(value);
+              if (parsed != null && parsed >= 0) cubit.updateNursery(latePickupGraceMinutes: parsed);
             },
           ),
         ),

@@ -17,6 +17,8 @@ class AppSettings {
     this.capacity = 50,
     this.currency = 'AED',
     this.overtimeHourlyRate = 25,
+    this.latePickupGraceMinutes = 15,
+    this.latePickupFine = 50,
     this.openingHour = 7,
     this.closingHour = 17,
   });
@@ -40,6 +42,16 @@ class AppSettings {
   /// AED charged per hour a child stays past their plan.
   final double overtimeHourlyRate;
 
+  /// Minutes past a child's allowed hours before the pickup counts as late.
+  /// Traffic and a slow handover shouldn't fine a parent, so the hourly
+  /// overtime charge starts immediately but the fine does not.
+  final int latePickupGraceMinutes;
+
+  /// Flat AED fine per day a child is collected late, on top of the hourly
+  /// overtime. It is deliberately per-day rather than per-hour: the point is
+  /// to discourage the habit, and an hourly figure already prices the time.
+  final double latePickupFine;
+
   final int openingHour;
   final int closingHour;
 
@@ -53,6 +65,8 @@ class AppSettings {
     int? capacity,
     String? currency,
     double? overtimeHourlyRate,
+    int? latePickupGraceMinutes,
+    double? latePickupFine,
     int? openingHour,
     int? closingHour,
   }) {
@@ -66,6 +80,8 @@ class AppSettings {
       capacity: capacity ?? this.capacity,
       currency: currency ?? this.currency,
       overtimeHourlyRate: overtimeHourlyRate ?? this.overtimeHourlyRate,
+      latePickupGraceMinutes: latePickupGraceMinutes ?? this.latePickupGraceMinutes,
+      latePickupFine: latePickupFine ?? this.latePickupFine,
       openingHour: openingHour ?? this.openingHour,
       closingHour: closingHour ?? this.closingHour,
     );
@@ -81,6 +97,8 @@ class AppSettings {
         'capacity': capacity,
         'currency': currency,
         'overtimeHourlyRate': overtimeHourlyRate,
+        'latePickupGraceMinutes': latePickupGraceMinutes,
+        'latePickupFine': latePickupFine,
         'openingHour': openingHour,
         'closingHour': closingHour,
       };
@@ -99,6 +117,8 @@ class AppSettings {
       capacity: (json['capacity'] as num?)?.toInt() ?? 50,
       currency: json['currency'] as String? ?? 'AED',
       overtimeHourlyRate: (json['overtimeHourlyRate'] as num?)?.toDouble() ?? 25,
+      latePickupGraceMinutes: (json['latePickupGraceMinutes'] as num?)?.toInt() ?? 15,
+      latePickupFine: (json['latePickupFine'] as num?)?.toDouble() ?? 50,
       openingHour: (json['openingHour'] as num?)?.toInt() ?? 7,
       closingHour: (json['closingHour'] as num?)?.toInt() ?? 17,
     );

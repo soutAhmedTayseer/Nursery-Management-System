@@ -346,7 +346,7 @@
   "audit_log_title": "Activity Log",
   "audit_log_subtitle": "Every settled invoice, and who settled it.",
   "audit_log_empty": "No activity recorded yet.",
-  "audit_log_open": "Activity Log",
+  "audit_log_open": "Payment History",
   "audit_action_invoice_marked_paid": "marked {child}'s invoice paid",
   "audit_action_invoice_issued": "issued an invoice for {child}",
   "settings_title": "Settings",
@@ -393,5 +393,10 @@
   "settings_reset_confirm_message": "Theme, text size, your profile and the nursery configuration all go back to defaults. Children, attendance and payments are not affected.",
   "settings_reset_done": "Settings reset to defaults.",
   "settings_about_label": "Version",
-  "settings_about_value": "Wildwood Nursery Admin — demo build (no backend)"
+  "settings_about_value": "Wildwood Nursery Admin — demo build (no backend)",
+  "settings_late_fine_label": "Late pickup fine",
+  "settings_late_fine_description": "Flat charge per day a child is collected late, on top of the hourly overtime.",
+  "settings_late_grace_label": "Grace period",
+  "settings_late_grace_description": "Minutes past the plan's hours before a pickup counts as late and is fined.",
+  "settings_minutes_suffix": "min"
 }

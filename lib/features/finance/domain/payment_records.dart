@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/testing/attendance_store.dart';
+import '../../settings/data/app_settings.dart';
 import '../../subscriptions/data/models/subscription_plan.dart';
 import '../../subscriptions/presentation/cubit/plan_assignments_state.dart';
 import '../../subscriptions/presentation/cubit/plans_state.dart';
@@ -23,6 +24,41 @@ double overtimeHoursForMonth(String kidId, int? allowedHours, DateTime month) {
       .fold(0.0, (sum, record) => sum + record.overtimeHours(allowedHours));
 }
 
+/// Days in [month] on which [kidId] was collected late enough to be fined.
+///
+/// The hourly overtime charge starts the moment a child runs past their
+/// plan, but the fine only lands after [graceMinutes] — a parent stuck in
+/// traffic pays for the time, not a penalty on top.
+int latePickupDaysForMonth(
+  String kidId,
+  int? allowedHours,
+  DateTime month,
+  int graceMinutes,
+) {
+  final grace = graceMinutes / 60;
+  return AttendanceStore.instance
+      .forMonth(kidId, month)
+      .where((record) => record.overtimeHours(allowedHours) > grace)
+      .length;
+}
+
+/// The nursery's late-pickup fine for [kidId] this [month].
+///
+/// This is what was missing: a penalty could only ever be typed in by hand,
+/// so a child with weeks of recorded overtime still showed a 0 penalty, no
+/// orange row, and never matched the "with penalty" filter. Now overtime in
+/// the ledger produces a fine on its own, and an admin override only
+/// *replaces* it.
+double latePickupPenalty(
+  String kidId,
+  int? allowedHours,
+  DateTime month, {
+  required int graceMinutes,
+  required double finePerDay,
+}) {
+  return latePickupDaysForMonth(kidId, allowedHours, month, graceMinutes) * finePerDay;
+}
+
 /// Builds the finance ledger from real subscription data: one row per
 /// assigned kid, base fee from their plan's price, overtime computed from
 /// their attendance (unless an admin overrode it), penalty and paid status
@@ -33,7 +69,10 @@ List<PaymentRecord> derivePaymentRecords(
   PlansState plans,
   FinanceState finance, {
   DateTime? month,
-  double overtimeRate = kDefaultOvertimeHourlyRate,
+  // The whole policy travels together rather than one named knob per figure.
+  // Threading them individually is what let the CSV export fall back to the
+  // defaults and disagree with the numbers on screen.
+  AppSettings settings = const AppSettings(),
 }) {
   final targetMonth = month ?? DateTime.now();
   final records = <PaymentRecord>[];
@@ -54,11 +93,18 @@ List<PaymentRecord> derivePaymentRecords(
       baseFee: parsePlanPrice(item.price),
       overtimeHours: extras.overtimeHoursOverride ??
           overtimeHoursForMonth(assignment.kidId, item.hoursPerDay, targetMonth),
-      penaltyAmount: extras.penaltyAmount,
+      penaltyAmount: extras.penaltyOverride ??
+          latePickupPenalty(
+            assignment.kidId,
+            item.hoursPerDay,
+            targetMonth,
+            graceMinutes: settings.latePickupGraceMinutes,
+            finePerDay: settings.latePickupFine,
+          ),
       avatarColor: _avatarColorFor(assignment.kidId),
       parentPhone: assignment.parentPhone,
       isPaid: finance.paidKidIds.contains(assignment.kidId),
-      overtimeRate: overtimeRate,
+      overtimeRate: settings.overtimeHourlyRate,
     ));
   }
   // Alphabetical by child so the ledger reads in a stable order rather than

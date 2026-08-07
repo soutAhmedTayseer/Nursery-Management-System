@@ -4,13 +4,20 @@ enum PenaltyFilter { all, withPenalty, withoutPenalty, unpaid, paid }
 /// attendance ledger rather than stored here — only the manual penalty and
 /// any admin override of the computed overtime live in this state.
 class FinanceExtras {
-  const FinanceExtras({this.overtimeHoursOverride, this.penaltyAmount = 0});
+  const FinanceExtras({this.overtimeHoursOverride, this.penaltyOverride});
 
   /// Set when an admin types a different overtime figure than the ledger
   /// computed. Null means "trust the attendance ledger".
   final double? overtimeHoursOverride;
 
-  final double penaltyAmount;
+  /// A penalty the admin typed by hand. Null means "apply the nursery's
+  /// late-pickup policy", which is the case for every child until someone
+  /// intervenes — it used to default to 0, which is why a child who ran
+  /// overtime every week still showed no penalty and no flagged row.
+  ///
+  /// Nullable so that waiving a fine (an explicit 0) stays distinguishable
+  /// from never having touched it.
+  final double? penaltyOverride;
 }
 
 class FinanceState {

@@ -49,6 +49,8 @@ class AppSettingsCubit extends Cubit<AppSettings> {
     int? capacity,
     String? currency,
     double? overtimeHourlyRate,
+    int? latePickupGraceMinutes,
+    double? latePickupFine,
     int? openingHour,
     int? closingHour,
   }) {
@@ -57,6 +59,8 @@ class AppSettingsCubit extends Cubit<AppSettings> {
       capacity: capacity,
       currency: currency,
       overtimeHourlyRate: overtimeHourlyRate,
+      latePickupGraceMinutes: latePickupGraceMinutes,
+      latePickupFine: latePickupFine,
       openingHour: openingHour,
       closingHour: closingHour,
     ));

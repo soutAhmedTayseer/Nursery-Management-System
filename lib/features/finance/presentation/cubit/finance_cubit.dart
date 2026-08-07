@@ -7,22 +7,19 @@ import 'finance_state.dart';
 /// (who's on what plan) + PlansCubit (plan prices) + the shared attendance
 /// ledger (overtime) + this cubit — so it can't drift from the real data.
 class FinanceCubit extends Cubit<FinanceState> {
-  FinanceCubit()
-      : super(const FinanceState(
-          // One seeded penalty so the demo shows a flagged row out of the
-          // box. Overtime is no longer seeded here — it's computed from the
-          // child's real attendance.
-          extrasByKidId: {'kid-02': FinanceExtras(penaltyAmount: 225)},
-        ));
+  // Nothing is seeded. Penalties now follow from real attendance via the
+  // late-pickup policy, so a flagged row appears because a child was
+  // actually collected late — not because one kid was hardcoded.
+  FinanceCubit() : super(const FinanceState());
 
-  /// Records a penalty and, optionally, an overtime figure that differs
-  /// from what the attendance ledger computed. Pass null [overtimeHours] to
-  /// keep trusting the ledger.
-  void setExtras(String kidId, {double? overtimeHours, required double penaltyAmount}) {
+  /// Records an admin's manual figures. [penaltyAmount] overrides the
+  /// late-pickup policy for this child — pass 0 to waive the fine, or null
+  /// to hand the child back to the policy.
+  void setExtras(String kidId, {double? overtimeHours, double? penaltyAmount}) {
     emit(state.copyWith(
       extrasByKidId: {
         ...state.extrasByKidId,
-        kidId: FinanceExtras(overtimeHoursOverride: overtimeHours, penaltyAmount: penaltyAmount),
+        kidId: FinanceExtras(overtimeHoursOverride: overtimeHours, penaltyOverride: penaltyAmount),
       },
       // Re-invoicing a child reopens their balance.
       paidKidIds: {...state.paidKidIds}..remove(kidId),

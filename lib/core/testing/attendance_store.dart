@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 /// One attended day: when the child actually arrived and left.
 ///
 /// Replaces the old "random hours per day" mock — real check-in/out stamps
@@ -57,6 +59,13 @@ class AttendanceStore {
 
   /// How many months of history to fabricate behind today.
   static const _seededMonths = 4;
+
+  /// Drops every record. The store is a singleton, so without this a test
+  /// inherits whatever the test before it checked in — which silently
+  /// inflates overtime totals and makes billing assertions read as if the
+  /// maths were wrong.
+  @visibleForTesting
+  void clear() => _byKidId.clear();
 
   /// Seeds [kidId]'s history. [allowedHours] shapes how often, and by how
   /// much, the child overran their plan. Idempotent per kid.

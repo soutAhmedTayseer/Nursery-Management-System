@@ -4,6 +4,7 @@ import 'package:nursery_management_system/core/testing/attendance_store.dart';
 import 'package:nursery_management_system/features/finance/data/models/finance_model.dart';
 import 'package:nursery_management_system/features/finance/domain/payment_records.dart';
 import 'package:nursery_management_system/features/finance/presentation/cubit/finance_state.dart';
+import 'package:nursery_management_system/features/settings/data/app_settings.dart';
 import 'package:nursery_management_system/features/subscriptions/data/models/plan_assignment.dart';
 import 'package:nursery_management_system/features/subscriptions/data/models/subscription_plan.dart';
 import 'package:nursery_management_system/features/subscriptions/presentation/cubit/plan_assignments_state.dart';
@@ -37,7 +38,7 @@ const _plans = PlansState(categories: [
 void main() {
   setUp(() {
     // Two attended days this month: one within plan, one 2h over.
-    final store = AttendanceStore.instance;
+    final store = AttendanceStore.instance..clear();
     final now = DateTime.now();
     final day = DateTime(now.year, now.month, 1, 8);
     store.checkIn(_kidId, day);
@@ -95,5 +96,52 @@ void main() {
     );
     expect(records.single.isPaid, isTrue);
     expect(records.single.outstanding, 0);
+  });
+
+  group('late-pickup penalty', () {
+    // The bug this group exists for: a child could run overtime every week
+    // and still show a 0 penalty, because a penalty was only ever a figure
+    // an admin typed in. Nothing derived one from attendance.
+    test('a child who ran overtime is fined without an admin touching it', () {
+      final record = derivePaymentRecords(_assignments(), _plans, const FinanceState()).single;
+      expect(record.overtimeHours, 2);
+      expect(record.penaltyAmount, greaterThan(0), reason: 'overtime must produce a fine on its own');
+    });
+
+    test('the fine is per late day, not per overtime hour', () {
+      const settings = AppSettings(latePickupFine: 50, latePickupGraceMinutes: 15);
+      // One late day is seeded, so one fine regardless of how many hours.
+      final record = derivePaymentRecords(
+        _assignments(), _plans, const FinanceState(), settings: settings,
+      ).single;
+      expect(record.penaltyAmount, 50);
+    });
+
+    test('an overrun inside the grace period is billed but not fined', () {
+        final store = AttendanceStore.instance;
+      final now = DateTime.now();
+      final day = DateTime(now.year, now.month, 2, 8);
+      store.checkIn(_kidId, day);
+      store.checkOut(_kidId, day.add(const Duration(hours: 3, minutes: 10)));
+
+      // Day 2 alone: 10 minutes over a 15-minute grace is not a late pickup.
+      expect(latePickupDaysForMonth(_kidId, 3, now, 15), 1, reason: 'only day 1 is late');
+    });
+
+    test('an admin override replaces the policy, and 0 waives the fine', () {
+      const waived = FinanceState(extrasByKidId: {_kidId: FinanceExtras(penaltyOverride: 0)});
+      expect(derivePaymentRecords(_assignments(), _plans, waived).single.penaltyAmount, 0);
+
+      const raised = FinanceState(extrasByKidId: {_kidId: FinanceExtras(penaltyOverride: 300)});
+      expect(derivePaymentRecords(_assignments(), _plans, raised).single.penaltyAmount, 300);
+    });
+
+    test('the fine reaches the total due', () {
+      final record = derivePaymentRecords(
+        _assignments(), _plans, const FinanceState(),
+        settings: const AppSettings(overtimeHourlyRate: 25, latePickupFine: 50),
+      ).single;
+      expect(record.totalDue, 600 + 2 * 25 + 50);
+    });
   });
 }

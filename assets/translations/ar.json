@@ -346,7 +346,7 @@
   "audit_log_title": "سجل النشاط",
   "audit_log_subtitle": "كل فاتورة تم سدادها، ومن قام بذلك.",
   "audit_log_empty": "لا يوجد نشاط مسجل بعد.",
-  "audit_log_open": "سجل النشاط",
+  "audit_log_open": "سجل الدفعات",
   "audit_action_invoice_marked_paid": "سجّل فاتورة {child} كمدفوعة",
   "audit_action_invoice_issued": "أصدر فاتورة لـ {child}",
   "settings_title": "الإعدادات",
@@ -393,5 +393,10 @@
   "settings_reset_confirm_message": "ستعود السمة وحجم الخط وملفك الشخصي وإعدادات الحضانة إلى الوضع الافتراضي. لن يتأثر الأطفال أو الحضور أو المدفوعات.",
   "settings_reset_done": "تمت إعادة الإعدادات.",
   "settings_about_label": "الإصدار",
-  "settings_about_value": "إدارة حضانة وايلدوود — نسخة تجريبية (بدون خادم)"
+  "settings_about_value": "إدارة حضانة وايلدوود — نسخة تجريبية (بدون خادم)",
+  "settings_late_fine_label": "غرامة التأخر في الاستلام",
+  "settings_late_fine_description": "رسوم ثابتة عن كل يوم يتم فيه استلام الطفل متأخرًا، إضافة إلى أجر الوقت الإضافي بالساعة.",
+  "settings_late_grace_label": "فترة السماح",
+  "settings_late_grace_description": "عدد الدقائق بعد ساعات الاشتراك قبل اعتبار الاستلام متأخرًا وفرض الغرامة.",
+  "settings_minutes_suffix": "دقيقة"
 }

@@ -35,7 +35,7 @@ void main() {
     verify: (cubit) {
       expect(cubit.state.paidKidIds, isNot(contains('kid-01')));
       expect(cubit.state.extrasByKidId['kid-01']!.overtimeHoursOverride, 2);
-      expect(cubit.state.extrasByKidId['kid-01']!.penaltyAmount, 50);
+      expect(cubit.state.extrasByKidId['kid-01']!.penaltyOverride, 50);
     },
   );
 

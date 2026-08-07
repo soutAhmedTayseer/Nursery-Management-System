@@ -66,12 +66,11 @@ class OverviewScreen extends StatelessWidget {
                             BlocBuilder<FinanceCubit, FinanceState>(
                               builder: (context, finance) {
                                 final capacity = appSettings.capacity;
-                                final overtimeRate = appSettings.overtimeHourlyRate;
                                 final records = derivePaymentRecords(
                                   assignments,
                                   plans,
                                   finance,
-                                  overtimeRate: overtimeRate,
+                                  settings: appSettings,
                                 );
                                 // Settled invoices are no longer owed.
                                 final pendingDues = records.fold<double>(
