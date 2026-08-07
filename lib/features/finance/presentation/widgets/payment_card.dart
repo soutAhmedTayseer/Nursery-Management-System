@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/finance_model.dart';
 import '../utils/invoice_whatsapp.dart';
+import '../utils/settle_invoice.dart';
 
 /// Stacked payment layout for narrow (portrait/tablet) widths.
 ///
@@ -18,6 +19,7 @@ class PaymentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasPenalty = record.penaltyAmount > 0;
+    final statusColor = record.isPaid ? AppColors.successGreen : AppColors.penaltyOrange;
 
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -59,32 +61,81 @@ class PaymentCard extends StatelessWidget {
           Row(
             children: [
               _stat('finance_header_base_fee'.tr(), '${record.baseFee.toInt()} AED'),
-              _stat('finance_header_overtime_hours'.tr(), '${record.overtimeHours} hrs', color: hasPenalty ? AppColors.penaltyOrange : null),
+              _stat(
+                'finance_header_overtime_hours'.tr(),
+                '${record.overtimeHours.toStringAsFixed(1)} hrs',
+                color: record.overtimeHours > 0 ? AppColors.penaltyOrange : null,
+              ),
               _stat('finance_header_penalty_amount'.tr(), '${record.penaltyAmount.toInt()} AED', color: hasPenalty ? AppColors.penaltyOrange : null),
             ],
           ),
           SizedBox(height: 12.h),
-          SizedBox(
-            width: double.infinity,
-            child: InkWell(
-              onTap: () => sendInvoiceViaWhatsapp(context, record),
-              borderRadius: BorderRadius.circular(20.r),
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 10.h),
-                decoration: BoxDecoration(color: AppColors.whatsappGreen, borderRadius: BorderRadius.circular(20.r)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.chat_bubble_rounded, size: 14.w, color: Colors.white),
-                    SizedBox(width: 6.w),
-                    Text(
-                      'finance_export_invoice'.tr(),
-                      style: TextStyle(fontSize: 11.sp, color: Colors.white, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  // Settling is one-way, so a paid card's chip is inert.
+                  onTap: record.isPaid
+                      ? null
+                      : () => settleInvoice(
+                            context,
+                            kidId: record.id,
+                            childName: record.childName,
+                            amount: record.totalDue,
+                          ),
+                  borderRadius: BorderRadius.circular(20.r),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 10.h),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20.r),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.4)),
                     ),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(record.isPaid ? Icons.lock : Icons.schedule, size: 14.w, color: statusColor),
+                        SizedBox(width: 6.w),
+                        Flexible(
+                          child: Text(
+                            record.isPaid ? 'finance_status_paid'.tr() : 'finance_status_unpaid'.tr(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 11.sp, color: statusColor, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: InkWell(
+                  onTap: () => sendInvoiceViaWhatsapp(context, record),
+                  borderRadius: BorderRadius.circular(20.r),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 10.h),
+                    decoration: BoxDecoration(color: AppColors.whatsappGreen, borderRadius: BorderRadius.circular(20.r)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat_bubble_rounded, size: 14.w, color: Colors.white),
+                        SizedBox(width: 6.w),
+                        Flexible(
+                          child: Text(
+                            'finance_export_invoice'.tr(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 11.sp, color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
