@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_state.dart';
 import '../../../subscriptions/presentation/cubit/plans_state.dart';
 import '../../domain/payment_records.dart';
+import '../../../../core/theme/app_palette.dart';
 
 enum RevenuePeriod { daily, weekly, monthly, annual }
 
@@ -91,6 +92,7 @@ class _RevenueChartState extends State<RevenueChart> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final buckets = _buckets(context);
     final maxValue = buckets.fold<double>(0, (max, b) => b.total > max ? b.total : max);
     return Column(
@@ -98,12 +100,12 @@ class _RevenueChartState extends State<RevenueChart> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text('finance_revenue_title'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
-        Text('finance_revenue_subtitle'.tr(), style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
+        Text('finance_revenue_subtitle'.tr(), style: TextStyle(fontSize: 12.sp, color: palette.textTertiary)),
         SizedBox(height: 16.h),
         Wrap(
           spacing: 8.w,
           runSpacing: 8.h,
-          children: [for (final period in RevenuePeriod.values) _periodChip(period)],
+          children: [for (final period in RevenuePeriod.values) _periodChip(context, period)],
         ),
         SizedBox(height: 24.h),
         SizedBox(
@@ -112,7 +114,7 @@ class _RevenueChartState extends State<RevenueChart> {
               ? Center(
                   child: Text(
                     'finance_revenue_empty'.tr(),
-                    style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade500),
+                    style: TextStyle(fontSize: 13.sp, color: palette.textTertiary),
                   ),
                 )
               : Row(
@@ -122,7 +124,7 @@ class _RevenueChartState extends State<RevenueChart> {
                       Expanded(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 6.w),
-                          child: _bar(buckets[i], maxValue, i == buckets.length - 1),
+                          child: _bar(context, buckets[i], maxValue, i == buckets.length - 1),
                         ),
                       ),
                   ],
@@ -132,7 +134,9 @@ class _RevenueChartState extends State<RevenueChart> {
     );
   }
 
-  Widget _periodChip(RevenuePeriod period) {
+  Widget _periodChip(BuildContext context, RevenuePeriod period) {
+
+  final palette = context.palette;
     final isActive = period == _period;
     return InkWell(
       onTap: () => setState(() => _period = period),
@@ -145,13 +149,15 @@ class _RevenueChartState extends State<RevenueChart> {
         ),
         child: Text(
           'finance_period_${period.name}'.tr(),
-          style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: isActive ? Colors.white : Colors.grey.shade700),
+          style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: isActive ? Colors.white : palette.textSecondary),
         ),
       ),
     );
   }
 
-  Widget _bar(_Bucket bucket, double maxValue, bool isCurrent) {
+  Widget _bar(BuildContext context, _Bucket bucket, double maxValue, bool isCurrent) {
+
+  final palette = context.palette;
     final fraction = (bucket.total / maxValue).clamp(0.02, 1.0);
     return Tooltip(
       message: '${bucket.label}: ${bucket.total.toStringAsFixed(0)} ${'finance_currency_aed'.tr()}',
@@ -180,7 +186,7 @@ class _RevenueChartState extends State<RevenueChart> {
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
-              color: isCurrent ? AppColors.darkGreen : Colors.grey.shade500,
+              color: isCurrent ? AppColors.darkGreen : palette.textTertiary,
             ),
           ),
         ],

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../data/models/finance_model.dart';
 import '../utils/invoice_whatsapp.dart';
 import '../utils/settle_invoice.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Stacked payment layout for narrow (portrait/tablet) widths.
 ///
@@ -18,6 +19,7 @@ class PaymentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final hasPenalty = record.penaltyAmount > 0;
     final statusColor = record.isPaid ? AppColors.successGreen : AppColors.penaltyOrange;
 
@@ -44,7 +46,7 @@ class PaymentCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(record.parentName, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
-                    Text(record.childName, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
+                    Text(record.childName, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.sp, color: palette.textSecondary)),
                   ],
                 ),
               ),
@@ -60,13 +62,13 @@ class PaymentCard extends StatelessWidget {
           SizedBox(height: 12.h),
           Row(
             children: [
-              _stat('finance_header_base_fee'.tr(), '${record.baseFee.toInt()} AED'),
-              _stat(
+              _stat(context, 'finance_header_base_fee'.tr(), '${record.baseFee.toInt()} AED'),
+              _stat(context, 
                 'finance_header_overtime_hours'.tr(),
                 '${record.overtimeHours.toStringAsFixed(1)} hrs',
                 color: record.overtimeHours > 0 ? AppColors.penaltyOrange : null,
               ),
-              _stat('finance_header_penalty_amount'.tr(), '${record.penaltyAmount.toInt()} AED', color: hasPenalty ? AppColors.penaltyOrange : null),
+              _stat(context, 'finance_header_penalty_amount'.tr(), '${record.penaltyAmount.toInt()} AED', color: hasPenalty ? AppColors.penaltyOrange : null),
             ],
           ),
           SizedBox(height: 12.h),
@@ -127,7 +129,7 @@ class PaymentCard extends StatelessWidget {
                             'finance_export_invoice'.tr(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 11.sp, color: Colors.white, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 11.sp, color: palette.card, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -142,12 +144,14 @@ class PaymentCard extends StatelessWidget {
     );
   }
 
-  Widget _stat(String label, String value, {Color? color}) {
+  Widget _stat(BuildContext context, String label, String value, {Color? color}) {
+
+  final palette = context.palette;
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold, color: Colors.grey)),
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold, color: palette.textTertiary)),
           SizedBox(height: 2.h),
           Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: color ?? Colors.black)),
         ],

@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../data/models/subscription_plan.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// One category tile on [SubscriptionPlansScreen] / the Financial Dues tab's
 /// "Global Plans" grid — an icon+name header, its priced line items, and an
@@ -25,6 +26,7 @@ class PlanCategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final featured = category.isFeatured;
     final radius = BorderRadius.circular(AppSpacing.radiusXl.r * 1.5);
     return ClipRRect(
@@ -84,7 +86,7 @@ class PlanCategoryCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           category.name,
-                          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: palette.textPrimary),
                         ),
                       ),
                       if (onEdit != null)
@@ -93,7 +95,7 @@ class PlanCategoryCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(AppSpacing.radiusSm.r),
                           child: Padding(
                             padding: EdgeInsets.all(4.w),
-                            child: Icon(Icons.edit_outlined, size: AppSpacing.iconSm.w, color: AppColors.textSecondary),
+                            child: Icon(Icons.edit_outlined, size: AppSpacing.iconSm.w, color: palette.textSecondary),
                           ),
                         ),
                     ],
@@ -118,13 +120,14 @@ class _LineItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(item.label, style: TextStyle(fontSize: 15.sp, color: AppColors.textPrimary)),
+            child: Text(item.label, style: TextStyle(fontSize: 15.sp, color: palette.textPrimary)),
           ),
           if (item.badgeText != null) ...[
             Container(
@@ -133,7 +136,7 @@ class _LineItemRow extends StatelessWidget {
               decoration: BoxDecoration(color: AppColors.dangerRed, borderRadius: BorderRadius.circular(999)),
               child: Text(
                 item.badgeText!.toUpperCase(),
-                style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 0.5),
+                style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold, color: palette.card, letterSpacing: 0.5),
               ),
             ),
           ],

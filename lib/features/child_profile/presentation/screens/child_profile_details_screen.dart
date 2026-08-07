@@ -14,6 +14,7 @@ import '../cubit/attendance_cubit.dart';
 import '../utils/child_profile_export.dart';
 import '../widgets/attendance_log_tab.dart';
 import '../widgets/child_profile_card.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class ChildProfileDetailsScreen extends StatefulWidget {
   const ChildProfileDetailsScreen({super.key, required this.childData});
@@ -32,6 +33,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     // The calendar needs the child's contracted hours/day to flag overtime
     // days, and that lives on their assigned plan line item.
     final assignment = context.read<PlanAssignmentsCubit>().forKid(widget.childData.kid.id);
@@ -43,7 +45,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
       create: (_) => AttendanceCubit(widget.childData.kid.id, allowedHours: lineItem?.$2.hoursPerDay),
       child: Builder(
         builder: (context) => Scaffold(
-          backgroundColor: AppColors.surfacePage,
+          backgroundColor: palette.page,
           body: SafeArea(
             child: SingleChildScrollView(
               padding: EdgeInsets.all(32.w),
@@ -80,6 +82,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+  final palette = context.palette;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -89,7 +92,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
           child: Container(
             padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: palette.card,
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))],
             ),
@@ -102,7 +105,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
             widget.childData.kid.fullName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontFamily: AppFonts.jakarta, fontSize: 30.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary, letterSpacing: -0.75),
+            style: TextStyle(fontFamily: AppFonts.jakarta, fontSize: 30.sp, fontWeight: FontWeight.w800, color: palette.textPrimary, letterSpacing: -0.75),
           ),
         ),
         SizedBox(width: 16.w),
@@ -143,8 +146,8 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _tabBtn(0, 'child_profile_tab_attendance'.tr()),
-          _tabBtn(1, 'child_profile_tab_financial'.tr()),
+          _tabBtn(context, 0, 'child_profile_tab_attendance'.tr()),
+          _tabBtn(context, 1, 'child_profile_tab_financial'.tr()),
         ],
       ),
     );
@@ -177,7 +180,9 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
     );
   }
 
-  Widget _tabBtn(int index, String label) {
+  Widget _tabBtn(BuildContext context, int index, String label) {
+
+  final palette = context.palette;
     final isActive = _tabIndex == index;
     return InkWell(
       onTap: () => setState(() => _tabIndex = index),
@@ -194,7 +199,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-            color: isActive ? AppColors.darkGreen : AppColors.textSecondary,
+            color: isActive ? AppColors.darkGreen : palette.textSecondary,
           ),
         ),
       ),

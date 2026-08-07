@@ -6,6 +6,7 @@ import '../l10n/api_error_messages.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import 'list_skeleton.dart';
+import '../../core/theme/app_palette.dart';
 
 /// Maps a cubit's async state onto loading / error / empty / data UI.
 ///
@@ -34,6 +35,7 @@ class AsyncStateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final spacing = AppSpacing.of(context);
 
     if (error != null) {
@@ -71,7 +73,7 @@ class AsyncStateView extends StatelessWidget {
           children: [
             Icon(
               Icons.inbox_outlined,
-              color: AppColors.textTertiary,
+              color: palette.textTertiary,
               size: AppSpacing.iconLg,
             ),
             SizedBox(height: spacing.md),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/ui_scale.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Design height of every dashboard stat card, before `.h` scaling. Sized
 /// for the tallest content a card carries (two-line subtitle + a footer);
@@ -46,11 +46,12 @@ class DashboardStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final scale = context.uiScale;
     final card = Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: palette.card,
         borderRadius: BorderRadius.circular(32.r),
         boxShadow: [
           BoxShadow(
@@ -84,7 +85,7 @@ class DashboardStatCard extends StatelessWidget {
               CircleAvatar(
                 radius: (18 * scale).r,
                 backgroundColor: themeColor,
-                child: Icon(icon, color: Colors.white, size: (18 * scale).w),
+                child: Icon(icon, color: palette.card, size: (18 * scale).w),
               ),
             ],
           ),
@@ -105,7 +106,7 @@ class DashboardStatCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: (48 * scale).sp,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.textPrimary,
+                    color: palette.textPrimary,
                     height: 1,
                   ),
                 ),
@@ -116,7 +117,7 @@ class DashboardStatCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: (16 * scale).sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade500,
+                      color: palette.textTertiary,
                     ),
                   ),
                 ],
@@ -130,7 +131,7 @@ class DashboardStatCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: (14 * scale).sp,
-              color: Colors.grey.shade500,
+              color: palette.textTertiary,
             ),
           ),
 

@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../core/services/qr_image_decoder.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// mobile_scanner has no Windows/Linux plugin implementation at all — those
 /// platforms get an "upload a photo of the QR" flow instead of a live feed.
@@ -76,8 +77,9 @@ class _QrScanDialogState extends State<QrScanDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: palette.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.r)),
       child: Padding(
         padding: EdgeInsets.all(24.w),
@@ -88,14 +90,14 @@ class _QrScanDialogState extends State<QrScanDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('session_scan_qr_title'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                Text('session_scan_qr_title'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
                 IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
               ],
             ),
             SizedBox(height: 12.h),
             Text(
               _supportsLiveScanner ? 'session_scan_qr_hint'.tr() : 'session_scan_qr_upload_hint'.tr(),
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 13.sp, color: palette.textSecondary),
             ),
             SizedBox(height: 16.h),
             if (_supportsLiveScanner)
@@ -104,14 +106,16 @@ class _QrScanDialogState extends State<QrScanDialog> {
                 child: SizedBox(width: 360.w, height: 360.w, child: MobileScanner(controller: _controller, onDetect: _onDetect)),
               )
             else
-              _buildUploadArea(),
+              _buildUploadArea(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildUploadArea() {
+  Widget _buildUploadArea(BuildContext context) {
+
+  final palette = context.palette;
     return SizedBox(
       width: 360.w,
       child: Column(
@@ -123,7 +127,7 @@ class _QrScanDialogState extends State<QrScanDialog> {
             alignment: Alignment.center,
             child: _decoding
                 ? const CircularProgressIndicator()
-                : Icon(Icons.qr_code_2, size: 64.w, color: Colors.grey.shade400),
+                : Icon(Icons.qr_code_2, size: 64.w, color: palette.textTertiary),
           ),
           if (_uploadFailed) ...[
             SizedBox(height: 12.h),

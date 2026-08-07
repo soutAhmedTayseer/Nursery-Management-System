@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routes/app_routes.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../cubit/splash_cubit.dart';
 import '../cubit/splash_state.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class AdminSplashScreen extends StatefulWidget {
   const AdminSplashScreen({super.key});
@@ -33,6 +33,7 @@ class _AdminSplashScreenState extends State<AdminSplashScreen> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     // Scale off the actual screen instead of fixed per-breakpoint tiers — a
     // portrait tablet is still `compact` (width-based breakpoint) despite
     // having plenty of screen height, so a fixed 220px tier read as tiny.
@@ -50,7 +51,7 @@ class _AdminSplashScreenState extends State<AdminSplashScreen> with SingleTicker
           }
         },
         child: Scaffold(
-          backgroundColor: AppColors.surfacePage,
+          backgroundColor: palette.page,
           body: Center(
             child: FadeTransition(
               opacity: _fade,

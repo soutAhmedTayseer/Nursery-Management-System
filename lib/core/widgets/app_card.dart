@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../core/theme/app_palette.dart';
 
 class AppCard extends StatelessWidget {
   const AppCard({
@@ -13,10 +14,11 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       padding: padding ?? EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: palette.card,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(

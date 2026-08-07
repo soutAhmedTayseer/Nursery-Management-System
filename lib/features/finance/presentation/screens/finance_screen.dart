@@ -18,6 +18,7 @@ import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_state.dart';
 import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plans_state.dart';
+import '../../../settings/presentation/cubit/app_settings_cubit.dart';
 import '../../data/models/finance_model.dart';
 import '../../domain/payment_records.dart';
 import '../cubit/finance_cubit.dart';
@@ -27,6 +28,7 @@ import '../widgets/finance_stat_card.dart';
 import '../utils/invoice_whatsapp.dart';
 import '../widgets/payment_card.dart';
 import '../widgets/revenue_chart.dart';
+import '../../../../core/theme/app_palette.dart';
 
 List<PaymentRecord> _filterRecords(List<PaymentRecord> records, String query, PenaltyFilter penaltyFilter) {
   return records.where((p) {
@@ -56,7 +58,12 @@ class FinanceScreen extends StatelessWidget {
       builder: (context, assignments) => BlocBuilder<PlansCubit, PlansState>(
         builder: (context, plans) => BlocBuilder<FinanceCubit, FinanceState>(
           builder: (context, finance) {
-            final records = derivePaymentRecords(assignments, plans, finance);
+            final records = derivePaymentRecords(
+              assignments,
+              plans,
+              finance,
+              overtimeRate: context.watch<AppSettingsCubit>().state.overtimeHourlyRate,
+            );
             final filtered = _filterRecords(records, finance.searchQuery, finance.penaltyFilter);
             return _buildScaffold(context, records, filtered, assignments, plans);
           },
@@ -80,6 +87,7 @@ class FinanceScreen extends StatelessWidget {
     PlanAssignmentsState assignments,
     PlansState plans,
   ) {
+  final palette = context.palette;
     final spacing = AppSpacing.of(context);
     // Settled invoices drop out of "outstanding" — that's the whole point
     // of marking them paid.
@@ -90,7 +98,7 @@ class FinanceScreen extends StatelessWidget {
       value: totalOutstanding.toStringAsFixed(0),
       subtitle: 'finance_total_outstanding_subtitle'.tr(),
       color: AppColors.forestGreen,
-      trendWidget: _buildTrendBadge(),
+      trendWidget: _buildTrendBadge(context),
       watermarkIcon: Icons.eco,
     );
     final penaltyRevenueCard = FinanceStatCard(
@@ -143,7 +151,7 @@ class FinanceScreen extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(spacing.xl),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: palette.card,
           borderRadius: BorderRadius.circular(32.r),
         ),
         child: RevenueChart(assignments: assignments, plans: plans, chartHeight: 200),
@@ -151,7 +159,7 @@ class FinanceScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.surfacePage,
+      backgroundColor: palette.page,
       body: SingleChildScrollView(
         padding: EdgeInsets.all(spacing.pagePadding),
         child: Column(
@@ -199,7 +207,7 @@ class FinanceScreen extends StatelessWidget {
                   : null,
               columns: [
                 AdaptiveColumn(label: 'finance_header_parent_name'.tr(), cell: (r) => Text(r.parentName, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold))),
-                AdaptiveColumn(label: 'finance_header_child_name'.tr(), cell: (r) => Text(r.childName, style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600))),
+                AdaptiveColumn(label: 'finance_header_child_name'.tr(), cell: (r) => Text(r.childName, style: TextStyle(fontSize: 13.sp, color: palette.textSecondary))),
                 AdaptiveColumn(
                   label: 'finance_header_base_fee'.tr(),
                   align: AdaptiveColumnAlign.center,
@@ -248,7 +256,9 @@ class FinanceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTrendBadge() {
+  Widget _buildTrendBadge(BuildContext context) {
+
+  final palette = context.palette;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
@@ -258,12 +268,12 @@ class FinanceScreen extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.trending_up, color: Colors.white, size: 12.w),
+          Icon(Icons.trending_up, color: palette.card, size: 12.w),
           SizedBox(width: 4.w),
           Text(
             'finance_trend_vs_last_month'.tr(),
             style: TextStyle(
-              color: Colors.white,
+              color: palette.card,
               fontSize: 10.sp,
               fontWeight: FontWeight.bold
             )
@@ -358,12 +368,13 @@ class FinanceScreen extends StatelessWidget {
   }
 
   Widget _buildTableActions(BuildContext context, List<PaymentRecord> filtered) {
+  final palette = context.palette;
     final title = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text('finance_pending_title'.tr(), style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w900)),
-        Text('finance_pending_subtitle'.tr(), style: TextStyle(fontSize: 13.sp, color: Colors.grey)),
+        Text('finance_pending_subtitle'.tr(), style: TextStyle(fontSize: 13.sp, color: palette.textTertiary)),
       ],
     );
     final actions = Wrap(
@@ -516,6 +527,7 @@ class FinanceScreen extends StatelessWidget {
   /// "Add" writes straight into FinanceCubit's extras, which
   /// derivePaymentRecords folds into the payments/overtime table.
   void _showAddInvoiceDialog(BuildContext context) {
+    final palette = context.palette;
     final cubit = context.read<FinanceCubit>();
     final plansCubit = context.read<PlansCubit>();
     final assignments = context.read<PlanAssignmentsCubit>().state.byKidId.values.toList();
@@ -554,7 +566,7 @@ class FinanceScreen extends StatelessWidget {
                         decoration: InputDecoration(
                           labelText: 'finance_dialog_child_label'.tr(),
                           filled: true,
-                          fillColor: AppColors.surfaceSmoke,
+                          fillColor: palette.divider,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
                         ),
                         items: [
@@ -578,7 +590,7 @@ class FinanceScreen extends StatelessWidget {
                       ),
                     ],
                     SizedBox(height: 12.h),
-                    _dialogField(overtimeCtrl, 'finance_header_overtime_hours'.tr(), isNumber: true),
+                    _dialogField(context, overtimeCtrl, 'finance_header_overtime_hours'.tr(), isNumber: true),
                     if (item != null && selected != null) ...[
                       SizedBox(height: 6.h),
                       Align(
@@ -587,12 +599,12 @@ class FinanceScreen extends StatelessWidget {
                           'finance_overtime_auto_note'.tr(namedArgs: {
                             'days': '${AttendanceStore.instance.forMonth(selected!.kidId, DateTime.now()).where((r) => r.overtimeHours(item.$2.hoursPerDay) > 0).length}',
                           }),
-                          style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade600),
+                          style: TextStyle(fontSize: 11.sp, color: palette.textSecondary),
                         ),
                       ),
                     ],
                     SizedBox(height: 12.h),
-                    _dialogField(penaltyCtrl, 'finance_header_penalty_amount'.tr(), isNumber: true),
+                    _dialogField(context, penaltyCtrl, 'finance_header_penalty_amount'.tr(), isNumber: true),
                   ],
                 ),
               ),
@@ -630,7 +642,9 @@ class FinanceScreen extends StatelessWidget {
     );
   }
 
-  Widget _dialogField(TextEditingController controller, String label, {bool isNumber = false, bool isRequired = true}) {
+  Widget _dialogField(BuildContext context, TextEditingController controller, String label, {bool isNumber = false, bool isRequired = true}) {
+
+  final palette = context.palette;
     return TextFormField(
       controller: controller,
       keyboardType: isNumber ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
@@ -638,7 +652,7 @@ class FinanceScreen extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: AppColors.surfaceSmoke,
+        fillColor: palette.divider,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
       ),
     );

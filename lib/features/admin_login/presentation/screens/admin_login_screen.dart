@@ -12,6 +12,7 @@ import '../../../../core/widgets/app_snackbar.dart';
 import '../cubit/admin_login_cubit.dart';
 import '../widgets/admin_text_field.dart';
 import '../widgets/login_background_decor.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -33,6 +34,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final spacing = AppSpacing.of(context);
     final screenWidth = MediaQuery.sizeOf(context).width;
     final cardWidthFraction = const ResponsiveValue<double>(
@@ -55,7 +57,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           }
         },
         child: Scaffold(
-          backgroundColor: AppColors.surfacePage,
+          backgroundColor: palette.page,
           body: Stack(
             children: [
               const LoginBackgroundDecor(),
@@ -75,7 +77,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       ),
                       Text(
                         'login_portal_subtitle'.tr(),
-                        style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade500, fontWeight: FontWeight.w600, letterSpacing: 6),
+                        style: TextStyle(fontSize: 14.sp, color: palette.textTertiary, fontWeight: FontWeight.w600, letterSpacing: 6),
                       ),
                       SizedBox(height: 50.h),
 
@@ -84,7 +86,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         width: finalCardWidth, // تحديد العرض المباشر يمنع الـ Non-normalized Error
                         padding: EdgeInsets.symmetric(horizontal: spacing.xxl, vertical: spacing.xxl),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: palette.card,
                           borderRadius: BorderRadius.circular(40.r),
                           boxShadow: [
                             BoxShadow(
@@ -99,13 +101,13 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           children: [
                             Text(
                                 'login_welcome_back'.tr(),
-                                style: TextStyle(fontSize: 42.sp, fontWeight: FontWeight.w900, color: AppColors.textPrimary)
+                                style: TextStyle(fontSize: 42.sp, fontWeight: FontWeight.w900, color: palette.textPrimary)
                             ),
                             SizedBox(height: 16.h),
                             Text(
                                 'login_instructions'.tr(),
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 18.sp, color: Colors.grey.shade500, height: 1.6)
+                                style: TextStyle(fontSize: 18.sp, color: palette.textTertiary, height: 1.6)
                             ),
                             SizedBox(height: 64.h),
 
@@ -154,7 +156,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                                     ),
                                     child: isLoading
                                         ? SizedBox(width: 28.w, height: 28.w, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-                                        : Text('login_submit_button'.tr(), style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 2.5)),
+                                        : Text('login_submit_button'.tr(), style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: palette.card, letterSpacing: 2.5)),
                                   ),
                                 );
                               },
@@ -181,7 +183,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       SizedBox(height: 64.h),
                       Text(
                         'login_footer'.tr(),
-                        style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400, fontWeight: FontWeight.w500, letterSpacing: 1.5),
+                        style: TextStyle(fontSize: 14.sp, color: palette.textTertiary, fontWeight: FontWeight.w500, letterSpacing: 1.5),
                       ),
                     ],
                   ),

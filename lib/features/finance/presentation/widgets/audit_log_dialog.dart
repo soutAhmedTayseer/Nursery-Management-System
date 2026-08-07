@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/audit_entry.dart';
 import '../cubit/audit_log_cubit.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Read-only view of the activity log. No filters or export yet — when
 /// roles land, this is where a head admin picks a sub-admin and sees only
@@ -25,8 +26,9 @@ class AuditLogDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: palette.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 560.w, maxHeight: 560.h),
@@ -44,19 +46,19 @@ class AuditLogDialog extends StatelessWidget {
                       children: [
                         Text(
                           'audit_log_title'.tr(),
-                          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: palette.textPrimary),
                         ),
                         SizedBox(height: 2.h),
                         Text(
                           'audit_log_subtitle'.tr(),
-                          style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 12.sp, color: palette.textSecondary),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.close, size: 20.w, color: AppColors.textSecondary),
+                    icon: Icon(Icons.close, size: 20.w, color: palette.textSecondary),
                   ),
                 ],
               ),
@@ -69,7 +71,7 @@ class AuditLogDialog extends StatelessWidget {
                         padding: EdgeInsets.symmetric(vertical: 32.h),
                         child: Text(
                           'audit_log_empty'.tr(),
-                          style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 13.sp, color: palette.textSecondary),
                         ),
                       );
                     }
@@ -104,13 +106,14 @@ class _EntryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final at = entry.at;
     final stamp = '${at.year}-${at.month.toString().padLeft(2, '0')}-${at.day.toString().padLeft(2, '0')} '
         '${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}';
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: AppColors.surfaceCream,
+        color: palette.cardMuted,
         borderRadius: BorderRadius.circular(14.r),
       ),
       child: Row(
@@ -127,11 +130,11 @@ class _EntryTile extends StatelessWidget {
                     children: [
                       TextSpan(
                         text: entry.actor,
-                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: palette.textPrimary),
                       ),
                       TextSpan(
                         text: ' $_description',
-                        style: TextStyle(fontSize: 13.sp, color: AppColors.textPrimary),
+                        style: TextStyle(fontSize: 13.sp, color: palette.textPrimary),
                       ),
                     ],
                   ),
@@ -139,7 +142,7 @@ class _EntryTile extends StatelessWidget {
                 SizedBox(height: 4.h),
                 Text(
                   entry.amount == null ? stamp : '$stamp · ${entry.amount!.toInt()} AED',
-                  style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 11.sp, color: palette.textSecondary),
                 ),
               ],
             ),

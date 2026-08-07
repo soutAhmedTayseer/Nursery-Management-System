@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Final registration step: the nursery's terms & conditions in a scrollable
 /// box, followed by [children] (allergy recap, media release choice,
@@ -14,6 +15,7 @@ class AgreementSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final scale = context.uiScale;
     return Container(
       padding: EdgeInsets.all(24.w),
@@ -54,7 +56,7 @@ class AgreementSection extends StatelessWidget {
             height: 320.h,
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: palette.card,
               borderRadius: BorderRadius.circular(16.r),
               border: Border.all(color: Colors.grey.shade200),
             ),
@@ -64,7 +66,7 @@ class AgreementSection extends StatelessWidget {
                   'registration_agreement_terms'.tr(),
                   style: TextStyle(
                     fontSize: (12.5 * scale).sp,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                     height: 1.5,
                   ),
                 ),

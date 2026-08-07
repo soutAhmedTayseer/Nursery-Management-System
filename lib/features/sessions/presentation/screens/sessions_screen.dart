@@ -13,6 +13,7 @@ import '../../data/repositories/sessions_repository.dart';
 import '../cubit/sessions_cubit.dart';
 import '../widgets/child_session_card.dart';
 import '../widgets/qr_scan_dialog.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class SessionsScreen extends StatelessWidget {
   const SessionsScreen({super.key});
@@ -31,8 +32,9 @@ class SessionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Scaffold(
-      backgroundColor: AppColors.surfacePage,
+      backgroundColor: palette.page,
       body: Padding(
         padding: EdgeInsets.all(32.w),
         child: Column(
@@ -72,7 +74,7 @@ class SessionsScreen extends StatelessWidget {
                     ),
                     _CountPill(
                       icon: Icons.logout,
-                      color: Colors.grey.shade600,
+                      color: palette.textSecondary,
                       label: 'session_count_checked_out'.tr(namedArgs: {'count': '${state.checkedOutCount}'}),
                       isSelected: state.filter == AttendanceFilter.checkedOut,
                       onTap: () => cubit.setFilter(
@@ -82,7 +84,7 @@ class SessionsScreen extends StatelessWidget {
                     if (state.filter != AttendanceFilter.all)
                       _CountPill(
                         icon: Icons.close,
-                        color: AppColors.textSecondary,
+                        color: palette.textSecondary,
                         label: 'session_filter_clear'.tr(),
                         onTap: () => cubit.setFilter(AttendanceFilter.all),
                       ),
@@ -224,6 +226,7 @@ class _CountPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),
@@ -246,7 +249,7 @@ class _CountPill extends StatelessWidget {
               child: Icon(icon, size: 14.w, color: color),
             ),
             SizedBox(width: 10.w),
-            Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
           ],
         ),
       ),

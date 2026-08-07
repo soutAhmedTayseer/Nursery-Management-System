@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// What the nursery charges per hour a child stays past their plan.
-/// Flat rate for now — a real backend would make this configurable per
-/// plan, which is why it lives here rather than being sprinkled inline.
-const double kOvertimeHourlyRate = 25;
+/// Fallback overtime rate, used only where no admin setting is in reach
+/// (model defaults, tests). The live figure comes from Settings — see
+/// `AppSettings.overtimeHourlyRate`.
+const double kDefaultOvertimeHourlyRate = 25;
 
 class PaymentRecord {
   final String id;
@@ -30,11 +30,17 @@ class PaymentRecord {
     required this.avatarColor,
     this.parentPhone = '',
     this.isPaid = false,
+    this.overtimeRate = kDefaultOvertimeHourlyRate,
   });
+
+  /// AED per overtime hour, from Settings at the time this record was
+  /// derived — carried on the record so a rate change doesn't silently
+  /// restate an invoice already on screen.
+  final double overtimeRate;
 
   /// Overtime is billable, so it has to reach the total — it used to be
   /// displayed but never charged, which understated every invoice.
-  double get overtimeAmount => overtimeHours * kOvertimeHourlyRate;
+  double get overtimeAmount => overtimeHours * overtimeRate;
 
   double get totalDue => baseFee + overtimeAmount + penaltyAmount;
 

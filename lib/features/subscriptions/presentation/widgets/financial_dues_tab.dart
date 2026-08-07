@@ -15,6 +15,7 @@ import '../cubit/plans_state.dart';
 import 'assign_plan_section.dart';
 import 'plan_category_card.dart';
 import 'plan_history_section.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Body content of subscription management — global plans, assign-plan
 /// form, and plan history/export. Extracted from ManageSubscriptionScreen
@@ -103,6 +104,7 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final kid = widget.childData.kid;
     final parentName = kid.emergencyContactName.isNotEmpty ? kid.emergencyContactName : kid.fullName;
     final spacing = AppSpacing.of(context);
@@ -123,7 +125,7 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
                       children: [
                         SvgPicture.asset('assets/icons/subscriptions/plans_heading.svg', width: 20.w, height: 20.w),
                         SizedBox(width: 8.w),
-                        Text('subscriptions_global_plans_title'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                        Text('subscriptions_global_plans_title'.tr(), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
                       ],
                     ),
                     Container(

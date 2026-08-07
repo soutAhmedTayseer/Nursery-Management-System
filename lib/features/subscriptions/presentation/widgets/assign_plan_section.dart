@@ -12,6 +12,7 @@ import '../../data/models/subscription_plan.dart';
 import '../cubit/plan_assignments_cubit.dart';
 import '../cubit/plans_cubit.dart';
 import '../cubit/plans_state.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class AssignPlanSection extends StatefulWidget {
   final KidSession child;
@@ -65,6 +66,7 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final kid = widget.child.kid;
     final parentName = kid.emergencyContactName.isNotEmpty ? kid.emergencyContactName : widget.child.planLabel;
     final showChildTile = widget.showChildTile;
@@ -84,14 +86,14 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('assign_plan_title'.tr(), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+              Text('assign_plan_title'.tr(), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
               SizedBox(height: 20.h),
 
               if (showChildTile) ...[
             // Child Info Tile
             Container(
               padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
+              decoration: BoxDecoration(color: palette.card, borderRadius: BorderRadius.circular(20.r)),
               child: Row(
                 children: [
                   CircleAvatar(
@@ -106,7 +108,7 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(kid.fullName, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                        Text('assign_plan_parent_name_label'.tr(namedArgs: {'name': parentName}), style: TextStyle(fontSize: 11.sp, color: Colors.grey)),
+                        Text('assign_plan_parent_name_label'.tr(namedArgs: {'name': parentName}), style: TextStyle(fontSize: 11.sp, color: palette.textTertiary)),
                       ],
                     ),
                   ),
@@ -121,7 +123,7 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
             SizedBox(height: 24.h),
           ],
 
-              Text('assign_plan_current_plan_label'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 0.6)),
+              Text('assign_plan_current_plan_label'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: palette.textSecondary, letterSpacing: 0.6)),
               SizedBox(height: 8.h),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -129,18 +131,18 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(widget.currentPlanTitle, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+                    Text(widget.currentPlanTitle, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500, color: palette.textPrimary)),
                     Text(widget.currentPlanPrice, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
                   ],
                 ),
               ),
 
               SizedBox(height: 24.h),
-              Text('assign_plan_change_plan_label'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 0.6)),
+              Text('assign_plan_change_plan_label'.tr(), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: palette.textSecondary, letterSpacing: 0.6)),
               SizedBox(height: 8.h),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 4.w),
-                decoration: BoxDecoration(color: AppColors.neutralChip, borderRadius: BorderRadius.circular(48.r)),
+                decoration: BoxDecoration(color: palette.chip, borderRadius: BorderRadius.circular(48.r)),
                 child: BlocBuilder<PlansCubit, PlansState>(
                   builder: (context, state) {
                     return DropdownButtonHideUnderline(
@@ -149,7 +151,7 @@ class _AssignPlanSectionState extends State<AssignPlanSection> {
                         isExpanded: true,
                         hint: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12.w),
-                          child: Text('assign_plan_select_new'.tr(), style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary)),
+                          child: Text('assign_plan_select_new'.tr(), style: TextStyle(fontSize: 14.sp, color: palette.textPrimary)),
                         ),
                         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
                         icon: Padding(

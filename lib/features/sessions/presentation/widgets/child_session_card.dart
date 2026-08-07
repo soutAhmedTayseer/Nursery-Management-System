@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/kid_photo_provider.dart';
 import '../../data/models/kid_session.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Matches Figma node 1:807's child card: photo with one squared corner,
 /// a "CHECKED-IN"/"CHECKED-OUT" pill + elapsed timer, name, plan line, and
@@ -24,6 +25,7 @@ class ChildSessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final photoUrl = entry.kid.photoUrl;
     final isCheckedIn = entry.isCheckedIn;
     // Portrait keeps the same 2-column grid as a narrow landscape window, but
@@ -36,7 +38,7 @@ class ChildSessionCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(20.w * scale),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: palette.card,
           borderRadius: BorderRadius.circular(28.r),
           boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 10))],
         ),
@@ -62,13 +64,13 @@ class ChildSessionCard extends StatelessWidget {
                   ),
                   child: photoUrl.isEmpty ? Icon(Icons.person, color: AppColors.accentGreen, size: 24.w * scale) : null,
                 ),
-                _buildStatusBadge(scale),
+                _buildStatusBadge(context, scale),
               ],
             ),
             SizedBox(height: 16.h * scale),
             Text(
               entry.kid.fullName,
-              style: TextStyle(fontSize: 20.sp * scale, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: TextStyle(fontSize: 20.sp * scale, fontWeight: FontWeight.bold, color: palette.textPrimary),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -78,16 +80,16 @@ class ChildSessionCard extends StatelessWidget {
             // distinguishes them, so let it wrap.
             Text(
               'session_subscribed_label'.tr(namedArgs: {'plan': entry.planLabel}),
-              style: TextStyle(fontSize: 12.sp * scale, color: Colors.grey.shade500, fontWeight: FontWeight.w500, height: 1.35),
+              style: TextStyle(fontSize: 12.sp * scale, color: palette.textTertiary, fontWeight: FontWeight.w500, height: 1.35),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
             const Spacer(),
             Row(
               children: [
-                _buildActionButton(Icons.login, 'session_clock_in'.tr(), isCheckedIn ? Colors.grey.shade200 : AppColors.mintTint, !isCheckedIn, scale, isCheckedIn ? null : onClockIn),
+                _buildActionButton(context, Icons.login, 'session_clock_in'.tr(), isCheckedIn ? Colors.grey.shade200 : AppColors.mintTint, !isCheckedIn, scale, isCheckedIn ? null : onClockIn),
                 SizedBox(width: 8.w * scale),
-                _buildActionButton(Icons.logout, 'session_clock_out'.tr(), !isCheckedIn ? Colors.grey.shade200 : AppColors.peachTint, isCheckedIn, scale, isCheckedIn ? onClockOut : null),
+                _buildActionButton(context, Icons.logout, 'session_clock_out'.tr(), !isCheckedIn ? Colors.grey.shade200 : AppColors.peachTint, isCheckedIn, scale, isCheckedIn ? onClockOut : null),
               ],
             ),
           ],
@@ -96,10 +98,12 @@ class ChildSessionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(double scale) {
+  Widget _buildStatusBadge(BuildContext context, double scale) {
+
+  final palette = context.palette;
     final isCheckedIn = entry.isCheckedIn;
-    final color = isCheckedIn ? AppColors.accentGreen : Colors.grey.shade500;
-    final bgColor = isCheckedIn ? AppColors.accentGreen.withValues(alpha: 0.1) : AppColors.neutralChip;
+    final color = isCheckedIn ? AppColors.accentGreen : palette.textTertiary;
+    final bgColor = isCheckedIn ? AppColors.accentGreen.withValues(alpha: 0.1) : palette.chip;
     final elapsed = entry.elapsed;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w * scale, vertical: 6.h * scale),
@@ -112,14 +116,16 @@ class ChildSessionCard extends StatelessWidget {
             Row(children: [Icon(Icons.timer_outlined, size: 10.w * scale, color: AppColors.amberLabel), SizedBox(width: 4.w * scale), Text(_formatElapsed(elapsed), style: TextStyle(fontSize: 11.sp * scale, fontWeight: FontWeight.bold, color: AppColors.amberLabel))]),
           ] else if (!isCheckedIn) ...[
             SizedBox(height: 4.h * scale),
-            Text('--h --m', style: TextStyle(fontSize: 11.sp * scale, fontWeight: FontWeight.bold, color: Colors.grey.shade400)),
+            Text('--h --m', style: TextStyle(fontSize: 11.sp * scale, fontWeight: FontWeight.bold, color: palette.textTertiary)),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label, Color bgColor, bool isActive, double scale, VoidCallback? onTap) {
+  Widget _buildActionButton(BuildContext context, IconData icon, String label, Color bgColor, bool isActive, double scale, VoidCallback? onTap) {
+
+  final palette = context.palette;
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -130,12 +136,12 @@ class ChildSessionCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 14.w * scale, color: isActive ? Colors.black87 : Colors.grey.shade500),
+              Icon(icon, size: 14.w * scale, color: isActive ? Colors.black87 : palette.textTertiary),
               SizedBox(width: 4.w * scale),
               Flexible(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 10.sp * scale, fontWeight: FontWeight.bold, color: isActive ? Colors.black87 : Colors.grey.shade500),
+                  style: TextStyle(fontSize: 10.sp * scale, fontWeight: FontWeight.bold, color: isActive ? Colors.black87 : palette.textTertiary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

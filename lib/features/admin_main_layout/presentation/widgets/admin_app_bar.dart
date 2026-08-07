@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 import '../../../sessions/presentation/widgets/qr_scan_dialog.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class AdminAppBar extends StatefulWidget {
   const AdminAppBar({super.key});
@@ -49,6 +50,7 @@ class _AdminAppBarState extends State<AdminAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 20.h),
       color: AppColors.background, // نفس لون خلفية الـ Dashboard الرئيسي
@@ -68,7 +70,7 @@ class _AdminAppBarState extends State<AdminAppBar> {
             child: Container(
               height: 48.h,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: palette.card,
                 borderRadius: BorderRadius.circular(24.r),
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 5))],
               ),
@@ -76,8 +78,8 @@ class _AdminAppBarState extends State<AdminAppBar> {
                 onChanged: _onSearchChanged,
                 decoration: InputDecoration(
                   hintText: 'appbar_search_hint'.tr(),
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
-                  prefixIcon: Icon(Icons.search, color: Colors.grey.shade500, size: 20.w),
+                  hintStyle: TextStyle(color: palette.textTertiary, fontSize: 14.sp),
+                  prefixIcon: Icon(Icons.search, color: palette.textTertiary, size: 20.w),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(vertical: 14.h),
                 ),

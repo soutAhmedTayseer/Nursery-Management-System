@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/app_colors.dart';
+import '../../core/theme/app_palette.dart';
 
 class AppTextField extends StatelessWidget {
   const AppTextField({
@@ -23,6 +24,7 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -31,7 +33,7 @@ class AppTextField extends StatelessWidget {
           style: TextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary.withValues(alpha: 0.7),
+            color: palette.textPrimary.withValues(alpha: 0.7),
             letterSpacing: 1.2,
           ),
         ),
@@ -40,10 +42,10 @@ class AppTextField extends StatelessWidget {
           obscureText: obscureText,
           maxLines: obscureText ? 1 : maxLines,
           validator: validator,
-          style: TextStyle(fontSize: 16.sp, color: AppColors.textPrimary),
+          style: TextStyle(fontSize: 16.sp, color: palette.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16.sp),
+            hintStyle: TextStyle(color: palette.textTertiary, fontSize: 16.sp),
             suffixIcon: suffixIcon,
             filled: true,
             fillColor: AppColors.lightGrey,

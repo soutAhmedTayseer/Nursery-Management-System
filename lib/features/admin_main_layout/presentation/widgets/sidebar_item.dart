@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class SidebarItem extends StatelessWidget {
   final IconData icon;
@@ -20,9 +21,10 @@ class SidebarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final iconWidget = Icon(
       icon,
-      color: isSelected ? AppColors.darkGreen : Colors.grey.shade600,
+      color: isSelected ? AppColors.darkGreen : palette.textSecondary,
       size: 22.w
     );
 
@@ -48,7 +50,7 @@ class SidebarItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                        color: isSelected ? AppColors.darkGreen : Colors.grey.shade600,
+                        color: isSelected ? AppColors.darkGreen : palette.textSecondary,
                       ),
                     ),
                   ),

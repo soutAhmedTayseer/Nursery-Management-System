@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class AdminTextField extends StatelessWidget {
   final String label;
@@ -20,6 +21,7 @@ class AdminTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -36,13 +38,13 @@ class AdminTextField extends StatelessWidget {
         TextField(
           controller: controller,
           obscureText: isPassword,
-          style: TextStyle(fontSize: 18.sp, color: AppColors.textPrimary), // خط الكتابة (كان 14)
+          style: TextStyle(fontSize: 18.sp, color: palette.textPrimary), // خط الكتابة (كان 14)
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 18.sp), // الـ Hint (كان 14)
+            hintStyle: TextStyle(color: palette.textTertiary, fontSize: 18.sp), // الـ Hint (كان 14)
             suffixIcon: Padding(
               padding: EdgeInsets.only(right: 12.w),
-              child: Icon(suffixIcon, color: Colors.grey.shade400, size: 26.w), // الأيقونة (كانت 20)
+              child: Icon(suffixIcon, color: palette.textTertiary, size: 26.w), // الأيقونة (كانت 20)
             ),
             filled: true,
             fillColor: AppColors.surfaceWhite,

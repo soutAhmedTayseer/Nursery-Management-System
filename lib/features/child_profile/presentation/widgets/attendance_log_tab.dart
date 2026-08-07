@@ -8,6 +8,7 @@ import '../../../../core/theme/app_fonts.dart';
 import '../../data/models/attendance_day.dart';
 import '../cubit/attendance_cubit.dart';
 import '../cubit/attendance_state.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class AttendanceLogTab extends StatelessWidget {
   const AttendanceLogTab({super.key, required this.kid});
@@ -16,10 +17,11 @@ class AttendanceLogTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(32.w),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(48.r)),
+      decoration: BoxDecoration(color: palette.card, borderRadius: BorderRadius.circular(48.r)),
       child: BlocBuilder<AttendanceCubit, AttendanceState>(
         builder: (context, state) {
           final cubit = context.read<AttendanceCubit>();
@@ -36,23 +38,23 @@ class AttendanceLogTab extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(DateFormat.yMMMM(locale).format(state.month), style: TextStyle(fontFamily: AppFonts.jakarta, fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(DateFormat.yMMMM(locale).format(state.month), style: TextStyle(fontFamily: AppFonts.jakarta, fontSize: 20.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
                       SizedBox(height: 2.h),
                       Text(
                         'child_profile_attendance_subtitle'.tr(namedArgs: {
                           'days': '${state.presentDaysCount}',
                           'hours': state.totalHours.toStringAsFixed(state.totalHours % 1 == 0 ? 0 : 1),
                         }),
-                        style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
+                        style: TextStyle(fontSize: 14.sp, color: palette.textSecondary),
                       ),
                     ],
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _navBtn(Icons.chevron_left, cubit.previousMonth),
+                      _navBtn(context, Icons.chevron_left, cubit.previousMonth),
                       SizedBox(width: 8.w),
-                      _navBtn(Icons.chevron_right, cubit.nextMonth),
+                      _navBtn(context, Icons.chevron_right, cubit.nextMonth),
                     ],
                   ),
                 ],
@@ -64,7 +66,7 @@ class AttendanceLogTab extends StatelessWidget {
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceCream,
+                  color: palette.cardMuted,
                   borderRadius: BorderRadius.circular(24.r),
                   border: Border(left: BorderSide(color: AppColors.darkGreen, width: 4.w)),
                 ),
@@ -74,13 +76,13 @@ class AttendanceLogTab extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.schedule, size: 20.w, color: AppColors.textSecondary),
+                        Icon(Icons.schedule, size: 20.w, color: palette.textSecondary),
                         SizedBox(width: 16.w),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('child_profile_average_stay_title'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                            Text('child_profile_average_stay_subtitle'.tr(), style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
+                            Text('child_profile_average_stay_title'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
+                            Text('child_profile_average_stay_subtitle'.tr(), style: TextStyle(fontSize: 12.sp, color: palette.textSecondary)),
                           ],
                         ),
                       ],
@@ -110,10 +112,10 @@ class AttendanceLogTab extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('child_profile_overtime_summary_title'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                              Text('child_profile_overtime_summary_title'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
                               Text(
                                 'child_profile_overtime_summary_subtitle'.tr(namedArgs: {'days': '${state.overtimeDays.length}'}),
-                                style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
+                                style: TextStyle(fontSize: 12.sp, color: palette.textSecondary),
                               ),
                             ],
                           ),
@@ -131,7 +133,9 @@ class AttendanceLogTab extends StatelessWidget {
     );
   }
 
-  Widget _navBtn(IconData icon, VoidCallback onTap) {
+  Widget _navBtn(BuildContext context, IconData icon, VoidCallback onTap) {
+
+  final palette = context.palette;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(999),
@@ -139,12 +143,13 @@ class AttendanceLogTab extends StatelessWidget {
         width: 40.w,
         height: 40.w,
         decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
-        child: Icon(icon, size: 18.w, color: AppColors.textPrimary),
+        child: Icon(icon, size: 18.w, color: palette.textPrimary),
       ),
     );
   }
 
   Widget _buildCalendarGrid(BuildContext context, AttendanceState state, String locale) {
+  final palette = context.palette;
     final weekdayLabels = List.generate(7, (i) => DateFormat.E(locale).format(DateTime(2024, 1, 1 + i))); // Mon..Sun
 
     return LayoutBuilder(
@@ -160,7 +165,7 @@ class AttendanceLogTab extends StatelessWidget {
                       child: Text(
                         label.toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary.withValues(alpha: 0.4), letterSpacing: 0.5),
+                        style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: palette.textSecondary.withValues(alpha: 0.4), letterSpacing: 0.5),
                       ),
                     ),
                   ),
@@ -234,10 +239,10 @@ class AttendanceLogTab extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _detailRow('child_profile_overtime_checked_in'.tr(), _formatTime(record.checkIn, locale)),
-            _detailRow('child_profile_overtime_checked_out'.tr(), record.checkOut == null ? '—' : _formatTime(record.checkOut!, locale)),
-            _detailRow('child_profile_overtime_allowed'.tr(), '${day.allowedHours}h'),
-            _detailRow('child_profile_overtime_actual'.tr(), '${_formatHours(record.hours)}h'),
+            _detailRow(context, 'child_profile_overtime_checked_in'.tr(), _formatTime(record.checkIn, locale)),
+            _detailRow(context, 'child_profile_overtime_checked_out'.tr(), record.checkOut == null ? '—' : _formatTime(record.checkOut!, locale)),
+            _detailRow(context, 'child_profile_overtime_allowed'.tr(), '${day.allowedHours}h'),
+            _detailRow(context, 'child_profile_overtime_actual'.tr(), '${_formatHours(record.hours)}h'),
             const Divider(height: 24),
             if (window != null)
               Container(
@@ -278,15 +283,17 @@ class AttendanceLogTab extends StatelessWidget {
     );
   }
 
-  Widget _detailRow(String label, String value) {
+  Widget _detailRow(BuildContext context, String label, String value) {
+
+  final palette = context.palette;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
+          Text(label, style: TextStyle(fontSize: 13.sp, color: palette.textSecondary)),
           SizedBox(width: 16.w),
-          Text(value, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+          Text(value, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
         ],
       ),
     );
@@ -295,6 +302,7 @@ class AttendanceLogTab extends StatelessWidget {
   String _formatTime(DateTime time, String locale) => DateFormat.Hm(locale).format(time);
 
   Widget _dayCell(BuildContext context, AttendanceDay day) {
+  final palette = context.palette;
     final hasAttendance = day.hours != null;
 
     if (day.hasOvertime) return _overtimeCell(context, day);
@@ -324,9 +332,9 @@ class AttendanceLogTab extends StatelessWidget {
         opacity: 0.2,
         child: Container(
           height: 96.h,
-          decoration: BoxDecoration(color: AppColors.surfaceCream.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(32.r)),
+          decoration: BoxDecoration(color: palette.cardMuted.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(32.r)),
           alignment: Alignment.center,
-          child: Text('${day.date.day}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+          child: Text('${day.date.day}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
         ),
       );
     }
@@ -360,10 +368,10 @@ class AttendanceLogTab extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('${day.date.day}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+          Text('${day.date.day}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.textSecondary)),
           if (day.date.weekday < DateTime.saturday) ...[
             SizedBox(height: 4.h),
-            Text('child_profile_absent_marker'.tr(), style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600)),
+            Text('child_profile_absent_marker'.tr(), style: TextStyle(fontSize: 10.sp, color: palette.textSecondary)),
           ],
         ],
       ),

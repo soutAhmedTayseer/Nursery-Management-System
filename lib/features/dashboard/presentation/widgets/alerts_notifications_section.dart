@@ -8,6 +8,7 @@ import '../../../../core/utils/whatsapp.dart';
 import '../../../finance/presentation/utils/settle_invoice.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 import '../../domain/nursery_alerts.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Dashboard alert feed. Every card is derived from real state (live
 /// attendance, unpaid invoices) and every button does something: message
@@ -19,6 +20,7 @@ class AlertsNotificationsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final scale = context.uiScale;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,7 +29,7 @@ class AlertsNotificationsSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('alerts_header_title'.tr(), style: TextStyle(fontSize: (22 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Text('alerts_header_title'.tr(), style: TextStyle(fontSize: (22 * scale).sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
             if (alerts.isNotEmpty)
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
@@ -42,7 +44,7 @@ class AlertsNotificationsSection extends StatelessWidget {
         SizedBox(height: 20.h),
         Expanded(
           child: alerts.isEmpty
-              ? Center(child: Text('alerts_empty'.tr(), style: TextStyle(fontSize: (13 * scale).sp, color: Colors.grey.shade500)))
+              ? Center(child: Text('alerts_empty'.tr(), style: TextStyle(fontSize: (13 * scale).sp, color: palette.textTertiary)))
               : ListView.separated(
                   itemCount: alerts.length,
                   separatorBuilder: (_, _) => SizedBox(height: 16.h),
@@ -113,10 +115,11 @@ class _AlertCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final look = _presentation;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: palette.card,
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 5))],
       ),
@@ -148,7 +151,7 @@ class _AlertCard extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   look.title,
-                                  style: TextStyle(fontSize: (16 * scale).sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                                  style: TextStyle(fontSize: (16 * scale).sp, fontWeight: FontWeight.bold, color: palette.textPrimary),
                                 ),
                               ),
                               if (alert.isUrgent)
@@ -159,7 +162,7 @@ class _AlertCard extends StatelessWidget {
                             ],
                           ),
                           SizedBox(height: 8.h),
-                          Text(look.description, style: TextStyle(fontSize: (13 * scale).sp, color: Colors.grey.shade600, height: 1.5)),
+                          Text(look.description, style: TextStyle(fontSize: (13 * scale).sp, color: palette.textSecondary, height: 1.5)),
                           SizedBox(height: 16.h),
                           Wrap(
                             spacing: 12.w,

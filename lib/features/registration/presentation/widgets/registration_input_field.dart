@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Constrains what a field will accept, and what UI it uses to accept it.
 enum RegistrationFieldInputType {
@@ -124,6 +125,7 @@ class _RegistrationInputFieldState extends State<RegistrationInputField> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final scale = context.uiScale;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,7 +135,7 @@ class _RegistrationInputFieldState extends State<RegistrationInputField> {
           style: TextStyle(
             fontSize: (10 * scale).sp,
             fontWeight: FontWeight.w800,
-            color: AppColors.textTertiary,
+            color: palette.textTertiary,
             letterSpacing: 1.1,
           ),
         ),
@@ -150,10 +152,10 @@ class _RegistrationInputFieldState extends State<RegistrationInputField> {
           style: TextStyle(fontSize: (14 * scale).sp, color: Colors.black87),
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: (14 * scale).sp),
+            hintStyle: TextStyle(color: palette.textTertiary, fontSize: (14 * scale).sp),
             filled: true,
-            fillColor: Colors.white,
-            suffixIcon: _suffixIcon == null ? null : Icon(_suffixIcon, size: (18 * scale).w, color: Colors.grey.shade500),
+            fillColor: palette.card,
+            suffixIcon: _suffixIcon == null ? null : Icon(_suffixIcon, size: (18 * scale).w, color: palette.textTertiary),
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: (16 * scale).h),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),

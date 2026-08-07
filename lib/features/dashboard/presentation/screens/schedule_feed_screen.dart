@@ -10,6 +10,7 @@ import '../../data/models/schedule_item.dart';
 import '../cubit/schedule_cubit.dart';
 import '../cubit/schedule_state.dart';
 import '../widgets/schedule_item_edit_dialog.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Timeline feed matching Figma node 188-415, always sorted by start time.
 /// Edit/delete controls are always visible — no drag reorder (order is
@@ -41,16 +42,17 @@ class ScheduleFeedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final spacing = AppSpacing.of(context);
     final scale = context.uiScale;
     return Scaffold(
-      backgroundColor: AppColors.surfacePage,
+      backgroundColor: palette.page,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: spacing.pagePadding, vertical: spacing.xxl),
           child: Container(
             padding: EdgeInsets.all(32.w),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(48.r)),
+            decoration: BoxDecoration(color: palette.card, borderRadius: BorderRadius.circular(48.r)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -110,6 +112,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -120,7 +123,7 @@ class _Header extends StatelessWidget {
               IconButton(
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
-                icon: Icon(Icons.arrow_back, size: (18 * scale).w, color: AppColors.textSecondary),
+                icon: Icon(Icons.arrow_back, size: (18 * scale).w, color: palette.textSecondary),
                 onPressed: onBack,
               ),
               SizedBox(height: 12.h),
@@ -136,14 +139,14 @@ class _Header extends StatelessWidget {
                     Container(
                       width: 10.w,
                       height: 10.w,
-                      decoration: BoxDecoration(shape: BoxShape.circle, color: activeTitle != null ? AppColors.darkGreen : AppColors.textTertiary),
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: activeTitle != null ? AppColors.darkGreen : palette.textTertiary),
                     ),
                     SizedBox(width: 8.w),
                     Text(
                       activeTitle != null
                           ? 'schedule_status_active'.tr(namedArgs: {'title': activeTitle!.toUpperCase()})
                           : 'schedule_status_none'.tr(),
-                      style: TextStyle(fontSize: (12 * scale).sp, fontWeight: FontWeight.bold, letterSpacing: 0.6, color: activeTitle != null ? AppColors.activeBadgeText : AppColors.textTertiary),
+                      style: TextStyle(fontSize: (12 * scale).sp, fontWeight: FontWeight.bold, letterSpacing: 0.6, color: activeTitle != null ? AppColors.activeBadgeText : palette.textTertiary),
                     ),
                   ],
                 ),
@@ -151,7 +154,7 @@ class _Header extends StatelessWidget {
               SizedBox(height: 8.h),
               Text('schedule_screen_title'.tr(), style: TextStyle(fontSize: (30 * scale).sp, fontWeight: FontWeight.w800, letterSpacing: -0.6, color: AppColors.darkGreen)),
               SizedBox(height: 8.h),
-              Text('schedule_screen_subtitle'.tr(), style: TextStyle(fontSize: (15 * scale).sp, color: AppColors.textSecondary)),
+              Text('schedule_screen_subtitle'.tr(), style: TextStyle(fontSize: (15 * scale).sp, color: palette.textSecondary)),
             ],
           ),
         ),
@@ -196,6 +199,7 @@ class _ScheduleTimelineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final isActive = status == ActivityStatus.active;
     final isUpcoming = status == ActivityStatus.upcoming;
 
@@ -214,10 +218,10 @@ class _ScheduleTimelineCard extends StatelessWidget {
                   height: (48 * scale).w,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isActive ? AppColors.darkGreen : (isUpcoming ? AppColors.neutralChip : item.themeColor),
+                    color: isActive ? AppColors.darkGreen : (isUpcoming ? palette.chip : item.themeColor),
                     boxShadow: isActive ? [BoxShadow(color: AppColors.darkGreen.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 8))] : null,
                   ),
-                  child: Icon(item.icon, size: (20 * scale).w, color: isActive ? Colors.white : AppColors.textPrimary),
+                  child: Icon(item.icon, size: (20 * scale).w, color: isActive ? Colors.white : palette.textPrimary),
                 ),
                 SizedBox(width: 16.w),
                 Expanded(
@@ -226,8 +230,8 @@ class _ScheduleTimelineCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_formatStart(item), style: TextStyle(fontSize: (18 * scale).sp, fontWeight: FontWeight.bold, color: isActive ? AppColors.darkGreen : AppColors.textPrimary)),
-                        Text('schedule_to_time'.tr(namedArgs: {'time': _formatEnd(item)}), style: TextStyle(fontSize: (14 * scale).sp, color: isActive ? AppColors.darkGreen.withValues(alpha: 0.8) : AppColors.textSecondary)),
+                        Text(_formatStart(item), style: TextStyle(fontSize: (18 * scale).sp, fontWeight: FontWeight.bold, color: isActive ? AppColors.darkGreen : palette.textPrimary)),
+                        Text('schedule_to_time'.tr(namedArgs: {'time': _formatEnd(item)}), style: TextStyle(fontSize: (14 * scale).sp, color: isActive ? AppColors.darkGreen.withValues(alpha: 0.8) : palette.textSecondary)),
                       ],
                     ),
                   ),
@@ -241,7 +245,7 @@ class _ScheduleTimelineCard extends StatelessWidget {
               width: double.infinity,
               padding: EdgeInsets.all(isActive ? 24.w : 20.w),
               decoration: BoxDecoration(
-                color: isActive ? Colors.white : (isUpcoming ? AppColors.surfaceCream.withValues(alpha: 0.5) : AppColors.surfaceCream),
+                color: isActive ? Colors.white : (isUpcoming ? palette.cardMuted.withValues(alpha: 0.5) : palette.cardMuted),
                 borderRadius: BorderRadius.circular(32.r),
                 border: isActive
                     ? Border.all(color: AppColors.darkGreen.withValues(alpha: 0.2), width: 2)
@@ -257,7 +261,7 @@ class _ScheduleTimelineCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           item.title,
-                          style: TextStyle(fontSize: ((isActive ? 24 : 20) * scale).sp, fontWeight: isActive ? FontWeight.w800 : FontWeight.bold, letterSpacing: isActive ? -0.6 : 0, color: AppColors.textPrimary),
+                          style: TextStyle(fontSize: ((isActive ? 24 : 20) * scale).sp, fontWeight: isActive ? FontWeight.w800 : FontWeight.bold, letterSpacing: isActive ? -0.6 : 0, color: palette.textPrimary),
                         ),
                       ),
                       if (isActive) ...[
@@ -269,14 +273,14 @@ class _ScheduleTimelineCard extends StatelessWidget {
                         ),
                       ],
                       SizedBox(width: 8.w),
-                      _RowIconButton(icon: Icons.edit_outlined, color: AppColors.textSecondary, onTap: onEdit),
+                      _RowIconButton(icon: Icons.edit_outlined, color: palette.textSecondary, onTap: onEdit),
                       SizedBox(width: 4.w),
                       _RowIconButton(icon: Icons.delete_outline, color: AppColors.dangerRed, onTap: onDelete),
                     ],
                   ),
                   if (item.description.isNotEmpty) ...[
                     SizedBox(height: isActive ? 12.h : 3.h),
-                    Text(item.description, style: TextStyle(fontSize: ((isActive ? 16 : 14) * scale).sp, color: AppColors.textSecondary, height: 1.4)),
+                    Text(item.description, style: TextStyle(fontSize: ((isActive ? 16 : 14) * scale).sp, color: palette.textSecondary, height: 1.4)),
                   ],
                 ],
               ),

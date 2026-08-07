@@ -8,6 +8,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../data/models/subscription_plan.dart';
 import '../cubit/plans_cubit.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Fixed defaults for a newly created category — icon/color are no longer
 /// admin-editable (see design change: this dialog dropped the icon/color
@@ -150,8 +151,9 @@ class _PlanCategoryEditDialogState extends State<PlanCategoryEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: palette.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.r)),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 560.w),
@@ -169,20 +171,20 @@ class _PlanCategoryEditDialogState extends State<PlanCategoryEditDialog> {
                       _isEditMode
                           ? 'subscriptions_category_dialog_title_edit'.tr()
                           : 'subscriptions_category_dialog_title_add'.tr(),
-                      style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                      style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, color: palette.textPrimary),
                     ),
                   ),
                   InkWell(
                     onTap: () => Navigator.of(context).pop(),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSm.r),
-                    child: Icon(Icons.close, size: AppSpacing.iconMd.w, color: AppColors.textSecondary),
+                    child: Icon(Icons.close, size: AppSpacing.iconMd.w, color: palette.textSecondary),
                   ),
                 ],
               ),
               SizedBox(height: 8.h),
               Text(
                 'subscriptions_category_dialog_subtitle'.tr(),
-                style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 14.sp, color: palette.textSecondary),
               ),
               SizedBox(height: 24.h),
               Flexible(
@@ -214,7 +216,7 @@ class _PlanCategoryEditDialogState extends State<PlanCategoryEditDialog> {
                       SizedBox(height: 24.h),
                       Text(
                         'subscriptions_line_items_label'.tr().toUpperCase(),
-                        style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 0.6),
+                        style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: palette.textSecondary, letterSpacing: 0.6),
                       ),
                       SizedBox(height: 8.h),
                       for (final item in _items)
@@ -296,12 +298,13 @@ class _StyledField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label.toUpperCase(),
-          style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 0.6),
+          style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: palette.textSecondary, letterSpacing: 0.6),
         ),
         SizedBox(height: 12.h),
         Container(
@@ -334,11 +337,12 @@ class _LineItemFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.surfaceCream,
+        color: palette.cardMuted,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg.r),
       ),
       child: Column(

@@ -33,6 +33,7 @@ List<PaymentRecord> derivePaymentRecords(
   PlansState plans,
   FinanceState finance, {
   DateTime? month,
+  double overtimeRate = kDefaultOvertimeHourlyRate,
 }) {
   final targetMonth = month ?? DateTime.now();
   final records = <PaymentRecord>[];
@@ -57,6 +58,7 @@ List<PaymentRecord> derivePaymentRecords(
       avatarColor: _avatarColorFor(assignment.kidId),
       parentPhone: assignment.parentPhone,
       isPaid: finance.paidKidIds.contains(assignment.kidId),
+      overtimeRate: overtimeRate,
     ));
   }
   // Alphabetical by child so the ledger reads in a stable order rather than
@@ -69,7 +71,12 @@ List<PaymentRecord> derivePaymentRecords(
 /// child's plan fee amortised over the days their cycle covers, plus any
 /// overtime they ran up that day. Backs the revenue chart and the
 /// dashboard's per-day figures, so both move when real attendance changes.
-double revenueForDay(PlanAssignmentsState assignments, PlansState plans, DateTime day) {
+double revenueForDay(
+  PlanAssignmentsState assignments,
+  PlansState plans,
+  DateTime day, {
+  double overtimeRate = kDefaultOvertimeHourlyRate,
+}) {
   final attended = AttendanceStore.instance.allOn(day);
   var total = 0.0;
   for (final entry in attended.entries) {
@@ -84,16 +91,22 @@ double revenueForDay(PlanAssignmentsState assignments, PlansState plans, DateTim
     }
     if (item == null) continue;
     final perDay = parsePlanPrice(item.price) / (item.daysPerCycle == 0 ? 1 : item.daysPerCycle);
-    total += perDay + entry.value.overtimeHours(item.hoursPerDay) * kOvertimeHourlyRate;
+    total += perDay + entry.value.overtimeHours(item.hoursPerDay) * overtimeRate;
   }
   return total;
 }
 
 /// [revenueForDay] summed over every day in `[from, to)`.
-double revenueForRange(PlanAssignmentsState assignments, PlansState plans, DateTime from, DateTime to) {
+double revenueForRange(
+  PlanAssignmentsState assignments,
+  PlansState plans,
+  DateTime from,
+  DateTime to, {
+  double overtimeRate = kDefaultOvertimeHourlyRate,
+}) {
   var total = 0.0;
   for (var day = from; day.isBefore(to); day = day.add(const Duration(days: 1))) {
-    total += revenueForDay(assignments, plans, day);
+    total += revenueForDay(assignments, plans, day, overtimeRate: overtimeRate);
   }
   return total;
 }

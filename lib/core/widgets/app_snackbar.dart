@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_colors.dart';
+import '../../core/theme/app_palette.dart';
 
 /// Central place for all snackbars — one look everywhere, one place to
 /// restyle. Use [AppSnackbar.showSuccess]/[showError] instead of a raw
@@ -17,12 +18,13 @@ class AppSnackbar {
   }
 
   static void _show(BuildContext context, {required String message, required IconData icon, required Color color}) {
+  final palette = context.palette;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.white,
+          backgroundColor: palette.card,
           elevation: 4,
           margin: EdgeInsets.all(16.w),
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
@@ -35,7 +37,7 @@ class AppSnackbar {
               Expanded(
                 child: Text(
                   message,
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: palette.textPrimary),
                 ),
               ),
             ],

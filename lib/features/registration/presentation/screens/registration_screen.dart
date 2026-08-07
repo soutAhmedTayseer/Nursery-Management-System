@@ -22,6 +22,7 @@ import '../widgets/emergency_contact_section.dart';
 import '../widgets/registration_form_section.dart';
 import '../widgets/registration_input_field.dart';
 import '../widgets/plan_picker_section.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// One row of the field grid — one or two fields that must line up together.
 class _FieldRow {
@@ -253,6 +254,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final spacing = AppSpacing.of(context);
     final stepLabels = [
       'registration_step_child'.tr(),
@@ -386,7 +388,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
       RegistrationFormSection(
         title: 'registration_section_father'.tr(),
         icon: Icons.male_rounded,
-        accentColor: AppColors.textSecondary,
+        accentColor: palette.textSecondary,
         children: [
           _fieldRows(context, spacing, [
             _FieldRow(
@@ -467,7 +469,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
             style: TextStyle(
               fontSize: (10 * context.uiScale).sp,
               fontWeight: FontWeight.w800,
-              color: AppColors.textTertiary,
+              color: palette.textTertiary,
               letterSpacing: 1.1,
             ),
           ),
@@ -478,7 +480,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 : _allergies.join(', '),
             style: TextStyle(
               fontSize: (14 * context.uiScale).sp,
-              color: AppColors.textPrimary,
+              color: palette.textPrimary,
             ),
           ),
           SizedBox(height: spacing.lg),
@@ -487,7 +489,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
             style: TextStyle(
               fontSize: (13 * context.uiScale).sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: palette.textPrimary,
             ),
           ),
           RadioListTile<bool>(
@@ -518,7 +520,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
             style: TextStyle(
               fontSize: (10 * context.uiScale).sp,
               fontWeight: FontWeight.w800,
-              color: AppColors.textTertiary,
+              color: palette.textTertiary,
               letterSpacing: 1.1,
             ),
           ),
@@ -527,7 +529,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
             _todayLabel(),
             style: TextStyle(
               fontSize: (14 * context.uiScale).sp,
-              color: AppColors.textPrimary,
+              color: palette.textPrimary,
             ),
           ),
           SizedBox(height: spacing.lg),
@@ -561,7 +563,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.surfacePage,
+        backgroundColor: palette.page,
         // Default keyboard behavior: Scaffold resizes the body so the
         // focused field stays above the keyboard instead of being covered by
         // it, and the per-page SingleChildScrollView auto-scrolls the
@@ -632,7 +634,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                               style: TextStyle(
                                 fontSize: (14 * context.uiScale).sp,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade600,
+                                color: palette.textSecondary,
                                 letterSpacing: 1.5,
                               ),
                             ),
@@ -646,7 +648,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                             ),
                             style: TextStyle(
                               fontSize: (13 * context.uiScale).sp,
-                              color: Colors.grey.shade500,
+                              color: palette.textTertiary,
                               fontWeight: FontWeight.w600,
                             ),
                           )
@@ -690,7 +692,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                                       style: TextStyle(
                                         fontSize: (16 * scale).sp,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        color: palette.card,
                                       ),
                                     ),
                             );
@@ -765,6 +767,7 @@ class _StepDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final scale = context.uiScale;
     return InkWell(
       onTap: onTap,
@@ -789,7 +792,7 @@ class _StepDot extends StatelessWidget {
                     style: TextStyle(
                       fontSize: (13 * scale).sp,
                       fontWeight: FontWeight.bold,
-                      color: isActive ? Colors.white : Colors.grey.shade500,
+                      color: isActive ? Colors.white : palette.textTertiary,
                     ),
                   ),
           ),
@@ -799,7 +802,7 @@ class _StepDot extends StatelessWidget {
             style: TextStyle(
               fontSize: (11 * scale).sp,
               fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive ? AppColors.leafGreen : Colors.grey.shade500,
+              color: isActive ? AppColors.leafGreen : palette.textTertiary,
             ),
           ),
         ],

@@ -11,6 +11,7 @@ import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../auth/data/repositories/auth_repository.dart';
 import '../cubit/admin_main_layout_cubit.dart';
 import 'sidebar_item.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class AdminSidebar extends StatelessWidget {
   const AdminSidebar({super.key, this.forceFull = false});
@@ -22,6 +23,7 @@ class AdminSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final cubit = context.watch<AdminMainLayoutCubit>();
     final showFull = forceFull || context.isExpanded;
     final spacing = AppSpacing.of(context);
@@ -58,7 +60,7 @@ class AdminSidebar extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('sidebar_brand_name'.tr(), overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
-                          Text('sidebar_brand_subtitle'.tr(), overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600)),
+                          Text('sidebar_brand_subtitle'.tr(), overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10.sp, color: palette.textSecondary)),
                         ],
                       ),
                     ),
@@ -92,9 +94,9 @@ class AdminSidebar extends StatelessWidget {
 
           // Bottom Actions (Support, Logout)
           SizedBox(height: 16.h),
-          _buildBottomAction(Icons.help_outline, 'sidebar_support'.tr(), iconOnly: !showFull),
+          _buildBottomAction(context, Icons.help_outline, 'sidebar_support'.tr(), iconOnly: !showFull),
           SizedBox(height: 12.h),
-          _buildBottomAction(
+          _buildBottomAction(context, 
             Icons.logout,
             'sidebar_logout'.tr(),
             onTap: () => _handleLogout(context),
@@ -105,8 +107,10 @@ class AdminSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomAction(IconData icon, String title, {VoidCallback? onTap, bool iconOnly = false}) {
-    final iconWidget = Icon(icon, color: Colors.grey.shade600, size: 20.w);
+  Widget _buildBottomAction(BuildContext context, IconData icon, String title, {VoidCallback? onTap, bool iconOnly = false}) {
+
+  final palette = context.palette;
+    final iconWidget = Icon(icon, color: palette.textSecondary, size: 20.w);
 
     return InkWell(
       onTap: onTap,
@@ -119,7 +123,7 @@ class AdminSidebar extends StatelessWidget {
                   iconWidget,
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: Text(title, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
+                    child: Text(title, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14.sp, color: palette.textSecondary, fontWeight: FontWeight.w500)),
                   ),
                 ],
               ),

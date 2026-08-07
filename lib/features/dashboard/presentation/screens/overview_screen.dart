@@ -18,7 +18,8 @@ import '../../../finance/presentation/cubit/finance_cubit.dart';
 import '../../../finance/presentation/cubit/finance_state.dart';
 import '../../../sessions/data/repositories/sessions_repository.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
-import '../../../settings/presentation/cubit/nursery_settings_cubit.dart';
+import '../../../settings/data/app_settings.dart';
+import '../../../settings/presentation/cubit/app_settings_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_state.dart';
 import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
@@ -28,6 +29,7 @@ import '../cubit/overview_state.dart';
 import '../widgets/alerts_notifications_section.dart';
 import '../widgets/dashboard_stat_card.dart';
 import '../widgets/live_activity_feed.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Finance index in AdminMainLayoutScreen's nav — see that file's `screens`
 /// list. Kept as a constant here rather than threading a callback through,
@@ -40,6 +42,7 @@ class OverviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final spacing = AppSpacing.of(context);
     final isCompact = context.isCompact;
 
@@ -54,18 +57,21 @@ class OverviewScreen extends StatelessWidget {
         builder: (context) => BlocListener<SessionsCubit, SessionsState>(
           listener: (context, _) => context.read<OverviewCubit>().fetchDashboardData(),
           child: BlocBuilder<OverviewCubit, OverviewState>(
-          builder: (context, overview) => BlocBuilder<NurserySettingsCubit, int>(
-            builder: (context, capacity) =>
+          builder: (context, overview) => BlocBuilder<AppSettingsCubit, AppSettings>(
+            builder: (context, appSettings) =>
                 BlocBuilder<PlanAssignmentsCubit, PlanAssignmentsState>(
                   builder: (context, assignments) =>
                       BlocBuilder<PlansCubit, PlansState>(
                         builder: (context, plans) =>
                             BlocBuilder<FinanceCubit, FinanceState>(
                               builder: (context, finance) {
+                                final capacity = appSettings.capacity;
+                                final overtimeRate = appSettings.overtimeHourlyRate;
                                 final records = derivePaymentRecords(
                                   assignments,
                                   plans,
                                   finance,
+                                  overtimeRate: overtimeRate,
                                 );
                                 // Settled invoices are no longer owed.
                                 final pendingDues = records.fold<double>(
@@ -167,7 +173,7 @@ class OverviewScreen extends StatelessWidget {
                                       );
 
                                 return Scaffold(
-                                  backgroundColor: AppColors.surfacePage,
+                                  backgroundColor: palette.page,
                                   body: Padding(
                                     padding: EdgeInsets.all(
                                       spacing.pagePadding,
@@ -332,7 +338,7 @@ class OverviewScreen extends StatelessWidget {
   }
 
   Future<void> _editCapacity(BuildContext context, int currentCapacity) async {
-    final cubit = context.read<NurserySettingsCubit>();
+    final cubit = context.read<AppSettingsCubit>();
     final controller = TextEditingController(text: '$currentCapacity');
     final newCapacity = await showDialog<int>(
       context: context,
@@ -360,7 +366,7 @@ class OverviewScreen extends StatelessWidget {
         ],
       ),
     );
-    if (newCapacity != null && newCapacity > 0) cubit.setCapacity(newCapacity);
+    if (newCapacity != null && newCapacity > 0) cubit.updateNursery(capacity: newCapacity);
   }
 
   Widget _buildProgressBar(double percentage, Color color) {

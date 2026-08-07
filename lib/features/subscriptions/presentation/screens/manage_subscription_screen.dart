@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../widgets/financial_dues_tab.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Standalone full-screen wrapper around [FinancialDuesTab]. Most
 /// navigation now goes through ChildProfileDetailsScreen's Financial Dues
@@ -15,6 +16,7 @@ class ManageSubscriptionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Scaffold(
       backgroundColor: AppColors.surfaceIvory,
       appBar: AppBar(
@@ -27,7 +29,7 @@ class ManageSubscriptionScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(16.r),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: palette.card,
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))],
               ),

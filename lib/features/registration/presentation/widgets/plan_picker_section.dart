@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../subscriptions/data/models/subscription_plan.dart';
 import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plans_state.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Picks a real subscription plan for the child being registered — replaces
 /// the old manual timing/fees/hours fields with values derived from the
@@ -21,6 +22,7 @@ class PlanPickerSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final scale = context.uiScale;
     return BlocBuilder<PlansCubit, PlansState>(
       builder: (context, state) {
@@ -33,17 +35,17 @@ class PlanPickerSection extends StatelessWidget {
             children: [
               Text(
                 'registration_label_plan'.tr().toUpperCase(),
-                style: TextStyle(fontSize: (10 * scale).sp, fontWeight: FontWeight.w800, color: AppColors.textTertiary, letterSpacing: 1.1),
+                style: TextStyle(fontSize: (10 * scale).sp, fontWeight: FontWeight.w800, color: palette.textTertiary, letterSpacing: 1.1),
               ),
               SizedBox(height: 8.h),
               Container(
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.r)),
+                decoration: BoxDecoration(color: palette.card, borderRadius: BorderRadius.circular(8.r)),
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: selectedCompositeId,
                     isExpanded: true,
-                    hint: Text('registration_hint_plan'.tr(), style: TextStyle(fontSize: (14 * scale).sp, color: Colors.grey.shade400)),
+                    hint: Text('registration_hint_plan'.tr(), style: TextStyle(fontSize: (14 * scale).sp, color: palette.textTertiary)),
                     padding: EdgeInsets.symmetric(vertical: 4.h),
                     items: [
                       for (final category in state.categories)
@@ -110,10 +112,11 @@ class _DerivedStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: AppColors.textTertiary, letterSpacing: 0.6)),
+        Text(label, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: palette.textTertiary, letterSpacing: 0.6)),
         SizedBox(height: 4.h),
         Text(value, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.darkGreen)),
       ],

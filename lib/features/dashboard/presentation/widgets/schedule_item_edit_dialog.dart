@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/schedule_item.dart';
+import '../../../../core/theme/app_palette.dart';
 
 const _kNewItemIcon = Icons.event_note_outlined;
 const _kNewItemColor = AppColors.schedulePastelSage;
@@ -68,9 +69,10 @@ class _ScheduleItemEditDialogState extends State<ScheduleItemEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final isEdit = widget.existing != null;
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: palette.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.r)),
       child: Padding(
         padding: EdgeInsets.all(28.w),
@@ -80,7 +82,7 @@ class _ScheduleItemEditDialogState extends State<ScheduleItemEditDialog> {
           children: [
             Text(
               isEdit ? 'schedule_edit_title'.tr() : 'schedule_add_title'.tr(),
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: palette.textPrimary),
             ),
             SizedBox(height: 20.h),
             _StyledField(label: 'schedule_field_title'.tr(), controller: _titleController),
@@ -100,7 +102,7 @@ class _ScheduleItemEditDialogState extends State<ScheduleItemEditDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('action_cancel'.tr(), style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                  child: Text('action_cancel'.tr(), style: TextStyle(color: palette.textSecondary, fontWeight: FontWeight.bold)),
                 ),
                 SizedBox(width: 12.w),
                 ElevatedButton(
@@ -130,10 +132,11 @@ class _StyledField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+        Text(label, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: palette.textSecondary)),
         SizedBox(height: 8.h),
         TextField(
           controller: controller,
@@ -159,10 +162,11 @@ class _TimeField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+        Text(label, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: palette.textSecondary)),
         SizedBox(height: 8.h),
         InkWell(
           borderRadius: BorderRadius.circular(16.r),
@@ -170,7 +174,7 @@ class _TimeField extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             decoration: BoxDecoration(color: AppColors.surfaceSand, borderRadius: BorderRadius.circular(16.r)),
-            child: Text(time.format(context), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            child: Text(time.format(context), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
           ),
         ),
       ],

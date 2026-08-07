@@ -13,6 +13,7 @@ import '../../../../core/theme/app_fonts.dart';
 import '../../../../core/utils/kid_photo_provider.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Left-column profile card on the Child Profile Details screen: photo,
 /// name, age, allergy chips, emergency contact, and QR — matches the Figma
@@ -55,9 +56,10 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final kid = widget.childData.kid;
     return Container(
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(48.r)),
+      decoration: BoxDecoration(color: palette.card, borderRadius: BorderRadius.circular(48.r)),
       padding: EdgeInsets.all(32.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +102,7 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
                       decoration: BoxDecoration(
                         color: AppColors.darkGreen,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3.w),
+                        border: Border.all(color: palette.card, width: 3.w),
                       ),
                       child: Icon(Icons.camera_alt, size: 13.w, color: Colors.white),
                     ),
@@ -113,18 +115,18 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
           Text(
             kid.fullName,
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: AppFonts.jakarta, fontSize: 22.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            style: TextStyle(fontFamily: AppFonts.jakarta, fontSize: 22.sp, fontWeight: FontWeight.bold, color: palette.textPrimary),
           ),
           SizedBox(height: 4.h),
           Text(
             'child_profile_age_label'.tr(namedArgs: {'age': '$_ageYears'}),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: palette.textSecondary),
           ),
           SizedBox(height: 24.h),
 
           if (_allergies.isNotEmpty) ...[
-            Text('child_profile_allergies_label'.tr(), style: _sectionLabelStyle()),
+            Text('child_profile_allergies_label'.tr(), style: _sectionLabelStyle(context)),
             SizedBox(height: 10.h),
             Wrap(
               spacing: 8.w,
@@ -159,14 +161,14 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
                 SizedBox(height: 14.h),
                 Row(
                   children: [
-                    _iconBadge(Icons.person),
+                    _iconBadge(context, Icons.person),
                     SizedBox(width: 14.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(kid.emergencyContactName, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                          Text('child_profile_emergency_relation'.tr(), style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
+                          Text(kid.emergencyContactName, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
+                          Text('child_profile_emergency_relation'.tr(), style: TextStyle(fontSize: 11.sp, color: palette.textSecondary)),
                         ],
                       ),
                     ),
@@ -175,14 +177,14 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
                 SizedBox(height: 14.h),
                 Row(
                   children: [
-                    _iconBadge(Icons.call),
+                    _iconBadge(context, Icons.call),
                     SizedBox(width: 14.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(kid.emergencyContactPhone, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                          Text('child_profile_primary_number'.tr(), style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
+                          Text(kid.emergencyContactPhone, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
+                          Text('child_profile_primary_number'.tr(), style: TextStyle(fontSize: 11.sp, color: palette.textSecondary)),
                         ],
                       ),
                     ),
@@ -192,25 +194,27 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
             ),
           ),
           SizedBox(height: 20.h),
-          _buildQrSection(kid),
+          _buildQrSection(context, kid),
         ],
       ),
     );
   }
 
-  Widget _buildQrSection(Kid kid) {
+  Widget _buildQrSection(BuildContext context, Kid kid) {
+
+  final palette = context.palette;
     final payload = kid.qrPayload;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(color: AppColors.surfaceCream, borderRadius: BorderRadius.circular(24.r)),
+      decoration: BoxDecoration(color: palette.cardMuted, borderRadius: BorderRadius.circular(24.r)),
       child: Row(
         children: [
           Container(
             width: 96.w,
             height: 96.w,
             padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r)),
+            decoration: BoxDecoration(color: palette.card, borderRadius: BorderRadius.circular(16.r)),
             child: payload == null
                 ? Icon(Icons.qr_code_2, size: 48.w, color: Colors.grey.shade300)
                 : QrImageView(data: payload, backgroundColor: Colors.white),
@@ -220,9 +224,9 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('child_profile_qr_title'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                Text('child_profile_qr_title'.tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: palette.textPrimary)),
                 SizedBox(height: 4.h),
-                Text('child_profile_qr_subtitle'.tr(), style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
+                Text('child_profile_qr_subtitle'.tr(), style: TextStyle(fontSize: 12.sp, color: palette.textSecondary)),
               ],
             ),
           ),
@@ -231,14 +235,17 @@ class _ChildProfileCardState extends State<ChildProfileCard> {
     );
   }
 
-  TextStyle _sectionLabelStyle() => TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 1);
+  TextStyle _sectionLabelStyle(BuildContext context) =>
+      TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: context.palette.textSecondary, letterSpacing: 1);
 
-  Widget _iconBadge(IconData icon) {
+  Widget _iconBadge(BuildContext context, IconData icon) {
+
+  final palette = context.palette;
     return Container(
       width: 36.w,
       height: 36.w,
-      decoration: const BoxDecoration(color: AppColors.neutralChip, shape: BoxShape.circle),
-      child: Icon(icon, size: 16.w, color: AppColors.textSecondary),
+      decoration: BoxDecoration(color: palette.chip, shape: BoxShape.circle),
+      child: Icon(icon, size: 16.w, color: palette.textSecondary),
     );
   }
 }

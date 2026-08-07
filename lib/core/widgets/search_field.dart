@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/app_colors.dart';
+import '../../core/theme/app_palette.dart';
 
 /// Debounced pill search field shared by the sessions and subscriptions grids.
 class SearchField extends StatefulWidget {
@@ -40,10 +41,11 @@ class _SearchFieldState extends State<SearchField> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       height: 52.h,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: palette.card,
         borderRadius: BorderRadius.circular(26.r),
         border: Border.all(color: AppColors.accentGreen.withValues(alpha: 0.12)),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 16, offset: const Offset(0, 8))],
@@ -51,15 +53,15 @@ class _SearchFieldState extends State<SearchField> {
       child: TextField(
         controller: _controller,
         onChanged: _onChanged,
-        style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
+        style: TextStyle(fontSize: 14.sp, color: palette.textPrimary),
         decoration: InputDecoration(
           hintText: widget.hint,
-          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
+          hintStyle: TextStyle(color: palette.textTertiary, fontSize: 14.sp),
           prefixIcon: Icon(Icons.search_rounded, color: AppColors.accentGreen, size: 22.w),
           suffixIcon: _controller.text.isEmpty
               ? null
               : IconButton(
-                  icon: Icon(Icons.close_rounded, color: Colors.grey.shade400, size: 18.w),
+                  icon: Icon(Icons.close_rounded, color: palette.textTertiary, size: 18.w),
                   onPressed: _clear,
                 ),
           border: InputBorder.none,

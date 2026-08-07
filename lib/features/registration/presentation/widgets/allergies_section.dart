@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Common allergies as selectable chips instead of a free-text box — faster
 /// to fill, consistent data. "Other" reveals a small input; each entry typed
@@ -56,6 +57,7 @@ class _AllergiesSectionState extends State<AllergiesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final scale = context.uiScale;
     final chipTextSize = (12 * scale).sp;
     final inputTextSize = (14 * scale).sp;
@@ -113,7 +115,7 @@ class _AllergiesSectionState extends State<AllergiesSection> {
                             },
                             selectedColor: AppColors.accentGreen.withValues(alpha: 0.15),
                             checkmarkColor: AppColors.accentGreen,
-                            backgroundColor: Colors.white,
+                            backgroundColor: palette.card,
                             side: BorderSide(color: Colors.grey.shade300),
                           ),
                         for (final custom in _customAllergies)
@@ -133,7 +135,7 @@ class _AllergiesSectionState extends State<AllergiesSection> {
                           onSelected: (v) => setState(() => _otherSelected = v),
                           selectedColor: AppColors.accentGreen.withValues(alpha: 0.15),
                           checkmarkColor: AppColors.accentGreen,
-                          backgroundColor: Colors.white,
+                          backgroundColor: palette.card,
                           side: BorderSide(color: Colors.grey.shade300),
                         ),
                       ],
@@ -150,9 +152,9 @@ class _AllergiesSectionState extends State<AllergiesSection> {
                               style: TextStyle(fontSize: inputTextSize),
                               decoration: InputDecoration(
                                 hintText: 'allergy_other_hint'.tr(),
-                                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: inputTextSize),
+                                hintStyle: TextStyle(color: palette.textTertiary, fontSize: inputTextSize),
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: palette.card,
                                 contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: (14 * scale).h),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8.r),

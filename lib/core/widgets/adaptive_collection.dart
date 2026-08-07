@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../responsive/breakpoints.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
+import '../../core/theme/app_palette.dart';
 
 /// Horizontal placement of a column's header and its cells. Both use the
 /// same value, so a header always sits over the data it describes.
@@ -116,10 +116,11 @@ class AdaptiveCollection<T> extends StatelessWidget {
   }
 
   Widget _buildTable(BuildContext context) {
+  final palette = context.palette;
     final spacing = AppSpacing.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: palette.card,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Column(
@@ -169,7 +170,7 @@ class AdaptiveCollection<T> extends StatelessWidget {
                 ),
               ),
             ),
-            const Divider(height: AppSpacing.hairline, color: AppColors.surfaceSmoke),
+            Divider(height: AppSpacing.hairline, color: palette.divider),
           ],
         ],
       ),

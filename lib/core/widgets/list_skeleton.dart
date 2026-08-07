@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
+import '../../core/theme/app_palette.dart';
 
 /// Grey placeholder rows shown while a collection loads.
 ///
@@ -17,6 +17,7 @@ class ListSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final spacing = AppSpacing.of(context);
     return Column(
       children: List.generate(
@@ -26,7 +27,7 @@ class ListSkeleton extends StatelessWidget {
           child: Container(
             height: rowHeight,
             decoration: BoxDecoration(
-              color: AppColors.surfaceSmoke,
+              color: palette.divider,
               borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             ),
           ),
