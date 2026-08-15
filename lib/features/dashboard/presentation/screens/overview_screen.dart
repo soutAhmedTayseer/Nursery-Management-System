@@ -16,6 +16,7 @@ import '../../domain/nursery_alerts.dart';
 import '../../../finance/presentation/cubit/finance_cubit.dart';
 import '../../../finance/presentation/cubit/finance_state.dart';
 import '../../../sessions/data/repositories/sessions_repository.dart';
+import '../../data/repositories/dashboard_repository.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 import '../../../settings/data/app_settings.dart';
 import '../../../settings/presentation/cubit/app_settings_cubit.dart';
@@ -47,7 +48,8 @@ class OverviewScreen extends StatelessWidget {
 
     return BlocProvider(
       create: (_) =>
-          OverviewCubit(sl<SessionsRepository>())..fetchDashboardData(),
+          OverviewCubit(sl<SessionsRepository>(), sl<DashboardRepository>())
+            ..fetchDashboardData(),
       child: Builder(
         // Clocking a child in/out anywhere (Sessions grid, QR scan, or the
         // "Check Out" action on an alert right here) changes today's
