@@ -19,9 +19,9 @@ class _NoTokens implements TokenStorage {
 
 /// Records every request and replies with one canned body.
 class _StubAdapter implements HttpClientAdapter {
-  _StubAdapter({this.status = 200, this.body = const {}});
+  _StubAdapter({this.body = const {}});
 
-  int status;
+  int status = 200;
   Map<String, dynamic> body;
 
   final List<String> paths = [];

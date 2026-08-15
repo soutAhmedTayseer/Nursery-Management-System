@@ -1,5 +1,6 @@
 import 'package:nursery_shared/nursery_shared.dart';
 
+import '../../../../core/services/qr_code_service.dart';
 import '../../../../core/testing/attendance_store.dart';
 import '../../../../core/testing/demo_photo_store.dart';
 import '../../../../core/testing/demo_seed.dart';
@@ -126,7 +127,12 @@ class FakeSessionsRepository implements SessionsRepository {
   }
 
   @override
-  Future<KidSession?> clockToggle(String kidId) async {
+  Future<KidSession?> clockToggle(String qrPayload) async {
+    // Offline stand-in for the server validating the payload. The real codes
+    // are signed and verified server-side (contract §5); these only have to be
+    // scannable without a backend.
+    final kidId = QrCodeService.verify(qrPayload);
+    if (kidId == null) return null;
     final index = _seed.indexWhere((e) => e.kid.id == kidId);
     if (index == -1) return null;
     return _seed[index].isCheckedIn ? checkOut(kidId) : checkIn(kidId);

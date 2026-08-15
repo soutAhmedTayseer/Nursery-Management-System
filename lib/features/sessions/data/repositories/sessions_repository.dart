@@ -32,6 +32,11 @@ abstract class SessionsRepository {
   /// Adds a newly registered kid to the roster, not yet checked in.
   /// [planLabel] is the display name of the plan picked at registration,
   /// e.g. "Monthly Packages · 3 hours / 5 Days".
+  ///
+  /// A no-op in the API implementation — `POST /kids` already created the kid
+  /// and the roster is derived server-side. It stays on the interface because
+  /// the fake keeps its own roster list, which would otherwise never see a
+  /// newly registered child when the app runs offline.
   Future<void> addKid(Kid kid, {required String planLabel});
 
   /// Opens a new session for [kidId]. No-op if already checked in.
@@ -40,10 +45,14 @@ abstract class SessionsRepository {
   /// Closes [kidId]'s open session. No-op if already checked out.
   Future<KidSession?> checkOut(String kidId);
 
-  /// Flips [kidId]'s current checked-in state — used by the QR scan flow,
-  /// which only knows a kid id, not their current state. Returns null if no
-  /// kid matches [kidId] (a malformed/unrecognized scan).
-  Future<KidSession?> clockToggle(String kidId);
+  /// Flips the scanned kid's checked-in state.
+  ///
+  /// Takes the raw [qrPayload], not a kid id: the payload is signed and
+  /// verified server-side (contract §5), so the client cannot decode it, and
+  /// the server is also the only party that can decide the direction without
+  /// racing a second admin scanning the same child. Returns null for a payload
+  /// that matches no kid.
+  Future<KidSession?> clockToggle(String qrPayload);
 
   /// Updates [kidId]'s photo (local file path or URL). No-op if no kid
   /// matches.

@@ -9,6 +9,7 @@ import '../../features/auth/data/repositories/fake_auth_repository.dart';
 import '../../features/kids/data/repositories/api_kids_repository.dart';
 import '../../features/kids/data/repositories/fake_kids_repository.dart';
 import '../../features/kids/data/repositories/kids_repository.dart';
+import '../../features/sessions/data/repositories/api_sessions_repository.dart';
 import '../../features/sessions/data/repositories/fake_sessions_repository.dart';
 import '../../features/sessions/data/repositories/sessions_repository.dart';
 import '../../features/sessions/presentation/cubit/sessions_cubit.dart';
@@ -38,9 +39,11 @@ Future<void> setupLocator({required String baseUrl}) async {
   );
   sl.registerLazySingleton<FakeFailureSwitch>(() => FakeFailureSwitch());
 
-  // --- Repositories (swap these at integration) ---
+  // --- Sessions (integrated: Phase 3) ---
   sl.registerLazySingleton<SessionsRepository>(
-    () => FakeSessionsRepository(failureSwitch: sl<FakeFailureSwitch>()),
+    () => useFakes
+        ? FakeSessionsRepository(failureSwitch: sl<FakeFailureSwitch>())
+        : ApiSessionsRepository(sl<ApiClient>()),
   );
 
   // --- Kids (integrated: Phase 2) ---

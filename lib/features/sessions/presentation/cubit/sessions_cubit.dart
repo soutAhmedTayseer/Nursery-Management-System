@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nursery_shared/nursery_shared.dart';
 
-import '../../../../core/services/qr_code_service.dart';
 import '../../data/models/kid_session.dart';
 import '../../data/repositories/sessions_repository.dart';
 
@@ -50,13 +49,14 @@ class SessionsCubit extends Cubit<SessionsState> {
     await _fetch();
   }
 
-  /// Decodes a scanned QR payload and clocks that kid in or out, whichever
-  /// is the opposite of their current state. Returns the kid's display name
-  /// on success, or null if the payload didn't verify or matched no kid.
+  /// Clocks the scanned kid in or out, whichever is the opposite of their
+  /// current state. Returns the kid's display name on success, or null if the
+  /// payload matched no kid.
+  ///
+  /// The payload is passed through untouched — it is signed and verified
+  /// server-side (contract §5), so the client neither decodes nor trusts it.
   Future<String?> handleQrScan(String payload) async {
-    final kidId = QrCodeService.verify(payload);
-    if (kidId == null) return null;
-    final updated = await _repository.clockToggle(kidId);
+    final updated = await _repository.clockToggle(payload);
     if (updated == null) return null;
     await _fetch();
     return updated.kid.fullName;

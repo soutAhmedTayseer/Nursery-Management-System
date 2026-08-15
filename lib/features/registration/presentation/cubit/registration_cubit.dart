@@ -43,10 +43,10 @@ class RegistrationCubit extends Cubit<RegistrationState> {
         allergies: allergies,
       );
 
-      // ponytail: Sessions is still fake, and addKid is what puts a child on
-      // the roster. Without this the new child would create fine and then
-      // vanish from the Sessions screen. Phase 3 wires Sessions to the API and
-      // deletes this call.
+      // A no-op against the API — the roster is derived server-side from the
+      // kid that was just created. It stays because the fake keeps its own
+      // roster list, which would otherwise never see a newly registered child
+      // when the app runs offline.
       await _sessionsRepository.addKid(
         kid,
         planLabel: '${planCategory.name} · ${planItem.label}',

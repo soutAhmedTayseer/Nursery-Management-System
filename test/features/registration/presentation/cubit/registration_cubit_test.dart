@@ -110,8 +110,8 @@ void main() {
     build: () => RegistrationCubit(kids, sessions),
     act: register,
     verify: (_) {
-      // Sessions is still fake this phase; without this the child would be
-      // created and then vanish from the roster.
+      // A no-op against the API, but the offline roster is a separate list and
+      // would otherwise never see the new child.
       verify(() => sessions.addKid(_serverKid,
           planLabel: 'Monthly Packages · 3 hours / 5 Days')).called(1);
     },
