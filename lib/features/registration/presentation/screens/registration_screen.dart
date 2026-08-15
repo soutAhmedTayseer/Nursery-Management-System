@@ -10,6 +10,7 @@ import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../kids/data/repositories/kids_repository.dart';
 import '../../../sessions/data/repositories/sessions_repository.dart';
 import '../../../subscriptions/data/models/subscription_plan.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
@@ -38,7 +39,7 @@ class RegistrationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => RegistrationCubit(sl<SessionsRepository>()),
+      create: (context) => RegistrationCubit(sl<KidsRepository>(), sl<SessionsRepository>()),
       child: const _RegistrationPager(),
     );
   }

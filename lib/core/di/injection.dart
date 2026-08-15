@@ -6,6 +6,9 @@ import '../../features/admin_splash/presentation/cubit/splash_cubit.dart';
 import '../../features/auth/data/repositories/api_auth_repository.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
 import '../../features/auth/data/repositories/fake_auth_repository.dart';
+import '../../features/kids/data/repositories/api_kids_repository.dart';
+import '../../features/kids/data/repositories/fake_kids_repository.dart';
+import '../../features/kids/data/repositories/kids_repository.dart';
 import '../../features/sessions/data/repositories/fake_sessions_repository.dart';
 import '../../features/sessions/data/repositories/sessions_repository.dart';
 import '../../features/sessions/presentation/cubit/sessions_cubit.dart';
@@ -38,6 +41,13 @@ Future<void> setupLocator({required String baseUrl}) async {
   // --- Repositories (swap these at integration) ---
   sl.registerLazySingleton<SessionsRepository>(
     () => FakeSessionsRepository(failureSwitch: sl<FakeFailureSwitch>()),
+  );
+
+  // --- Kids (integrated: Phase 2) ---
+  sl.registerLazySingleton<KidsRepository>(
+    () => useFakes
+        ? FakeKidsRepository(failureSwitch: sl<FakeFailureSwitch>())
+        : ApiKidsRepository(sl<ApiClient>()),
   );
 
   // --- Auth (integrated: Phase 1) ---
