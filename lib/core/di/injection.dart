@@ -13,6 +13,7 @@ import '../../features/finance/data/repositories/finance_repository.dart';
 import '../../features/kids/data/repositories/api_kids_repository.dart';
 import '../../features/kids/data/repositories/fake_kids_repository.dart';
 import '../../features/kids/data/repositories/kids_repository.dart';
+import '../../features/notifications/data/repositories/notifications_repository.dart';
 import '../../features/sessions/data/repositories/api_sessions_repository.dart';
 import '../../features/sessions/data/repositories/fake_sessions_repository.dart';
 import '../../features/sessions/data/repositories/sessions_repository.dart';
@@ -104,6 +105,13 @@ Future<void> setupLocator({required String baseUrl}) async {
     () => useFakes
         ? FakeSettingsRepository(failureSwitch: sl<FakeFailureSwitch>())
         : ApiSettingsRepository(sl<ApiClient>()),
+  );
+
+  // --- Notifications & devices (integrated: Phase 7) ---
+  sl.registerLazySingleton<NotificationsRepository>(
+    () => useFakes
+        ? FakeNotificationsRepository(failureSwitch: sl<FakeFailureSwitch>())
+        : ApiNotificationsRepository(sl<ApiClient>()),
   );
 
   // --- Cubits ---
