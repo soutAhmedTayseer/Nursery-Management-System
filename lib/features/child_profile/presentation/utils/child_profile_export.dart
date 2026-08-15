@@ -7,7 +7,10 @@ import 'package:flutter/material.dart';
 
 import '../../../sessions/data/models/kid_session.dart';
 import '../../../subscriptions/data/models/subscription_plan.dart';
-import '../cubit/attendance_cubit.dart';
+import 'package:nursery_shared/nursery_shared.dart';
+
+import '../../../../core/di/injection.dart';
+import '../../data/repositories/attendance_repository.dart';
 import '../cubit/attendance_state.dart';
 
 String _csvField(String value) {
@@ -17,22 +20,32 @@ String _csvField(String value) {
 }
 
 /// Every month's [AttendanceState] from the child's join month through the
-/// currently-viewed month, generated via the same deterministic mock cubit
-/// the Attendance Log tab uses — there's no backend endpoint for historical
-/// attendance yet, so this recreates each month's calendar rather than
-/// storing a separate copy of it.
-List<AttendanceState> _fullAttendanceHistory(String kidId, DateTime joinDate, DateTime throughMonth) {
-  final cubit = AttendanceCubit(kidId);
+/// currently-viewed month, read one month at a time from the attendance
+/// endpoint — the same source the Attendance Log tab draws.
+///
+/// A month that fails to load is skipped rather than aborting the export: a
+/// partial history is more use to an admin than no file, and each month is an
+/// independent request.
+Future<List<AttendanceState>> _fullAttendanceHistory(
+  String kidId,
+  DateTime joinDate,
+  DateTime throughMonth,
+) async {
+  final repository = sl<AttendanceRepository>();
   final states = <AttendanceState>[];
   var cursor = DateTime(throughMonth.year, throughMonth.month);
   final start = DateTime(joinDate.year, joinDate.month);
+
   while (!cursor.isBefore(start)) {
-    states.add(cubit.state);
+    try {
+      final days = await repository.fetchMonth(kidId, cursor);
+      states.add(AttendanceState(month: cursor, days: days));
+    } on ApiException {
+      // Skip this month; the rest of the export still stands.
+    }
     if (cursor == start) break;
-    cubit.previousMonth();
     cursor = DateTime(cursor.year, cursor.month - 1);
   }
-  cubit.close();
   return states;
 }
 
@@ -58,7 +71,7 @@ Future<void> exportChildProfileCsv({
     ..writeln()
     ..writeln('Attendance Month,Days Present,Total Hours,Average Daily Stay (h)');
 
-  for (final month in _fullAttendanceHistory(kid.id, kid.createdAt, attendance.month)) {
+  for (final month in await _fullAttendanceHistory(kid.id, kid.createdAt, attendance.month)) {
     buffer.writeln(
       '${month.month.year}-${month.month.month.toString().padLeft(2, '0')},'
       '${month.presentDaysCount},${month.totalHours},${month.averageDailyStay.toStringAsFixed(1)}',

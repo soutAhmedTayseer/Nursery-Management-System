@@ -6,6 +6,7 @@ import '../../features/admin_splash/presentation/cubit/splash_cubit.dart';
 import '../../features/auth/data/repositories/api_auth_repository.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
 import '../../features/auth/data/repositories/fake_auth_repository.dart';
+import '../../features/child_profile/data/repositories/attendance_repository.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository.dart';
 import '../../features/finance/data/repositories/api_finance_repository.dart';
 import '../../features/finance/data/repositories/fake_finance_repository.dart';
@@ -112,6 +113,13 @@ Future<void> setupLocator({required String baseUrl}) async {
     () => useFakes
         ? FakeNotificationsRepository(failureSwitch: sl<FakeFailureSwitch>())
         : ApiNotificationsRepository(sl<ApiClient>()),
+  );
+
+  // --- Attendance calendar (integrated: Phase 8) ---
+  sl.registerLazySingleton<AttendanceRepository>(
+    () => useFakes
+        ? FakeAttendanceRepository(failureSwitch: sl<FakeFailureSwitch>())
+        : ApiAttendanceRepository(sl<ApiClient>()),
   );
 
   // --- Cubits ---

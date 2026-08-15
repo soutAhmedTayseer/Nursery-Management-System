@@ -18,7 +18,6 @@ import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_state.dart';
 import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plans_state.dart';
-import '../../../settings/presentation/cubit/app_settings_cubit.dart';
 import '../../data/models/finance_model.dart';
 import '../cubit/finance_cubit.dart';
 import '../cubit/finance_state.dart';
@@ -28,22 +27,6 @@ import '../utils/invoice_whatsapp.dart';
 import '../widgets/payment_card.dart';
 import '../widgets/revenue_chart.dart';
 import '../../../../core/theme/app_palette.dart';
-
-List<PaymentRecord> _filterRecords(List<PaymentRecord> records, String query, PenaltyFilter penaltyFilter) {
-  return records.where((p) {
-    final matchesQuery = query.isEmpty ||
-        p.parentName.toLowerCase().contains(query.toLowerCase()) ||
-        p.childName.toLowerCase().contains(query.toLowerCase());
-    final matchesPenalty = switch (penaltyFilter) {
-      PenaltyFilter.all => true,
-      PenaltyFilter.withPenalty => p.penaltyAmount > 0,
-      PenaltyFilter.withoutPenalty => p.penaltyAmount == 0,
-      PenaltyFilter.unpaid => !p.isPaid,
-      PenaltyFilter.paid => p.isPaid,
-    };
-    return matchesQuery && matchesPenalty;
-  }).toList();
-}
 
 class FinanceScreen extends StatelessWidget {
   const FinanceScreen({super.key});
@@ -599,7 +582,6 @@ class FinanceScreen extends StatelessWidget {
                         ],
                         onChanged: (value) => setDialogState(() {
                           selected = value;
-                          final newItem = lineItemFor(value);
                           overtimeCtrl.text = serverOvertime(value?.kidId).toStringAsFixed(1);
                         }),
                       ),

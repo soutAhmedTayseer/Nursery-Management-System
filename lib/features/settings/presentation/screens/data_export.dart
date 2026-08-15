@@ -11,7 +11,6 @@ import '../../../finance/presentation/cubit/audit_log_cubit.dart';
 import '../../../finance/presentation/cubit/finance_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
-import '../cubit/app_settings_cubit.dart';
 
 String _csvField(String value) {
   final needsQuoting = value.contains(',') || value.contains('"') || value.contains('\n');
@@ -25,10 +24,8 @@ String _csvField(String value) {
 /// hand over or archive before the backend exists.
 Future<void> exportAllDataCsv(BuildContext context) async {
   final assignments = context.read<PlanAssignmentsCubit>().state;
-  final plans = context.read<PlansCubit>().state;
   final finance = context.read<FinanceCubit>().state;
   final auditEntries = context.read<AuditLogCubit>().state;
-  final settings = context.read<AppSettingsCubit>().state;
 
   final buffer = StringBuffer()
     ..writeln('# Children & Plans')
