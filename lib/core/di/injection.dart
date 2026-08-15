@@ -3,6 +3,7 @@ import 'package:nursery_shared/nursery_shared.dart';
 
 import '../../features/admin_login/presentation/cubit/admin_login_cubit.dart';
 import '../../features/admin_splash/presentation/cubit/splash_cubit.dart';
+import '../../features/auth/data/repositories/api_auth_repository.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
 import '../../features/auth/data/repositories/fake_auth_repository.dart';
 import '../../features/sessions/data/repositories/fake_sessions_repository.dart';
@@ -12,10 +13,18 @@ import '../testing/fake_failure_switch.dart';
 
 final GetIt sl = GetIt.instance;
 
+/// Forces every repository back onto its fake implementation.
+///
+/// Integration lands one feature at a time: a phase flips its own registration
+/// below to the API implementation while the rest keep running on fakes, so
+/// each phase ships independently. `--dart-define=USE_FAKES=true` overrides the
+/// lot and runs the app fully offline — which is also how widget tests boot it.
+const useFakes = bool.fromEnvironment('USE_FAKES');
+
 /// Wires the whole app.
 ///
-/// Integration day: change each `Fake<X>Repository()` below to
-/// `Api<X>Repository(sl<ApiClient>())`. No screen, cubit or test changes.
+/// A registration still reading `Fake<X>Repository()` unconditionally has not
+/// been integrated yet; one reading the [useFakes] ternary has.
 Future<void> setupLocator({required String baseUrl}) async {
   if (sl.isRegistered<ApiClient>()) return;
 
@@ -31,12 +40,17 @@ Future<void> setupLocator({required String baseUrl}) async {
     () => FakeSessionsRepository(failureSwitch: sl<FakeFailureSwitch>()),
   );
 
-  // --- Auth ---
+  // --- Auth (integrated: Phase 1) ---
   sl.registerLazySingleton<AuthRepository>(
-    () => FakeAuthRepository(
-      tokenStorage: sl<TokenStorage>(),
-      failureSwitch: sl<FakeFailureSwitch>(),
-    ),
+    () => useFakes
+        ? FakeAuthRepository(
+            tokenStorage: sl<TokenStorage>(),
+            failureSwitch: sl<FakeFailureSwitch>(),
+          )
+        : ApiAuthRepository(
+            client: sl<ApiClient>(),
+            tokenStorage: sl<TokenStorage>(),
+          ),
   );
 
   // --- Cubits ---
