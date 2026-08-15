@@ -79,9 +79,9 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) => PlansCubit()),
-            BlocProvider(create: (_) => PlanAssignmentsCubit()),
-            BlocProvider(create: (_) => PlanHistoryCubit()),
+            BlocProvider(create: (_) => PlansCubit(sl())..load()),
+            BlocProvider(create: (_) => PlanAssignmentsCubit(sl())),
+            BlocProvider(create: (_) => PlanHistoryCubit(sl())),
             BlocProvider(create: (_) => FinanceCubit()),
             BlocProvider(create: (_) => AuditLogCubit()),
             BlocProvider(create: (_) => ScheduleCubit()),

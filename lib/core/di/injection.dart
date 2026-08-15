@@ -13,6 +13,9 @@ import '../../features/sessions/data/repositories/api_sessions_repository.dart';
 import '../../features/sessions/data/repositories/fake_sessions_repository.dart';
 import '../../features/sessions/data/repositories/sessions_repository.dart';
 import '../../features/sessions/presentation/cubit/sessions_cubit.dart';
+import '../../features/subscriptions/data/repositories/api_plans_repository.dart';
+import '../../features/subscriptions/data/repositories/fake_plans_repository.dart';
+import '../../features/subscriptions/data/repositories/plans_repository.dart';
 import '../testing/fake_failure_switch.dart';
 
 final GetIt sl = GetIt.instance;
@@ -64,6 +67,13 @@ Future<void> setupLocator({required String baseUrl}) async {
             client: sl<ApiClient>(),
             tokenStorage: sl<TokenStorage>(),
           ),
+  );
+
+  // --- Plans & subscriptions (integrated: Phase 4) ---
+  sl.registerLazySingleton<PlansRepository>(
+    () => useFakes
+        ? FakePlansRepository(failureSwitch: sl<FakeFailureSwitch>())
+        : ApiPlansRepository(sl<ApiClient>()),
   );
 
   // --- Cubits ---

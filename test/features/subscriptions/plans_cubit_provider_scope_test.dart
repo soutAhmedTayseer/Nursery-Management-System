@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nursery_management_system/features/subscriptions/data/repositories/fake_plans_repository.dart';
+import 'package:nursery_management_system/core/testing/fake_failure_switch.dart';
 import 'package:nursery_management_system/features/subscriptions/presentation/cubit/plans_cubit.dart';
 
 /// Regression test for the crash fixed alongside this batch: PlansCubit used
@@ -36,7 +38,7 @@ void main() {
           // wrapped directly around MaterialApp — NOT nested inside a
           // layout screen's subtree.
           builder: (context, child) => BlocProvider(
-            create: (_) => PlansCubit(),
+            create: (_) => PlansCubit(FakePlansRepository(failureSwitch: FakeFailureSwitch())),
             child: child!,
           ),
           home: Builder(
@@ -62,9 +64,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // No ProviderNotFoundException was thrown while building the pushed
-      // route, and the consumer read the real (non-empty) seeded catalog.
+      // route, and the consumer resolved the cubit and read its state.
+      //
+      // The count is 0, not the old seeded 3: the catalog is fetched from
+      // /plans now rather than held in memory, and this test never awaits that
+      // load. What it proves is unchanged and is the reason it exists --
+      // *where* the provider sits, not what the catalog contains.
       expect(tester.takeException(), isNull);
-      expect(find.textContaining('categories: 3'), findsOneWidget);
+      expect(find.textContaining('categories: 0'), findsOneWidget);
     },
   );
 }

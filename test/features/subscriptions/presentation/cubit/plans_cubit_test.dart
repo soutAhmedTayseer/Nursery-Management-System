@@ -1,83 +1,157 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:nursery_management_system/features/subscriptions/data/models/subscription_plan.dart';
+import 'package:nursery_management_system/features/subscriptions/data/repositories/plans_repository.dart';
 import 'package:nursery_management_system/features/subscriptions/presentation/cubit/plans_cubit.dart';
 import 'package:nursery_management_system/features/subscriptions/presentation/cubit/plans_state.dart';
+import 'package:nursery_shared/nursery_shared.dart';
 
-const _category = PlanCategory(
-  id: 'cat1',
-  name: 'Test Category',
-  icon: Icons.star,
-  themeColor: Colors.green,
-  lineItems: [PlanLineItem(id: 'li1', label: 'One Hour', price: '35 AED')],
+class _MockPlansRepository extends Mock implements PlansRepository {}
+
+Plan _plan(String id, {String category = 'Monthly Packages', String name = 'One Hour'}) => Plan(
+      id: id,
+      name: name,
+      category: category,
+      hoursIncluded: 1,
+      hoursPerDay: 1,
+      daysPerCycle: 1,
+      price: 35,
+      currency: 'AED',
+      badgeText: null,
+      isFeatured: false,
+      active: true,
+    );
+
+const _boom = ApiException(
+  code: 'SERVER_ERROR',
+  message: 'boom',
+  statusCode: 500,
 );
 
 void main() {
-  test('starts seeded with kInitialPlanCategories', () {
-    expect(PlansCubit().state.categories, kInitialPlanCategories);
+  late _MockPlansRepository repository;
+
+  setUp(() {
+    repository = _MockPlansRepository();
+    registerFallbackValue(_plan('fallback'));
   });
 
-  blocTest<PlansCubit, PlansState>(
-    'addCategory appends a new category',
-    build: PlansCubit.new,
-    act: (cubit) => cubit.addCategory(_category),
-    verify: (cubit) => expect(cubit.state.categories, contains(_category)),
-  );
+  group('load', () {
+    blocTest<PlansCubit, PlansState>(
+      'groups the flat plan list into categories',
+      setUp: () {
+        when(repository.fetchPlans).thenAnswer((_) async => [
+              _plan('p1', name: 'One Hour'),
+              _plan('p2', name: 'Two Hours'),
+              _plan('p3', category: 'Daily Subscription', name: 'Full Day'),
+            ]);
+      },
+      build: () => PlansCubit(repository),
+      act: (cubit) => cubit.load(),
+      verify: (cubit) {
+        expect(cubit.state.categories, hasLength(2));
+        expect(cubit.state.categories.first.name, 'Monthly Packages');
+        expect(cubit.state.categories.first.lineItems, hasLength(2));
+        // Numeric price becomes the display string the screen renders.
+        expect(cubit.state.categories.first.lineItems.first.price, '35 AED');
+        expect(cubit.state.error, isNull);
+      },
+    );
 
-  blocTest<PlansCubit, PlansState>(
-    'updateCategory replaces the category with matching id',
-    build: () => PlansCubit(seed: [_category]),
-    act: (cubit) => cubit.updateCategory(_category.copyWith(name: 'Renamed')),
-    verify: (cubit) => expect(cubit.state.categories.single.name, 'Renamed'),
-  );
-
-  blocTest<PlansCubit, PlansState>(
-    'deleteCategory removes the category with matching id',
-    build: () => PlansCubit(seed: [_category]),
-    act: (cubit) => cubit.deleteCategory('cat1'),
-    verify: (cubit) => expect(cubit.state.categories, isEmpty),
-  );
-
-  blocTest<PlansCubit, PlansState>(
-    'addLineItem appends to the named category',
-    build: () => PlansCubit(seed: [_category]),
-    act: (cubit) => cubit.addLineItem(
-      'cat1',
-      const PlanLineItem(id: 'li2', label: 'Two Hours', price: '60 AED'),
-    ),
-    verify: (cubit) =>
-        expect(cubit.state.categories.single.lineItems, hasLength(2)),
-  );
-
-  blocTest<PlansCubit, PlansState>(
-    'updateLineItem replaces the line item with matching id',
-    build: () => PlansCubit(seed: [_category]),
-    act: (cubit) => cubit.updateLineItem(
-      'cat1',
-      const PlanLineItem(id: 'li1', label: 'One Hour', price: '40 AED'),
-    ),
-    verify: (cubit) =>
-        expect(cubit.state.categories.single.lineItems.single.price, '40 AED'),
-  );
-
-  blocTest<PlansCubit, PlansState>(
-    'deleteLineItem removes the line item with matching id',
-    build: () => PlansCubit(seed: [_category]),
-    act: (cubit) => cubit.deleteLineItem('cat1', 'li1'),
-    verify: (cubit) =>
-        expect(cubit.state.categories.single.lineItems, isEmpty),
-  );
-
-  test('findLineItem returns the category and line item for matching ids', () {
-    final cubit = PlansCubit(seed: [_category]);
-    final result = cubit.findLineItem('cat1', 'li1');
-    expect(result?.$1.id, 'cat1');
-    expect(result?.$2.id, 'li1');
+    blocTest<PlansCubit, PlansState>(
+      'surfaces a failed read instead of showing an empty catalog',
+      setUp: () => when(repository.fetchPlans).thenThrow(_boom),
+      build: () => PlansCubit(repository),
+      act: (cubit) => cubit.load(),
+      verify: (cubit) {
+        expect(cubit.state.isLoading, isFalse);
+        expect(cubit.state.error, _boom);
+      },
+    );
   });
 
-  test('findLineItem returns null for unknown ids', () {
-    final cubit = PlansCubit(seed: [_category]);
-    expect(cubit.findLineItem('nope', 'li1'), isNull);
+  group('writes', () {
+    const item = PlanLineItem(id: 'li2', label: 'Two Hours', price: '60 AED');
+
+    blocTest<PlansCubit, PlansState>(
+      'addLineItem creates the plan and re-reads the catalog',
+      setUp: () {
+        when(repository.fetchPlans).thenAnswer((_) async => [_plan('p1')]);
+        when(() => repository.createPlan(any())).thenAnswer((i) async => i.positionalArguments.first as Plan);
+      },
+      build: () => PlansCubit(repository),
+      act: (cubit) async {
+        await cubit.load();
+        await cubit.addLineItem('monthly_packages', item);
+      },
+      verify: (_) {
+        verify(() => repository.createPlan(any())).called(1);
+        // Re-read so server-assigned ids replace anything the UI minted.
+        verify(repository.fetchPlans).called(2);
+      },
+    );
+
+    blocTest<PlansCubit, PlansState>(
+      'a rejected write rolls the catalog back and reports the error',
+      setUp: () {
+        when(repository.fetchPlans).thenAnswer((_) async => [_plan('p1')]);
+        when(() => repository.createPlan(any())).thenThrow(_boom);
+      },
+      build: () => PlansCubit(repository),
+      act: (cubit) async {
+        await cubit.load();
+        await cubit.addLineItem('monthly_packages', item);
+      },
+      verify: (cubit) {
+        // The point: a rejected edit must not be left on screen looking saved.
+        expect(cubit.state.categories.single.lineItems, hasLength(1));
+        expect(cubit.state.categories.single.lineItems.single.id, 'p1');
+        expect(cubit.state.error, _boom);
+      },
+    );
+
+    blocTest<PlansCubit, PlansState>(
+      'deleteLineItem deactivates rather than deleting',
+      setUp: () {
+        when(repository.fetchPlans).thenAnswer((_) async => [_plan('p1')]);
+        when(() => repository.deactivatePlan('p1')).thenAnswer((_) async => _plan('p1'));
+      },
+      build: () => PlansCubit(repository),
+      act: (cubit) async {
+        await cubit.load();
+        await cubit.deleteLineItem('monthly_packages', 'p1');
+      },
+      verify: (_) => verify(() => repository.deactivatePlan('p1')).called(1),
+    );
+
+    blocTest<PlansCubit, PlansState>(
+      'deleteCategory deactivates every plan under it',
+      setUp: () {
+        when(repository.fetchPlans).thenAnswer((_) async => [
+              _plan('p1', name: 'One Hour'),
+              _plan('p2', name: 'Two Hours'),
+            ]);
+        when(() => repository.deactivatePlan(any())).thenAnswer((_) async => _plan('p1'));
+      },
+      build: () => PlansCubit(repository),
+      act: (cubit) async {
+        await cubit.load();
+        await cubit.deleteCategory('monthly_packages');
+      },
+      verify: (_) {
+        verify(() => repository.deactivatePlan('p1')).called(1);
+        verify(() => repository.deactivatePlan('p2')).called(1);
+      },
+    );
+  });
+
+  test('findLineItem locates an item by category and id', () async {
+    when(repository.fetchPlans).thenAnswer((_) async => [_plan('p1')]);
+    final cubit = PlansCubit(repository);
+    await cubit.load();
+
+    expect(cubit.findLineItem('monthly_packages', 'p1'), isNotNull);
+    expect(cubit.findLineItem('monthly_packages', 'nope'), isNull);
   });
 }

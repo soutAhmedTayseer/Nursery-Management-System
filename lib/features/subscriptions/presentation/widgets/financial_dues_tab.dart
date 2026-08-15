@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -86,15 +88,12 @@ class _FinancialDuesTabState extends State<FinancialDuesTab> {
         ];
 
   void _applyPlan(PlanCategory category, PlanLineItem item) {
-    context.read<PlanHistoryCubit>().record(
-          widget.childData.kid.id,
-          PlanChangeEntry(
-            date: DateTime.now(),
-            oldPlanLabel: _currentPlanTitle,
-            newPlanLabel: item.label,
-            changedBy: 'Admin',
-          ),
-        );
+    // History is no longer written here: the server appends a PlanChange on
+    // every successful assignment (contract §2), which keeps the log honest
+    // even when a plan is later renamed. Re-read it instead of inventing a row.
+    unawaited(
+      context.read<PlanHistoryCubit>().loadForKid(widget.childData.kid.id),
+    );
     setState(() {
       _currentPlanTitle = item.label;
       _currentPlanPrice = item.price;

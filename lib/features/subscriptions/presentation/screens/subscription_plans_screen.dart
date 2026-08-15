@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/async_state_view.dart';
 import '../cubit/plans_cubit.dart';
 import '../cubit/plans_state.dart';
 import '../widgets/plan_category_card.dart';
@@ -34,6 +35,18 @@ class SubscriptionPlansScreen extends StatelessWidget {
             BlocBuilder<PlansCubit, PlansState>(
               builder: (context, state) {
                 final columns = _columnsFor(context);
+                // The catalog comes from the server now, so it can be loading
+                // or failed — neither was possible while it was in memory.
+                if (state.isLoading || state.error != null) {
+                  return AsyncStateView(
+                    isLoading: state.isLoading,
+                    error: state.error,
+                    isEmpty: false,
+                    onRetry: () => context.read<PlansCubit>().load(),
+                    emptyMessage: 'state_empty_title'.tr(),
+                    builder: (_) => const SizedBox.shrink(),
+                  );
+                }
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     final cardWidth = (constraints.maxWidth - spacing.gutter * (columns - 1)) / columns;
