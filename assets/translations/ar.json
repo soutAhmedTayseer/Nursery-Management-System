@@ -282,6 +282,7 @@
   "plan_history_whatsapp_none": "لا يوجد تغييرات بعد.",
   "plan_history_whatsapp_message": "ملخص الاشتراك لـ {child}\nولي الأمر: {parent}\nالخطة الحالية: {plan} ({price})\nتاريخ البدء: {startDate}\n\nسجل الخطط:\n{history}",
   "assign_plan_updated_snackbar": "تم تحديث الخطة إلى {plan}.",
+  "finance_manual_charge_note": "رسوم يدوية أضافها المسؤول",
   "error_generic": "حدث خطأ ما. حاول مرة أخرى.",
   "error_network_error": "لا يوجد اتصال. تحقق من الشبكة وحاول مرة أخرى.",
   "error_unauthorized": "انتهت جلستك. الرجاء تسجيل الدخول مرة أخرى.",

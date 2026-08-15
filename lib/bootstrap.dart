@@ -82,7 +82,7 @@ class MyApp extends StatelessWidget {
             BlocProvider(create: (_) => PlansCubit(sl())..load()),
             BlocProvider(create: (_) => PlanAssignmentsCubit(sl())),
             BlocProvider(create: (_) => PlanHistoryCubit(sl())),
-            BlocProvider(create: (_) => FinanceCubit()),
+            BlocProvider(create: (_) => FinanceCubit(sl())..load()),
             BlocProvider(create: (_) => AuditLogCubit()),
             BlocProvider(create: (_) => ScheduleCubit()),
             BlocProvider(create: (_) => settings ?? AppSettingsCubit()),

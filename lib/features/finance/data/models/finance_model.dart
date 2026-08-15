@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+
 /// Fallback overtime rate, used only where no admin setting is in reach
 /// (model defaults, tests). The live figure comes from Settings — see
 /// `AppSettings.overtimeHourlyRate`.
@@ -33,6 +35,11 @@ class PaymentRecord {
     required this.overtimeHours,
     required this.penaltyAmount,
     required this.avatarColor,
+    required this.overtimeAmount,
+    required this.totalDue,
+    required this.outstanding,
+    this.amountPaid = 0,
+    this.currency = '',
     this.parentPhone = '',
     this.isPaid = false,
     this.overtimeRate = kDefaultOvertimeHourlyRate,
@@ -43,13 +50,50 @@ class PaymentRecord {
   /// restate an invoice already on screen.
   final double overtimeRate;
 
-  /// Overtime is billable, so it has to reach the total — it used to be
-  /// displayed but never charged, which understated every invoice.
-  double get overtimeAmount => overtimeHours * overtimeRate;
+  /// Overtime is billable, so it has to reach the total.
+  ///
+  /// Server-supplied — the client renders money, it does not compute it
+  /// (contract §2). A rounding rule or a late-pickup policy living here would
+  /// mean the admin app and the parent app could eventually disagree about what
+  /// a parent owes.
+  final double overtimeAmount;
 
-  double get totalDue => baseFee + overtimeAmount + penaltyAmount;
+  final double totalDue;
 
-  /// What's still owed. A settled invoice contributes nothing to the
-  /// nursery's outstanding balance.
-  double get outstanding => isPaid ? 0 : totalDue;
+  /// Already settled against this invoice.
+  final double amountPaid;
+
+  /// What is still owed.
+  final double outstanding;
+
+  final String currency;
+
+  /// Builds a record from `GET /admin/finance/balances` (contract §4).
+  factory PaymentRecord.fromJson(Map<String, dynamic> json) {
+    final kidId = json['kid_id'] as String;
+    return PaymentRecord(
+      id: kidId,
+      parentName: json['guardian_name'] as String? ?? '',
+      childName: json['kid_full_name'] as String? ?? '',
+      baseFee: _num(json['base_fee']),
+      overtimeHours: _num(json['overtime_hours']),
+      overtimeRate: _num(json['overtime_rate']),
+      overtimeAmount: _num(json['overtime_amount']),
+      penaltyAmount: _num(json['penalty_amount']),
+      totalDue: _num(json['total_due']),
+      amountPaid: _num(json['amount_paid']),
+      outstanding: _num(json['outstanding']),
+      isPaid: json['is_paid'] as bool? ?? false,
+      currency: json['currency'] as String? ?? '',
+      parentPhone: json['guardian_phone'] as String? ?? '',
+      avatarColor: avatarColorFor(kidId),
+    );
+  }
+
+  static double _num(Object? value) => (value as num?)?.toDouble() ?? 0;
 }
+
+/// One deterministic avatar tint per kid, so a re-render never flickers
+/// between colours. Presentation, not data — the server does not send it.
+Color avatarColorFor(String kidId) =>
+    AppColors.avatarPalette[kidId.hashCode.abs() % AppColors.avatarPalette.length];

@@ -1,50 +1,70 @@
+import 'package:nursery_shared/nursery_shared.dart';
+
+import '../../data/models/finance_model.dart';
+import '../../data/repositories/finance_repository.dart';
+
 enum PenaltyFilter { all, withPenalty, withoutPenalty, unpaid, paid }
-
-/// Finance-only figures for one kid. Overtime is derived from the shared
-/// attendance ledger rather than stored here — only the manual penalty and
-/// any admin override of the computed overtime live in this state.
-class FinanceExtras {
-  const FinanceExtras({this.overtimeHoursOverride, this.penaltyOverride});
-
-  /// Set when an admin types a different overtime figure than the ledger
-  /// computed. Null means "trust the attendance ledger".
-  final double? overtimeHoursOverride;
-
-  /// A penalty the admin typed by hand. Null means "apply the nursery's
-  /// late-pickup policy", which is the case for every child until someone
-  /// intervenes — it used to default to 0, which is why a child who ran
-  /// overtime every week still showed no penalty and no flagged row.
-  ///
-  /// Nullable so that waiving a fine (an explicit 0) stays distinguishable
-  /// from never having touched it.
-  final double? penaltyOverride;
-}
 
 class FinanceState {
   const FinanceState({
-    this.extrasByKidId = const {},
-    this.paidKidIds = const {},
+    this.records = const [],
+    this.summary,
+    this.revenue = const [],
+    this.isLoading = false,
+    this.error,
     this.searchQuery = '',
     this.penaltyFilter = PenaltyFilter.all,
   });
 
-  final Map<String, FinanceExtras> extrasByKidId;
+  /// The current page of per-kid invoices, exactly as the server computed them.
+  /// Nothing here is derived client-side (contract §2).
+  final List<PaymentRecord> records;
 
-  /// Kids whose current invoice the admin has marked settled.
-  final Set<String> paidKidIds;
+  final FinanceSummary? summary;
+
+  /// Revenue series backing the chart, oldest bucket first.
+  final List<RevenueBucket> revenue;
+
+  final bool isLoading;
+
+  /// Set when a read or a write failed.
+  ///
+  /// This screen records payments and charges, so a failure that is not shown
+  /// is money the admin believes was recorded and was not.
+  final ApiException? error;
 
   final String searchQuery;
   final PenaltyFilter penaltyFilter;
 
+  /// Rows after the penalty/paid filter, which is applied here because it is a
+  /// view concern over the page already fetched. The search itself is
+  /// server-side, since it selects which rows the page contains at all.
+  List<PaymentRecord> get visibleRecords => switch (penaltyFilter) {
+        PenaltyFilter.all => records,
+        PenaltyFilter.withPenalty =>
+          records.where((r) => r.penaltyAmount > 0).toList(),
+        PenaltyFilter.withoutPenalty =>
+          records.where((r) => r.penaltyAmount == 0).toList(),
+        PenaltyFilter.paid => records.where((r) => r.isPaid).toList(),
+        PenaltyFilter.unpaid => records.where((r) => !r.isPaid).toList(),
+      };
+
   FinanceState copyWith({
-    Map<String, FinanceExtras>? extrasByKidId,
-    Set<String>? paidKidIds,
+    List<PaymentRecord>? records,
+    FinanceSummary? summary,
+    List<RevenueBucket>? revenue,
+    bool? isLoading,
+    ApiException? error,
     String? searchQuery,
     PenaltyFilter? penaltyFilter,
+    bool clearError = false,
   }) =>
       FinanceState(
-        extrasByKidId: extrasByKidId ?? this.extrasByKidId,
-        paidKidIds: paidKidIds ?? this.paidKidIds,
+        records: records ?? this.records,
+        summary: summary ?? this.summary,
+        revenue: revenue ?? this.revenue,
+        isLoading: isLoading ?? this.isLoading,
+        error: clearError ? null : (error ?? this.error),
         searchQuery: searchQuery ?? this.searchQuery,
         penaltyFilter: penaltyFilter ?? this.penaltyFilter,
       );

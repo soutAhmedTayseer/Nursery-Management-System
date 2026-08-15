@@ -20,7 +20,6 @@ import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plans_state.dart';
 import '../../../settings/presentation/cubit/app_settings_cubit.dart';
 import '../../data/models/finance_model.dart';
-import '../../domain/payment_records.dart';
 import '../cubit/finance_cubit.dart';
 import '../cubit/finance_state.dart';
 import '../widgets/audit_log_dialog.dart';
@@ -58,14 +57,11 @@ class FinanceScreen extends StatelessWidget {
       builder: (context, assignments) => BlocBuilder<PlansCubit, PlansState>(
         builder: (context, plans) => BlocBuilder<FinanceCubit, FinanceState>(
           builder: (context, finance) {
-            final records = derivePaymentRecords(
-              assignments,
-              plans,
-              finance,
-              settings: context.watch<AppSettingsCubit>().state,
-            );
-            final filtered = _filterRecords(records, finance.searchQuery, finance.penaltyFilter);
-            return _buildScaffold(context, records, filtered, assignments, plans);
+            // Server-computed (contract §2) — this screen renders money, it
+            // no longer derives it from plans and the attendance ledger.
+            final records = finance.records;
+            final filtered = finance.visibleRecords;
+            return _buildScaffold(context, finance, records, filtered, assignments, plans);
           },
         ),
       ),
@@ -82,6 +78,7 @@ class FinanceScreen extends StatelessWidget {
 
   Widget _buildScaffold(
     BuildContext context,
+    FinanceState finance,
     List<PaymentRecord> records,
     List<PaymentRecord> filtered,
     PlanAssignmentsState assignments,
@@ -154,7 +151,7 @@ class FinanceScreen extends StatelessWidget {
           color: palette.card,
           borderRadius: BorderRadius.circular(32.r),
         ),
-        child: RevenueChart(assignments: assignments, plans: plans, chartHeight: 200),
+        child: RevenueChart(buckets: finance.revenue, chartHeight: 200),
       ),
     );
 
@@ -538,17 +535,11 @@ class FinanceScreen extends StatelessWidget {
     return '"${value.replaceAll('"', '""')}"';
   }
 
-  /// Hours the child stayed past their plan this month, read from the
-  /// shared attendance ledger — the same figure their calendar's red days
-  /// add up to. A "Full Day" plan (null hoursPerDay) can't accrue overtime.
-  double _computeOvertimeHours(String kidId, PlanLineItem item) =>
-      overtimeHoursForMonth(kidId, item.hoursPerDay, DateTime.now());
-
   /// Adds an invoice (overtime auto-computed from attendance, penalty
   /// manual) for a child picked from the sessions roster — their current
   /// assigned plan/price auto-fill from PlanAssignmentsCubit/PlansCubit.
-  /// "Add" writes straight into FinanceCubit's extras, which
-  /// derivePaymentRecords folds into the payments/overtime table.
+  /// "Add" posts a manual charge; the server recomputes the invoice and the
+  /// table re-reads it.
   void _showAddInvoiceDialog(BuildContext context) {
     final palette = context.palette;
     final cubit = context.read<FinanceCubit>();
@@ -562,9 +553,19 @@ class FinanceScreen extends StatelessWidget {
     (PlanCategory, PlanLineItem)? lineItemFor(PlanAssignment? assignment) =>
         assignment == null ? null : plansCubit.findLineItem(assignment.categoryId, assignment.lineItemId);
 
-    final initialItem = lineItemFor(selected);
+    // Overtime is computed and billed server-side from confirmed check-outs
+    // (contract §3.9). This field shows what the server has, read-only in
+    // effect — the admin adds a penalty, not an overtime override.
+    double serverOvertime(String? kidId) => kidId == null
+        ? 0
+        : cubit.state.records
+            .where((r) => r.id == kidId)
+            .map((r) => r.overtimeHours)
+            .followedBy([0.0])
+            .first;
+
     overtimeCtrl = TextEditingController(
-      text: initialItem == null ? '0' : _computeOvertimeHours(selected!.kidId, initialItem.$2).toStringAsFixed(1),
+      text: serverOvertime(selected?.kidId).toStringAsFixed(1),
     );
 
     showDialog(
@@ -599,7 +600,7 @@ class FinanceScreen extends StatelessWidget {
                         onChanged: (value) => setDialogState(() {
                           selected = value;
                           final newItem = lineItemFor(value);
-                          overtimeCtrl.text = newItem == null ? '0' : _computeOvertimeHours(value!.kidId, newItem.$2).toStringAsFixed(1);
+                          overtimeCtrl.text = serverOvertime(value?.kidId).toStringAsFixed(1);
                         }),
                       ),
                     if (item != null) ...[
@@ -643,17 +644,18 @@ class FinanceScreen extends StatelessWidget {
                     ? null
                     : () {
                         if (!formKey.currentState!.validate()) return;
-                        // Only record an override when the admin actually
-                        // changed the figure — otherwise leave overtime
-                        // tracking the attendance ledger so it keeps
-                        // updating as the child clocks in and out.
-                        final typed = double.tryParse(overtimeCtrl.text) ?? 0;
-                        final computed = item == null ? 0.0 : _computeOvertimeHours(selected!.kidId, item.$2);
-                        cubit.setExtras(
-                          selected!.kidId,
-                          overtimeHours: (typed - computed).abs() < 0.05 ? null : typed,
-                          penaltyAmount: double.tryParse(penaltyCtrl.text) ?? 0,
-                        );
+                        // Overtime is billed automatically from confirmed
+                        // check-outs (contract §3.9), so only the penalty the
+                        // admin typed is posted, as a manual charge with the
+                        // note the contract requires.
+                        final penalty = double.tryParse(penaltyCtrl.text) ?? 0;
+                        if (penalty > 0) {
+                          cubit.addCharge(
+                            selected!.kidId,
+                            amount: penalty,
+                            note: 'finance_manual_charge_note'.tr(),
+                          );
+                        }
                         Navigator.pop(dialogContext);
                       },
                 child: Text('finance_add_button'.tr(), style: const TextStyle(color: Colors.white)),

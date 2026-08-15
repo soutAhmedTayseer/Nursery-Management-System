@@ -92,4 +92,21 @@ class AppColors {
   static const Color schedulePastelMint = Color(0xFFD8F3DC);
   static const Color schedulePastelGreen = Color(0xFFB7E4C7);
   static const Color schedulePastelDeepGreen = Color(0xFF95D5B2);
+
+  // --- Kid avatar tints ---
+  // One deterministic tint per kid so a re-render never flickers between
+  // colours. Presentation only — the server does not send an avatar colour.
+  static const Color avatarLime = Color(0xFFDCEDC8);
+  static const Color avatarPeach = Color(0xFFFFE0B2);
+  static const Color avatarSky = Color(0xFFBBDEFB);
+  static const Color avatarPink = Color(0xFFF8BBD0);
+  static const Color avatarLilac = Color(0xFFD1C4E9);
+
+  static const List<Color> avatarPalette = [
+    avatarLime,
+    avatarPeach,
+    avatarSky,
+    avatarPink,
+    avatarLilac,
+  ];
 }

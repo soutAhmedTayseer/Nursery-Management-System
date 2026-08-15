@@ -282,6 +282,7 @@
   "plan_history_whatsapp_none": "No changes yet.",
   "plan_history_whatsapp_message": "Subscription summary for {child}\nParent: {parent}\nCurrent plan: {plan} ({price})\nStart date: {startDate}\n\nPlan history:\n{history}",
   "assign_plan_updated_snackbar": "Plan updated to {plan}.",
+  "finance_manual_charge_note": "Manual charge added by admin",
   "error_generic": "Something went wrong. Please try again.",
   "error_network_error": "No connection. Check your network and try again.",
   "error_unauthorized": "Your session expired. Please sign in again.",

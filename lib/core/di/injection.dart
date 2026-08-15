@@ -6,6 +6,9 @@ import '../../features/admin_splash/presentation/cubit/splash_cubit.dart';
 import '../../features/auth/data/repositories/api_auth_repository.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
 import '../../features/auth/data/repositories/fake_auth_repository.dart';
+import '../../features/finance/data/repositories/api_finance_repository.dart';
+import '../../features/finance/data/repositories/fake_finance_repository.dart';
+import '../../features/finance/data/repositories/finance_repository.dart';
 import '../../features/kids/data/repositories/api_kids_repository.dart';
 import '../../features/kids/data/repositories/fake_kids_repository.dart';
 import '../../features/kids/data/repositories/kids_repository.dart';
@@ -74,6 +77,13 @@ Future<void> setupLocator({required String baseUrl}) async {
     () => useFakes
         ? FakePlansRepository(failureSwitch: sl<FakeFailureSwitch>())
         : ApiPlansRepository(sl<ApiClient>()),
+  );
+
+  // --- Finance (integrated: Phase 5) ---
+  sl.registerLazySingleton<FinanceRepository>(
+    () => useFakes
+        ? FakeFinanceRepository(failureSwitch: sl<FakeFailureSwitch>())
+        : ApiFinanceRepository(sl<ApiClient>()),
   );
 
   // --- Cubits ---

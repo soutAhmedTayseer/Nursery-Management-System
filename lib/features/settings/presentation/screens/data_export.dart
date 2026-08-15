@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/testing/attendance_store.dart';
-import '../../../finance/domain/payment_records.dart';
 import '../../../finance/presentation/cubit/audit_log_cubit.dart';
 import '../../../finance/presentation/cubit/finance_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
@@ -47,7 +46,8 @@ Future<void> exportAllDataCsv(BuildContext context) async {
     ..writeln()
     ..writeln('# Payment Ledger')
     ..writeln('Child,Parent,Base Fee,Overtime Hours,Overtime Amount,Penalty,Total Due,Status');
-  for (final record in derivePaymentRecords(assignments, plans, finance, settings: settings)) {
+  // Server-computed figures (contract §2) — exported as fetched.
+  for (final record in finance.records) {
     buffer.writeln(
       '${_csvField(record.childName)},${_csvField(record.parentName)},${record.baseFee},'
       '${record.overtimeHours.toStringAsFixed(2)},${record.overtimeAmount.toStringAsFixed(2)},'

@@ -30,7 +30,16 @@ Future<void> settleInvoice(
   );
   if (!confirmed || !context.mounted) return;
 
-  context.read<FinanceCubit>().markPaid(kidId);
+  // Records the money against the kid's ledger. Not optimistic: the row only
+  // shows as settled once the server has it, because an invoice that looks paid
+  // and is not is the worst failure this screen can have.
+  await context.read<FinanceCubit>().recordPayment(
+        kidId,
+        amount: amount,
+        method: 'cash',
+      );
+  if (!context.mounted) return;
+
   context.read<AuditLogCubit>().record(AuditEntry(
         action: AuditAction.invoiceMarkedPaid,
         actor: kCurrentAdminName,
