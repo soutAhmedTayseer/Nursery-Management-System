@@ -12,11 +12,11 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/mouse_wheel_horizontal_scroll.dart';
 import '../../../admin_main_layout/presentation/cubit/admin_main_layout_cubit.dart';
 import '../../../finance/data/models/finance_model.dart';
-import '../../../finance/domain/payment_records.dart';
 import '../../domain/nursery_alerts.dart';
 import '../../../finance/presentation/cubit/finance_cubit.dart';
 import '../../../finance/presentation/cubit/finance_state.dart';
 import '../../../sessions/data/repositories/sessions_repository.dart';
+import '../../data/repositories/dashboard_repository.dart';
 import '../../../sessions/presentation/cubit/sessions_cubit.dart';
 import '../../../settings/data/app_settings.dart';
 import '../../../settings/presentation/cubit/app_settings_cubit.dart';
@@ -48,7 +48,8 @@ class OverviewScreen extends StatelessWidget {
 
     return BlocProvider(
       create: (_) =>
-          OverviewCubit(sl<SessionsRepository>())..fetchDashboardData(),
+          OverviewCubit(sl<SessionsRepository>(), sl<DashboardRepository>())
+            ..fetchDashboardData(),
       child: Builder(
         // Clocking a child in/out anywhere (Sessions grid, QR scan, or the
         // "Check Out" action on an alert right here) changes today's
@@ -66,17 +67,12 @@ class OverviewScreen extends StatelessWidget {
                             BlocBuilder<FinanceCubit, FinanceState>(
                               builder: (context, finance) {
                                 final capacity = appSettings.capacity;
-                                final records = derivePaymentRecords(
-                                  assignments,
-                                  plans,
-                                  finance,
-                                  settings: appSettings,
-                                );
-                                // Settled invoices are no longer owed.
-                                final pendingDues = records.fold<double>(
-                                  0,
-                                  (sum, r) => sum + r.outstanding,
-                                );
+                                // Server-computed (contract §2). total_outstanding
+                                // already excludes settled invoices, so this is
+                                // read rather than summed here.
+                                final records = finance.records;
+                                final pendingDues =
+                                    finance.summary?.totalOutstanding ?? 0;
                                 final allowedHoursByKidId = {
                                   for (final assignment in assignments.byKidId.values)
                                     assignment.kidId: plans
@@ -96,6 +92,9 @@ class OverviewScreen extends StatelessWidget {
                                   overview,
                                   records,
                                   pendingDues,
+                                  finance.revenue.isEmpty
+                                      ? 0.0
+                                      : finance.revenue.last.revenue,
                                   capacity,
                                   assignments,
                                   plans,
@@ -204,6 +203,8 @@ class OverviewScreen extends StatelessWidget {
     OverviewState overview,
     List<PaymentRecord> records,
     double pendingDues,
+    // Server-computed (contract §2): the latest bucket of the revenue series.
+    double revenueToday,
     int capacity,
     PlanAssignmentsState assignments,
     PlansState plans,
@@ -215,15 +216,14 @@ class OverviewScreen extends StatelessWidget {
         ? 0.0
         : (checkedIn / capacity).clamp(0, 1).toDouble();
 
-    // Everything below is today's real data, read from the shared
-    // attendance ledger and the derived payment records.
+    // Attendance figures still come from the shared ledger; every money
+    // figure arrives already computed from the server.
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final todayRecords = AttendanceStore.instance.allOn(today);
     final enrolled = assignments.byKidId.length;
     final attendedToday = todayRecords.length;
     final attendanceRate = enrolled == 0 ? 0.0 : (attendedToday / enrolled).clamp(0, 1).toDouble();
-    final revenueToday = revenueForDay(assignments, plans, today);
 
     var overtimeHoursToday = 0.0;
     for (final entry in todayRecords.entries) {
