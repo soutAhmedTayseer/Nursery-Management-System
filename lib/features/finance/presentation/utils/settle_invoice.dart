@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/confirmation_dialog.dart';
-import '../../domain/audit_entry.dart';
 import '../cubit/audit_log_cubit.dart';
 import '../cubit/finance_cubit.dart';
 
@@ -30,16 +29,19 @@ Future<void> settleInvoice(
   );
   if (!confirmed || !context.mounted) return;
 
-  context.read<FinanceCubit>().markPaid(kidId);
-  context.read<AuditLogCubit>().record(AuditEntry(
-        action: AuditAction.invoiceMarkedPaid,
-        actor: kCurrentAdminName,
-        subjectId: kidId,
-        subjectName: childName,
-        at: DateTime.now(),
+  // Records the money against the kid's ledger. Not optimistic: the row only
+  // shows as settled once the server has it, because an invoice that looks paid
+  // and is not is the worst failure this screen can have.
+  await context.read<FinanceCubit>().recordPayment(
+        kidId,
         amount: amount,
-      ));
+        method: 'cash',
+      );
+  if (!context.mounted) return;
 
+  // The server records the audit entry as it handles the payment (contract §2)
+  // — this app cannot write to the trail, only re-read it.
+  await context.read<AuditLogCubit>().load(subjectId: kidId);
   if (!context.mounted) return;
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(content: Text('finance_marked_paid'.tr(namedArgs: {'child': childName}))),

@@ -2,9 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../subscriptions/presentation/cubit/plan_assignments_state.dart';
-import '../../../subscriptions/presentation/cubit/plans_state.dart';
-import '../../domain/payment_records.dart';
+import '../../data/repositories/finance_repository.dart';
 import '../../../../core/theme/app_palette.dart';
 
 enum RevenuePeriod { daily, weekly, monthly, annual }
@@ -19,19 +17,23 @@ class _Bucket {
 /// Total revenue over time, switchable between daily / weekly / monthly /
 /// annual — one bar per bucket, latest highlighted.
 ///
-/// Every figure is computed from the shared attendance ledger and the real
-/// plan catalog (see [revenueForRange]), so clocking a child in or changing
-/// a plan price moves these bars. Nothing here is hardcoded.
+/// The series comes from `GET /admin/finance/revenue` — the client draws it and
+/// does not sum it (contract §2), and the chart needs history the client never
+/// holds, since it only ever has the current page of balances.
 class RevenueChart extends StatefulWidget {
   const RevenueChart({
     super.key,
-    required this.assignments,
-    required this.plans,
+    required this.buckets,
+    this.onPeriodChanged,
     this.chartHeight = 160,
   });
 
-  final PlanAssignmentsState assignments;
-  final PlansState plans;
+  /// Revenue per bucket, oldest first, as the server returned it.
+  final List<RevenueBucket> buckets;
+
+  /// Fired when the admin switches period, so the parent can refetch the range.
+  final ValueChanged<RevenuePeriod>? onPeriodChanged;
+
   final double chartHeight;
 
   @override
@@ -41,54 +43,22 @@ class RevenueChart extends StatefulWidget {
 class _RevenueChartState extends State<RevenueChart> {
   RevenuePeriod _period = RevenuePeriod.monthly;
 
+  /// Labels the buckets the server returned. The period only decides the label
+  /// format and which range the parent asked for — no totalling happens here.
   List<_Bucket> _buckets(BuildContext context) {
     final locale = context.locale.languageCode;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    double range(DateTime from, DateTime to) => revenueForRange(widget.assignments, widget.plans, from, to);
-
-    switch (_period) {
-      case RevenuePeriod.daily:
-        // The last 7 days, oldest first.
-        return [
-          for (var i = 6; i >= 0; i--)
-            () {
-              final day = today.subtract(Duration(days: i));
-              return _Bucket(
-                label: DateFormat.E(locale).format(day),
-                total: range(day, day.add(const Duration(days: 1))),
-              );
-            }(),
-        ];
-      case RevenuePeriod.weekly:
-        return [
-          for (var i = 3; i >= 0; i--)
-            () {
-              final end = today.subtract(Duration(days: 7 * i)).add(const Duration(days: 1));
-              final start = end.subtract(const Duration(days: 7));
-              return _Bucket(label: 'W${4 - i}', total: range(start, end));
-            }(),
-        ];
-      case RevenuePeriod.monthly:
-        return [
-          for (var i = 3; i >= 0; i--)
-            () {
-              final start = DateTime(now.year, now.month - i, 1);
-              final end = DateTime(now.year, now.month - i + 1, 1);
-              return _Bucket(label: DateFormat.MMM(locale).format(start), total: range(start, end));
-            }(),
-        ];
-      case RevenuePeriod.annual:
-        return [
-          for (var i = 3; i >= 0; i--)
-            () {
-              final start = DateTime(now.year - i, 1, 1);
-              final end = DateTime(now.year - i + 1, 1, 1);
-              return _Bucket(label: '${start.year}', total: range(start, end));
-            }(),
-        ];
-    }
+    return [
+      for (final bucket in widget.buckets)
+        _Bucket(label: _labelFor(bucket.start, locale), total: bucket.revenue),
+    ];
   }
+
+  String _labelFor(DateTime start, String locale) => switch (_period) {
+        RevenuePeriod.daily => DateFormat.E(locale).format(start),
+        RevenuePeriod.weekly => DateFormat.Md(locale).format(start),
+        RevenuePeriod.monthly => DateFormat.MMM(locale).format(start),
+        RevenuePeriod.annual => '${start.year}',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +109,12 @@ class _RevenueChartState extends State<RevenueChart> {
   final palette = context.palette;
     final isActive = period == _period;
     return InkWell(
-      onTap: () => setState(() => _period = period),
+      onTap: () {
+        setState(() => _period = period);
+        // The parent owns the fetch — a different period is a different date
+        // range, which only the server can answer.
+        widget.onPeriodChanged?.call(period);
+      },
       borderRadius: BorderRadius.circular(999),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),

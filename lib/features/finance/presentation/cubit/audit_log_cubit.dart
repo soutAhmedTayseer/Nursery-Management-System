@@ -1,17 +1,28 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nursery_shared/nursery_shared.dart';
 
+import '../../data/repositories/audit_log_repository.dart';
 import '../../domain/audit_entry.dart';
 
-/// Append-only activity log, newest first. Lives at app root (bootstrap.dart)
-/// so it spans every screen.
+/// Append-only activity log, newest first.
 ///
-/// Deliberately has no delete or edit: the point of an audit trail is that
-/// it can't be rewritten by the person being audited. When roles arrive,
-/// this is what a head admin reads to see what each sub-admin did.
+/// Read-only by design: the server records each action as it handles it, so
+/// this cubit has no `record` method. The point of an audit trail is that the
+/// person being audited cannot rewrite it, and a client-side `record` call is
+/// exactly that hole.
 class AuditLogCubit extends Cubit<List<AuditEntry>> {
-  AuditLogCubit() : super(const []);
+  AuditLogCubit(this._repository) : super(const []);
 
-  void record(AuditEntry entry) => emit([entry, ...state]);
+  final AuditLogRepository _repository;
+
+  Future<void> load({String? subjectId}) async {
+    try {
+      emit(await _repository.fetchEntries(subjectId: subjectId));
+    } on ApiException {
+      // Keep whatever was last read rather than blanking the dialog; the
+      // action that triggered this reports its own failure.
+    }
+  }
 
   List<AuditEntry> forSubject(String subjectId) =>
       state.where((entry) => entry.subjectId == subjectId).toList();

@@ -97,12 +97,24 @@ class _EntryTile extends StatelessWidget {
 
   final AuditEntry entry;
 
-  String get _description => switch (entry.action) {
-        AuditAction.invoiceMarkedPaid =>
-          'audit_action_invoice_marked_paid'.tr(namedArgs: {'child': entry.subjectName}),
-        AuditAction.invoiceIssued =>
-          'audit_action_invoice_issued'.tr(namedArgs: {'child': entry.subjectName}),
-      };
+  String get _description {
+    final child = {'child': entry.subjectName};
+    return switch (entry.action) {
+      AuditAction.invoiceMarkedPaid => 'audit_action_invoice_marked_paid'.tr(namedArgs: child),
+      AuditAction.chargeAdded => 'audit_action_charge_added'.tr(namedArgs: child),
+      AuditAction.planAssigned => 'audit_action_plan_assigned'.tr(namedArgs: child),
+      AuditAction.subscriptionRecorded => 'audit_action_subscription_recorded'.tr(namedArgs: child),
+      AuditAction.kidApproved => 'audit_action_kid_approved'.tr(namedArgs: child),
+      AuditAction.kidRejected => 'audit_action_kid_rejected'.tr(namedArgs: child),
+      AuditAction.kidDeactivated => 'audit_action_kid_deactivated'.tr(namedArgs: child),
+      AuditAction.sessionConfirmed => 'audit_action_session_confirmed'.tr(namedArgs: child),
+      AuditAction.sessionRejected => 'audit_action_session_rejected'.tr(namedArgs: child),
+      AuditAction.adminCreated => 'audit_action_admin_created'.tr(namedArgs: child),
+      AuditAction.adminRevoked => 'audit_action_admin_revoked'.tr(namedArgs: child),
+      // An action this build does not know about, logged by a newer backend.
+      AuditAction.unknown => 'audit_action_unknown'.tr(namedArgs: child),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
