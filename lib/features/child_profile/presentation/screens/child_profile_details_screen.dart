@@ -7,9 +7,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_fonts.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../../../subscriptions/data/models/subscription_plan.dart';
-import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
-import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
 import '../../../subscriptions/presentation/widgets/financial_dues_tab.dart';
+import '../../../../core/di/injection.dart';
+import '../../data/repositories/attendance_repository.dart';
 import '../cubit/attendance_cubit.dart';
 import '../utils/child_profile_export.dart';
 import '../widgets/attendance_log_tab.dart';
@@ -34,15 +34,11 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    // The calendar needs the child's contracted hours/day to flag overtime
-    // days, and that lives on their assigned plan line item.
-    final assignment = context.read<PlanAssignmentsCubit>().forKid(widget.childData.kid.id);
-    final lineItem = assignment == null
-        ? null
-        : context.read<PlansCubit>().findLineItem(assignment.categoryId, assignment.lineItemId);
+    // Contracted hours per day now ride on each session (contract §2
+    // allowed_hours), so the calendar no longer needs the child's plan here.
 
     return BlocProvider(
-      create: (_) => AttendanceCubit(widget.childData.kid.id, allowedHours: lineItem?.$2.hoursPerDay),
+      create: (_) => AttendanceCubit(widget.childData.kid.id, sl<AttendanceRepository>())..load(),
       child: Builder(
         builder: (context) => Scaffold(
           backgroundColor: palette.page,

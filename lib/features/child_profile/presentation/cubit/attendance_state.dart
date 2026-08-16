@@ -1,13 +1,41 @@
+import 'package:nursery_shared/nursery_shared.dart';
+
 import '../../data/models/attendance_day.dart';
 
 class AttendanceState {
-  const AttendanceState({required this.month, required this.days});
+  const AttendanceState({
+    required this.month,
+    required this.days,
+    this.isLoading = false,
+    this.error,
+  });
 
   /// First day of the currently viewed month.
   final DateTime month;
 
   /// Full calendar grid, including in-month + leading/trailing days.
   final List<AttendanceDay> days;
+
+  final bool isLoading;
+
+  /// Set when the month failed to load. The calendar is a record of what a
+  /// child actually did, so an empty grid must never stand in for one that
+  /// could not be fetched.
+  final ApiException? error;
+
+  AttendanceState copyWith({
+    DateTime? month,
+    List<AttendanceDay>? days,
+    bool? isLoading,
+    ApiException? error,
+    bool clearError = false,
+  }) =>
+      AttendanceState(
+        month: month ?? this.month,
+        days: days ?? this.days,
+        isLoading: isLoading ?? this.isLoading,
+        error: clearError ? null : (error ?? this.error),
+      );
 
   List<AttendanceDay> get inMonthDays => days.where((d) => d.inCurrentMonth).toList();
 

@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/widgets/async_state_view.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:nursery_shared/nursery_shared.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -149,6 +151,23 @@ class AttendanceLogTab extends StatelessWidget {
   }
 
   Widget _buildCalendarGrid(BuildContext context, AttendanceState state, String locale) {
+    // The calendar is fetched a month at a time now, so it can be loading or
+    // fail. An empty grid must never stand in for a month that could not be
+    // loaded — this is a record of what a child actually did.
+    if (state.isLoading || state.error != null) {
+      return SizedBox(
+        height: 320.h,
+        child: AsyncStateView(
+          isLoading: state.isLoading,
+          error: state.error,
+          isEmpty: false,
+          onRetry: () => context.read<AttendanceCubit>().load(),
+          emptyMessage: 'state_empty_title'.tr(),
+          builder: (_) => const SizedBox.shrink(),
+        ),
+      );
+    }
+
   final palette = context.palette;
     final weekdayLabels = List.generate(7, (i) => DateFormat.E(locale).format(DateTime(2024, 1, 1 + i))); // Mon..Sun
 

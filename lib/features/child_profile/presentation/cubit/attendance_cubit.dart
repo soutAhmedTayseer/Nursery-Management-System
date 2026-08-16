@@ -1,35 +1,44 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nursery_shared/nursery_shared.dart';
 
-import '../../data/mock_attendance.dart';
+import '../../data/repositories/attendance_repository.dart';
 import 'attendance_state.dart';
 
-/// Drives the Attendance Log calendar off the shared [AttendanceStore]
-/// ledger, so a child clocked in on the Sessions screen appears here right
-/// away and their overtime matches what Finance bills.
+/// Drives the Attendance Log calendar off `GET /kids/{id}/sessions`.
+///
+/// Asynchronous, unlike the version that read the in-memory ledger: a month is
+/// fetched, so it can be loading or fail, and the tab renders both. Each day's
+/// contracted hours come from its own session (contract §2 `allowed_hours`), so
+/// history stays correct across a plan change instead of assuming the current
+/// plan always applied.
 class AttendanceCubit extends Cubit<AttendanceState> {
-  AttendanceCubit(this.kidId, {this.allowedHours}) : super(_buildMonth(kidId, DateTime.now(), allowedHours));
+  AttendanceCubit(this.kidId, this._repository)
+      : super(AttendanceState(
+          month: DateTime(DateTime.now().year, DateTime.now().month),
+          days: const [],
+          isLoading: true,
+        ));
 
   final String kidId;
+  final AttendanceRepository _repository;
 
-  /// Contracted hours per day from the child's plan — null for full-day
-  /// plans, which never accrue overtime.
-  final int? allowedHours;
+  Future<void> load() => _loadMonth(state.month);
 
-  void previousMonth() {
-    final current = state.month;
-    emit(_buildMonth(kidId, DateTime(current.year, current.month - 1), allowedHours));
-  }
+  Future<void> previousMonth() =>
+      _loadMonth(DateTime(state.month.year, state.month.month - 1));
 
-  void nextMonth() {
-    final current = state.month;
-    emit(_buildMonth(kidId, DateTime(current.year, current.month + 1), allowedHours));
-  }
+  Future<void> nextMonth() =>
+      _loadMonth(DateTime(state.month.year, state.month.month + 1));
 
-  static AttendanceState _buildMonth(String kidId, DateTime anyDayInMonth, int? allowedHours) {
-    final month = DateTime(anyDayInMonth.year, anyDayInMonth.month);
-    return AttendanceState(
-      month: month,
-      days: generateMonthDays(kidId, month, allowedHours: allowedHours),
-    );
+  Future<void> _loadMonth(DateTime month) async {
+    emit(state.copyWith(month: month, isLoading: true, clearError: true));
+    try {
+      final days = await _repository.fetchMonth(kidId, month);
+      emit(state.copyWith(days: days, isLoading: false, clearError: true));
+    } on ApiException catch (exception) {
+      // Keep the month so the header still reads correctly, and clear the grid
+      // rather than leaving another month's days under a new title.
+      emit(state.copyWith(days: const [], isLoading: false, error: exception));
+    }
   }
 }
