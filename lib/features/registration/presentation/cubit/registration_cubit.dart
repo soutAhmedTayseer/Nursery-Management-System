@@ -1,22 +1,27 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nursery_shared/nursery_shared.dart';
 
-import '../../../../core/services/qr_code_service.dart';
+import '../../../../core/l10n/api_error_messages.dart';
+import '../../../kids/data/repositories/kids_repository.dart';
 import '../../../sessions/data/repositories/sessions_repository.dart';
 import '../../../subscriptions/data/models/plan_assignment.dart';
 import '../../../subscriptions/data/models/subscription_plan.dart';
 import 'registration_state.dart';
 
 class RegistrationCubit extends Cubit<RegistrationState> {
-  RegistrationCubit(this._sessionsRepository) : super(RegistrationInitial());
+  RegistrationCubit(this._kidsRepository, this._sessionsRepository)
+      : super(RegistrationInitial());
 
+  final KidsRepository _kidsRepository;
   final SessionsRepository _sessionsRepository;
 
-  /// Builds and saves the new Kid, generating its clock-in/out QR from the
-  /// new id. [fullName]/[dateOfBirth]/[planCategory]/[planItem] are the only
-  /// fields this step wires through today — the rest of the multi-step form
-  /// (parents, emergency contact, etc.) isn't yet plumbed to a persistence
-  /// layer, so those fields fall back to placeholders until that's built.
+  /// Creates the new Kid. [fullName]/[dateOfBirth]/[planCategory]/[planItem]
+  /// are the only fields this step wires through today — the rest of the
+  /// multi-step form isn't plumbed to a persistence layer yet, so those fields
+  /// fall back to placeholders until that's built.
+  ///
+  /// The server assigns the id and the QR payload; neither is sent, and neither
+  /// is derived here (contract §5 — the client never signs a QR).
   void registerChild({
     required String fullName,
     required DateTime? dateOfBirth,
@@ -27,35 +32,37 @@ class RegistrationCubit extends Cubit<RegistrationState> {
     String? allergies,
   }) async {
     emit(RegistrationLoading());
-    // Simulate registration process and data upload to API
-    await Future.delayed(const Duration(seconds: 2));
-    final id = DateTime.now().microsecondsSinceEpoch.toString();
     final name = fullName.trim().isEmpty ? 'Unnamed Child' : fullName.trim();
-    final kid = Kid(
-      id: id,
-      fullName: name,
-      dateOfBirth: dateOfBirth ?? DateTime.now(),
-      photoUrl: '',
-      status: KidStatus.active,
-      allergies: allergies,
-      medicalNotes: null,
-      emergencyContactName: parentName,
-      emergencyContactPhone: parentPhone,
-      createdBy: 'admin',
-      createdAt: DateTime.now(),
-      approvedAt: DateTime.now(),
-      approvedBy: 'admin',
-      qrPayload: QrCodeService.signKidId(id),
-    );
-    await _sessionsRepository.addKid(kid, planLabel: '${planCategory.name} · ${planItem.label}');
-    emit(RegistrationSuccess(PlanAssignment(
-      kidId: id,
-      kidName: name,
-      parentName: parentName,
-      parentPhone: parentPhone,
-      categoryId: planCategory.id,
-      lineItemId: planItem.id,
-      assignedAt: DateTime.now(),
-    )));
+
+    try {
+      final kid = await _kidsRepository.createKid(
+        fullName: name,
+        dateOfBirth: dateOfBirth ?? DateTime.now(),
+        emergencyContactName: parentName,
+        emergencyContactPhone: parentPhone,
+        allergies: allergies,
+      );
+
+      // A no-op against the API — the roster is derived server-side from the
+      // kid that was just created. It stays because the fake keeps its own
+      // roster list, which would otherwise never see a newly registered child
+      // when the app runs offline.
+      await _sessionsRepository.addKid(
+        kid,
+        planLabel: '${planCategory.name} · ${planItem.label}',
+      );
+
+      emit(RegistrationSuccess(PlanAssignment(
+        kidId: kid.id,
+        kidName: kid.fullName,
+        parentName: parentName,
+        parentPhone: parentPhone,
+        categoryId: planCategory.id,
+        lineItemId: planItem.id,
+        assignedAt: DateTime.now(),
+      )));
+    } on ApiException catch (exception) {
+      emit(RegistrationError(apiErrorMessage(exception)));
+    }
   }
 }
