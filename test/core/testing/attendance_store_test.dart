@@ -64,7 +64,11 @@ void main() {
     test('returning the same day resumes that day, not a second record', () {
       final store = AttendanceStore.instance;
       const kidId = 'test-kid-return';
-      final morning = DateTime.now().subtract(const Duration(hours: 6));
+      // A fixed mid-morning stamp, not `DateTime.now() - 6h`: run before about
+      // 06:00 that lands on the previous day, so `morning + 3h` crosses
+      // midnight and the store correctly records two days instead of one.
+      final now = DateTime.now();
+      final morning = DateTime(now.year, now.month, now.day, 8);
 
       store.checkIn(kidId, morning);
       store.checkOut(kidId, morning.add(const Duration(hours: 2)));

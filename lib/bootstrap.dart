@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,7 @@ import 'features/dashboard/presentation/cubit/schedule_cubit.dart';
 import 'features/finance/presentation/cubit/audit_log_cubit.dart';
 import 'features/finance/presentation/cubit/finance_cubit.dart';
 import 'features/settings/data/app_settings.dart';
+import 'features/settings/data/repositories/settings_repository.dart';
 import 'features/settings/presentation/cubit/app_settings_cubit.dart';
 import 'features/subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import 'features/subscriptions/presentation/cubit/plan_history_cubit.dart';
@@ -35,8 +37,11 @@ Future<void> bootstrap() async {
 
   // Loaded before the first frame so the app opens straight into the
   // admin's chosen theme instead of flashing the default one.
-  final settings = AppSettingsCubit();
+  final settings = AppSettingsCubit(sl<SettingsRepository>());
   await settings.load();
+  // Local cache first so the first frame has the right theme; the server's
+  // nursery policy layers over it once it arrives.
+  unawaited(settings.loadFromServer());
 
   if (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
     await windowManager.ensureInitialized();
@@ -79,12 +84,12 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) => PlansCubit()),
-            BlocProvider(create: (_) => PlanAssignmentsCubit()),
-            BlocProvider(create: (_) => PlanHistoryCubit()),
-            BlocProvider(create: (_) => FinanceCubit()),
-            BlocProvider(create: (_) => AuditLogCubit()),
-            BlocProvider(create: (_) => ScheduleCubit()),
+            BlocProvider(create: (_) => PlansCubit(sl())..load()),
+            BlocProvider(create: (_) => PlanAssignmentsCubit(sl())),
+            BlocProvider(create: (_) => PlanHistoryCubit(sl())),
+            BlocProvider(create: (_) => FinanceCubit(sl())..load()),
+            BlocProvider(create: (_) => AuditLogCubit(sl())..load()),
+            BlocProvider(create: (_) => ScheduleCubit(sl())..load()),
             BlocProvider(create: (_) => settings ?? AppSettingsCubit()),
           ],
           child: BlocBuilder<AppSettingsCubit, AppSettings>(

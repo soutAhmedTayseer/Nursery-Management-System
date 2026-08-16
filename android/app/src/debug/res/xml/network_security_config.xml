@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug builds only. This file lives in src/debug, so it is never merged into a
+  release APK — release keeps Android's default, which is that cleartext HTTP is
+  refused outright.
+
+  It exists so the app can reach the local mock server (docs/api/mock-server.mjs)
+  over plain HTTP while developing. Two ways in:
+
+    - 127.0.0.1 / localhost, when using `adb reverse tcp:8080 tcp:8080` (preferred:
+      works over USB, no Wi-Fi involved)
+    - 10.0.2.2, the host machine as seen from an Android emulator
+    - a LAN address, when the device reaches the host over Wi-Fi
+
+  Cleartext is allowed for these hosts and nothing else, so a debug build still
+  refuses plain HTTP to the open internet.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+        <!-- The host machine, from inside an Android emulator. -->
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <!-- This machine on the local network, for a physical device on Wi-Fi.
+             Change this if your LAN address changes. -->
+        <domain includeSubdomains="false">192.168.1.2</domain>
+    </domain-config>
+</network-security-config>
