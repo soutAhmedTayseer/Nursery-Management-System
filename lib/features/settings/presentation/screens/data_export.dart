@@ -7,12 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/testing/attendance_store.dart';
-import '../../../finance/domain/payment_records.dart';
 import '../../../finance/presentation/cubit/audit_log_cubit.dart';
 import '../../../finance/presentation/cubit/finance_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
 import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
-import '../cubit/app_settings_cubit.dart';
 
 String _csvField(String value) {
   final needsQuoting = value.contains(',') || value.contains('"') || value.contains('\n');
@@ -26,10 +24,8 @@ String _csvField(String value) {
 /// hand over or archive before the backend exists.
 Future<void> exportAllDataCsv(BuildContext context) async {
   final assignments = context.read<PlanAssignmentsCubit>().state;
-  final plans = context.read<PlansCubit>().state;
   final finance = context.read<FinanceCubit>().state;
   final auditEntries = context.read<AuditLogCubit>().state;
-  final settings = context.read<AppSettingsCubit>().state;
 
   final buffer = StringBuffer()
     ..writeln('# Children & Plans')
@@ -47,7 +43,8 @@ Future<void> exportAllDataCsv(BuildContext context) async {
     ..writeln()
     ..writeln('# Payment Ledger')
     ..writeln('Child,Parent,Base Fee,Overtime Hours,Overtime Amount,Penalty,Total Due,Status');
-  for (final record in derivePaymentRecords(assignments, plans, finance, settings: settings)) {
+  // Server-computed figures (contract §2) — exported as fetched.
+  for (final record in finance.records) {
     buffer.writeln(
       '${_csvField(record.childName)},${_csvField(record.parentName)},${record.baseFee},'
       '${record.overtimeHours.toStringAsFixed(2)},${record.overtimeAmount.toStringAsFixed(2)},'

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:nursery_shared/nursery_shared.dart';
+import '../../../../core/l10n/api_error_messages.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -168,7 +170,7 @@ class _ProfileSection extends StatelessWidget {
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
     final path = result?.files.single.path;
     if (path == null || !context.mounted) return;
-    await context.read<AppSettingsCubit>().updateProfile(photoPath: path);
+    await _save(context, () => context.read<AppSettingsCubit>().updateProfile(photoPath: path));
   }
 
   @override
@@ -218,7 +220,7 @@ class _ProfileSection extends StatelessWidget {
           description: 'settings_admin_name_description'.tr(),
           child: _InlineTextField(
             value: settings.adminName,
-            onSubmitted: (value) => context.read<AppSettingsCubit>().updateProfile(name: value),
+            onSubmitted: (value) => _save(context, () => context.read<AppSettingsCubit>().updateProfile(name: value)),
           ),
         ),
         SettingsTile(
@@ -226,7 +228,7 @@ class _ProfileSection extends StatelessWidget {
           child: _InlineTextField(
             value: settings.adminEmail,
             keyboardType: TextInputType.emailAddress,
-            onSubmitted: (value) => context.read<AppSettingsCubit>().updateProfile(email: value),
+            onSubmitted: (value) => _save(context, () => context.read<AppSettingsCubit>().updateProfile(email: value)),
           ),
         ),
         SettingsTile(
@@ -262,7 +264,7 @@ class _NurserySection extends StatelessWidget {
           label: 'settings_nursery_name_label'.tr(),
           child: _InlineTextField(
             value: settings.nurseryName,
-            onSubmitted: (value) => cubit.updateNursery(name: value),
+            onSubmitted: (value) => _save(context, () => cubit.updateNursery(name: value)),
           ),
         ),
         SettingsTile(
@@ -273,7 +275,9 @@ class _NurserySection extends StatelessWidget {
             keyboardType: TextInputType.number,
             onSubmitted: (value) {
               final parsed = int.tryParse(value);
-              if (parsed != null && parsed > 0) cubit.updateNursery(capacity: parsed);
+              if (parsed != null && parsed > 0) {
+                _save(context, () => cubit.updateNursery(capacity: parsed));
+              }
             },
           ),
         ),
@@ -286,7 +290,9 @@ class _NurserySection extends StatelessWidget {
             suffixText: settings.currency,
             onSubmitted: (value) {
               final parsed = double.tryParse(value);
-              if (parsed != null && parsed >= 0) cubit.updateNursery(overtimeHourlyRate: parsed);
+              if (parsed != null && parsed >= 0) {
+                _save(context, () => cubit.updateNursery(overtimeHourlyRate: parsed));
+              }
             },
           ),
         ),
@@ -299,7 +305,9 @@ class _NurserySection extends StatelessWidget {
             suffixText: settings.currency,
             onSubmitted: (value) {
               final parsed = double.tryParse(value);
-              if (parsed != null && parsed >= 0) cubit.updateNursery(latePickupFine: parsed);
+              if (parsed != null && parsed >= 0) {
+                _save(context, () => cubit.updateNursery(latePickupFine: parsed));
+              }
             },
           ),
         ),
@@ -312,7 +320,9 @@ class _NurserySection extends StatelessWidget {
             suffixText: 'settings_minutes_suffix'.tr(),
             onSubmitted: (value) {
               final parsed = int.tryParse(value);
-              if (parsed != null && parsed >= 0) cubit.updateNursery(latePickupGraceMinutes: parsed);
+              if (parsed != null && parsed >= 0) {
+                _save(context, () => cubit.updateNursery(latePickupGraceMinutes: parsed));
+              }
             },
           ),
         ),
@@ -321,7 +331,9 @@ class _NurserySection extends StatelessWidget {
           child: _InlineTextField(
             value: settings.currency,
             onSubmitted: (value) {
-              if (value.trim().isNotEmpty) cubit.updateNursery(currency: value.trim().toUpperCase());
+              if (value.trim().isNotEmpty) {
+                _save(context, () => cubit.updateNursery(currency: value.trim().toUpperCase()));
+              }
             },
           ),
         ),
@@ -333,7 +345,7 @@ class _NurserySection extends StatelessWidget {
               Expanded(
                 child: _HourDropdown(
                   value: settings.openingHour,
-                  onChanged: (hour) => cubit.updateNursery(openingHour: hour),
+                  onChanged: (hour) => _save(context, () => cubit.updateNursery(openingHour: hour)),
                 ),
               ),
               Padding(
@@ -343,7 +355,7 @@ class _NurserySection extends StatelessWidget {
               Expanded(
                 child: _HourDropdown(
                   value: settings.closingHour,
-                  onChanged: (hour) => cubit.updateNursery(closingHour: hour),
+                  onChanged: (hour) => _save(context, () => cubit.updateNursery(closingHour: hour)),
                 ),
               ),
             ],
@@ -498,4 +510,20 @@ class _HourDropdown extends StatelessWidget {
       onChanged: (hour) => hour == null ? null : onChanged(hour),
     );
   }
+}
+
+/// Runs a settings write and reports a rejection.
+///
+/// These fields save on submit with no explicit Save button, so without this a
+/// change the server refused would sit on screen looking applied until the next
+/// launch quietly reverted it.
+Future<void> _save(
+  BuildContext context,
+  Future<ApiException?> Function() write,
+) async {
+  final failure = await write();
+  if (failure == null || !context.mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(apiErrorMessage(failure))),
+  );
 }
