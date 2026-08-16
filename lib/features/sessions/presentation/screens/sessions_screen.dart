@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/l10n/api_error_messages.dart';
 import '../../../../core/responsive/responsive_value.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_snackbar.dart';
@@ -33,6 +34,20 @@ class SessionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    return BlocListener<SessionsCubit, SessionsState>(
+      // A rejected clock-in/out. Reported here rather than in the body, because
+      // the cubit restores the roster immediately afterwards and the list must
+      // not flicker.
+      listenWhen: (_, state) => state is SessionsActionFailed,
+      listener: (context, state) => AppSnackbar.showError(
+        context,
+        apiErrorMessage((state as SessionsActionFailed).exception),
+      ),
+      child: _scaffold(context, palette),
+    );
+  }
+
+  Widget _scaffold(BuildContext context, AppPalette palette) {
     return Scaffold(
       backgroundColor: palette.page,
       body: Padding(

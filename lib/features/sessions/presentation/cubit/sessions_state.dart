@@ -33,3 +33,15 @@ class SessionsError extends SessionsState {
 
   final ApiException exception;
 }
+
+/// A single write (clock in/out, QR toggle) was rejected.
+///
+/// Distinct from [SessionsError], which means the roster itself could not be
+/// read and the screen has nothing to show. This one is transient: the cubit
+/// emits it and immediately restores the previous state, so the list stays put
+/// and the screen reports it as a snackbar rather than replacing the page.
+class SessionsActionFailed extends SessionsState {
+  SessionsActionFailed(this.exception);
+
+  final ApiException exception;
+}

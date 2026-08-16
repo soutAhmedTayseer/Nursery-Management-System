@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nursery_shared/nursery_shared.dart';
 
-import '../../../../core/services/qr_code_service.dart';
 import '../../data/models/kid_session.dart';
 import '../../data/repositories/sessions_repository.dart';
 
@@ -40,26 +39,49 @@ class SessionsCubit extends Cubit<SessionsState> {
     return _fetch();
   }
 
-  Future<void> clockIn(String kidId) async {
-    await _repository.checkIn(kidId);
-    await _fetch();
-  }
+  Future<void> clockIn(String kidId) =>
+      _write(() => _repository.checkIn(kidId));
 
-  Future<void> clockOut(String kidId) async {
-    await _repository.checkOut(kidId);
-    await _fetch();
-  }
+  Future<void> clockOut(String kidId) =>
+      _write(() => _repository.checkOut(kidId));
 
-  /// Decodes a scanned QR payload and clocks that kid in or out, whichever
-  /// is the opposite of their current state. Returns the kid's display name
-  /// on success, or null if the payload didn't verify or matched no kid.
+  /// Clocks the scanned kid in or out, whichever is the opposite of their
+  /// current state. Returns the kid's display name on success, or null if the
+  /// payload matched no kid.
+  ///
+  /// The payload is passed through untouched — it is signed and verified
+  /// server-side (contract §5), so the client neither decodes nor trusts it.
   Future<String?> handleQrScan(String payload) async {
-    final kidId = QrCodeService.verify(payload);
-    if (kidId == null) return null;
-    final updated = await _repository.clockToggle(kidId);
-    if (updated == null) return null;
+    KidSession? updated;
+    final succeeded = await _write(() async {
+      updated = await _repository.clockToggle(payload);
+    });
+    if (!succeeded) return null;
+    return updated?.kid.fullName;
+  }
+
+  /// Runs a write, then refreshes.
+  ///
+  /// The write is inside the try: it used to sit outside, so a `409`
+  /// (`KID_ALREADY_CHECKED_IN`, `CAPACITY_EXCEEDED`, `KID_NOT_ACTIVE`) escaped
+  /// as an unhandled async error and the button silently did nothing.
+  ///
+  /// A failure emits [SessionsActionFailed] and then puts the previous state
+  /// straight back, so the roster stays on screen — one rejected row must not
+  /// blank the whole list the way [SessionsError] would.
+  ///
+  /// Returns whether the write succeeded.
+  Future<bool> _write(Future<void> Function() action) async {
+    final previous = state;
+    try {
+      await action();
+    } on ApiException catch (exception) {
+      emit(SessionsActionFailed(exception));
+      if (previous is SessionsLoaded) emit(previous);
+      return false;
+    }
     await _fetch();
-    return updated.kid.fullName;
+    return true;
   }
 
   /// Persists a locally-picked photo for [kidId] and refreshes so every
