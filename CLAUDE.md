@@ -4,8 +4,7 @@ This repository is the `Nursery Full App` monorepo on the
 `backend-integration-with-mobile` branch. The admin app lives at the root, the
 parent Flutter app lives in `mobile/`, and the shared package lives in
 `packages/nursery_shared/`. Read the root `AGENTS.md` when it is available
-before touching code
-here — this file is just the pointer and the app-specific TL;DR.
+before touching code here.
 
 ## This app
 
