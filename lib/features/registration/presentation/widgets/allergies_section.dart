@@ -9,12 +9,21 @@ import '../../../../core/theme/app_palette.dart';
 /// to fill, consistent data. "Other" reveals a small input; each entry typed
 /// there becomes its own removable chip.
 class AllergiesSection extends StatefulWidget {
-  const AllergiesSection({super.key, this.onChanged});
+  const AllergiesSection({
+    super.key,
+    this.onChanged,
+    this.initialAllergies = const [],
+  });
 
   /// Called with the localized allergy labels (chip options + custom
   /// entries) whenever the selection changes, so Registration can save them
   /// onto the new Kid record.
   final ValueChanged<List<String>>? onChanged;
+
+  /// Localized allergy labels to pre-select (used when editing an existing
+  /// child). Any that match a known option light up its chip; the rest become
+  /// custom chips.
+  final List<String> initialAllergies;
 
   @override
   State<AllergiesSection> createState() => _AllergiesSectionState();
@@ -34,6 +43,24 @@ class _AllergiesSectionState extends State<AllergiesSection> {
   final List<String> _customAllergies = [];
   final _customController = TextEditingController();
   bool _otherSelected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialAllergies.isEmpty) return;
+    final byLabel = {for (final o in _options) o.tr(): o};
+    for (final raw in widget.initialAllergies) {
+      final label = raw.trim();
+      if (label.isEmpty) continue;
+      final option = byLabel[label];
+      if (option != null) {
+        _selected.add(option);
+      } else {
+        _customAllergies.add(label);
+        _otherSelected = true;
+      }
+    }
+  }
 
   @override
   void dispose() {

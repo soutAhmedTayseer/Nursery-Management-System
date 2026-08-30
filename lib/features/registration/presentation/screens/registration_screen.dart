@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:nursery_shared/nursery_shared.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/responsive/breakpoints.dart';
@@ -10,10 +11,7 @@ import '../../../../core/responsive/ui_scale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_snackbar.dart';
-import '../../../sessions/data/repositories/sessions_repository.dart';
-import '../../../subscriptions/data/models/subscription_plan.dart';
-import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
-import '../../../subscriptions/presentation/cubit/plans_cubit.dart';
+import '../../../children/data/repositories/children_repository.dart';
 import '../cubit/registration_cubit.dart';
 import '../cubit/registration_state.dart';
 import '../widgets/agreement_section.dart';
@@ -38,7 +36,7 @@ class RegistrationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => RegistrationCubit(sl<SessionsRepository>()),
+      create: (context) => RegistrationCubit(sl<ChildrenRepository>()),
       child: const _RegistrationPager(),
     );
   }
@@ -56,13 +54,11 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
   int _currentStep = 0;
   int _formGeneration = 0;
 
-  var _childNameController = TextEditingController();
-  var _dobController = TextEditingController();
-  var _motherNameController = TextEditingController();
-  var _motherPhoneController = TextEditingController();
-  var _fatherNameController = TextEditingController();
-  var _fatherPhoneController = TextEditingController();
-  var _signatureController = TextEditingController();
+  // Every field gets a controller held here in State, so its value survives
+  // PageView disposing the off-screen step (that was the "data lost on
+  // back/next" bug — uncontrolled TextFormFields were rebuilt empty).
+  late _RegistrationControllers _c = _RegistrationControllers();
+
   String? _selectedPlanId;
   List<String> _allergies = [];
   bool _agreementChecked = false;
@@ -74,13 +70,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
   @override
   void dispose() {
     _pageController.dispose();
-    _childNameController.dispose();
-    _dobController.dispose();
-    _motherNameController.dispose();
-    _motherPhoneController.dispose();
-    _fatherNameController.dispose();
-    _fatherPhoneController.dispose();
-    _signatureController.dispose();
+    _c.dispose();
     super.dispose();
   }
 
@@ -91,8 +81,8 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     return '$d/$m/${now.year}';
   }
 
-  DateTime? _parseDob() {
-    final parts = _dobController.text.split('/');
+  DateTime? _parseDmy(String raw) {
+    final parts = raw.split('/');
     if (parts.length != 3) return null;
     final day = int.tryParse(parts[0]);
     final month = int.tryParse(parts[1]);
@@ -101,7 +91,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     return DateTime(year, month, day);
   }
 
-  void _goToStep(int step) {
+  void _jumpTo(int step) {
     setState(() => _currentStep = step);
     _pageController.animateToPage(
       step,
@@ -110,9 +100,50 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     );
   }
 
+  /// Navigation entry point for the Next button AND the step dots. Going
+  /// backward is always free; going forward runs the validator for every
+  /// step being skipped over and stops on the first incomplete one.
+  void _goToStep(int target) {
+    if (target <= _currentStep) {
+      _jumpTo(target);
+      return;
+    }
+    for (var i = _currentStep; i < target; i++) {
+      if (!(_formKeys[i].currentState?.validate() ?? true)) {
+        _jumpTo(i);
+        return;
+      }
+      if (i == 2 && _fatherAnyFilled && !_fatherAllFilled) {
+        AppSnackbar.showError(
+          context,
+          'registration_father_all_or_none_error'.tr(),
+        );
+        _jumpTo(2);
+        return;
+      }
+    }
+    _jumpTo(target);
+  }
+
+  /// Father is optional as a block: fill all of it or none of it.
+  List<String> get _fatherValues => [
+        _c.fatherName.text,
+        _c.fatherPhone.text,
+        _c.fatherEmail.text,
+        _c.fatherOccupation.text,
+        _c.fatherJobTitle.text,
+        _c.fatherCompany.text,
+        _c.fatherWorkPhone.text,
+        _c.fatherAddress.text,
+      ].map((v) => v.trim()).toList();
+
+  bool get _fatherAnyFilled => _fatherValues.any((v) => v.isNotEmpty);
+  bool get _fatherAllFilled => _fatherValues.every((v) => v.isNotEmpty);
+
   void _next(BuildContext context, RegistrationCubit cubit) {
     if (_currentStep < _stepCount - 1) {
-      if (!(_formKeys[_currentStep].currentState?.validate() ?? true)) return;
+      // _goToStep runs the current step's validator (and the father rule)
+      // before it will move forward.
       _goToStep(_currentStep + 1);
       return;
     }
@@ -120,14 +151,18 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     // triggering a step's Next-button validation, so re-validate everything.
     for (var i = 0; i < _stepCount; i++) {
       if (!(_formKeys[i].currentState?.validate() ?? true)) {
-        _goToStep(i);
+        _jumpTo(i);
         return;
       }
     }
-    if (_motherPhoneController.text.trim().isEmpty &&
-        _fatherPhoneController.text.trim().isEmpty) {
-      AppSnackbar.showError(context, 'registration_parent_required_error'.tr());
-      _goToStep(1);
+    if (_fatherAnyFilled && !_fatherAllFilled) {
+      AppSnackbar.showError(context, 'registration_father_all_or_none_error'.tr());
+      _goToStep(2);
+      return;
+    }
+    if (_selectedPlanId == null) {
+      AppSnackbar.showError(context, 'registration_plan_required_error'.tr());
+      _goToStep(0);
       return;
     }
     if (_mediaConsent == null) {
@@ -146,40 +181,59 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
       _goToStep(_stepCount - 1);
       return;
     }
-    final selected = _findSelectedPlan(context);
-    if (selected == null) {
-      AppSnackbar.showError(context, 'registration_plan_required_error'.tr());
+
+    final dob = _parseDmy(_c.dob.text);
+    final enrol = _parseDmy(_c.enrolDate.text) ?? DateTime.now();
+    if (dob == null) {
+      AppSnackbar.showError(context, 'registration_error_required'.tr());
       _goToStep(0);
       return;
     }
-    // Invoices go to the father's WhatsApp number when there is one, and
-    // fall back to the mother's — the step-4 validator already guarantees
-    // at least one of the two is filled in. The billing name follows
-    // whichever number we picked, so the invoice greets the person who
-    // actually receives it.
-    final fatherPhone = _fatherPhoneController.text.trim();
-    final motherPhone = _motherPhoneController.text.trim();
-    final useFather = fatherPhone.isNotEmpty;
-    final parentName = (useFather ? _fatherNameController.text : _motherNameController.text).trim();
-    cubit.registerChild(
-      fullName: _childNameController.text,
-      dateOfBirth: _parseDob(),
-      planCategory: selected.$1,
-      planItem: selected.$2,
-      // Names are optional on the form, so fall back rather than showing a
-      // blank parent on the invoice.
-      parentName: parentName.isNotEmpty ? parentName : 'registration_guardian_fallback'.tr(),
-      parentPhone: useFather ? fatherPhone : motherPhone,
-      allergies: _allergies.isEmpty ? null : _allergies.join(', '),
-    );
-  }
 
-  (PlanCategory, PlanLineItem)? _findSelectedPlan(BuildContext context) {
-    final compositeId = _selectedPlanId;
-    if (compositeId == null) return null;
-    final parts = compositeId.split(':');
-    if (parts.length != 2) return null;
-    return context.read<PlansCubit>().findLineItem(parts[0], parts[1]);
+    cubit.submit(
+      ChildInput(
+        fullName: _c.childName.text.trim(),
+        dateOfBirth: dob,
+        enrollmentDate: enrol,
+        nationality: _c.nationality.text.trim(),
+        religion: _c.religion.text.trim(),
+        homeAddress: _c.homeAddress.text.trim(),
+        allergies: _allergies.isEmpty ? null : _allergies.join(', '),
+        mother: ParentContact(
+          fullName: _c.motherName.text.trim(),
+          phone: _c.motherPhone.text.trim(),
+          email: _c.motherEmail.text.trim(),
+          occupation: _c.motherOccupation.text.trim(),
+          jobTitle: _c.motherJobTitle.text.trim(),
+          companyName: _c.motherCompany.text.trim(),
+          workPhone: _c.motherWorkPhone.text.trim(),
+          address: _c.motherAddress.text.trim(),
+        ),
+        father: ParentContact(
+          fullName: _c.fatherName.text.trim(),
+          phone: _c.fatherPhone.text.trim(),
+          email: _c.fatherEmail.text.trim(),
+          occupation: _c.fatherOccupation.text.trim(),
+          jobTitle: _c.fatherJobTitle.text.trim(),
+          companyName: _c.fatherCompany.text.trim(),
+          workPhone: _c.fatherWorkPhone.text.trim(),
+          address: _c.fatherAddress.text.trim(),
+        ),
+        agreement: ChildAgreement(
+          mediaPermission: _mediaConsent ?? false,
+          parentSignature: _c.signature.text.trim(),
+          signedDate: DateTime.now(),
+          acceptedTerms: _agreementChecked,
+        ),
+        emergencyContacts: [
+          NewEmergencyContact(
+            name: _c.emergencyName.text.trim(),
+            relationship: _c.emergencyRelationship.text.trim(),
+            phone: _c.emergencyPhone.text.trim(),
+          ),
+        ],
+      ),
+    );
   }
 
   void _back() {
@@ -188,23 +242,11 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
 
   void _resetForNewChild() {
     _pageController.jumpToPage(0);
-    _childNameController.dispose();
-    _dobController.dispose();
-    _motherNameController.dispose();
-    _motherPhoneController.dispose();
-    _fatherNameController.dispose();
-    _fatherPhoneController.dispose();
-    _signatureController.dispose();
+    _c.dispose();
     setState(() {
       _currentStep = 0;
       _formGeneration++; // forces fresh field widgets, clearing all input state
-      _childNameController = TextEditingController();
-      _dobController = TextEditingController();
-      _motherNameController = TextEditingController();
-      _motherPhoneController = TextEditingController();
-      _fatherNameController = TextEditingController();
-      _fatherPhoneController = TextEditingController();
-      _signatureController = TextEditingController();
+      _c = _RegistrationControllers();
       _selectedPlanId = null;
       _allergies = [];
       _agreementChecked = false;
@@ -276,7 +318,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_child_name'.tr(),
                 hint: 'registration_hint_child_name'.tr(),
                 inputType: RegistrationFieldInputType.letters,
-                controller: _childNameController,
+                controller: _c.childName,
                 required: true,
               ),
             ),
@@ -285,13 +327,15 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_dob'.tr(),
                 hint: 'registration_hint_date'.tr(),
                 inputType: RegistrationFieldInputType.date,
-                controller: _dobController,
+                controller: _c.dob,
                 required: true,
               ),
               RegistrationInputField(
                 label: 'registration_label_enrol_date'.tr(),
                 hint: 'registration_hint_date'.tr(),
                 inputType: RegistrationFieldInputType.date,
+                controller: _c.enrolDate,
+                required: true,
               ),
             ),
             _FieldRow(
@@ -299,11 +343,15 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_nationality'.tr(),
                 hint: 'registration_hint_nationality'.tr(),
                 inputType: RegistrationFieldInputType.letters,
+                controller: _c.nationality,
+                required: true,
               ),
               RegistrationInputField(
                 label: 'registration_label_religion'.tr(),
                 hint: 'registration_hint_religion'.tr(),
                 inputType: RegistrationFieldInputType.letters,
+                controller: _c.religion,
+                required: true,
               ),
             ),
             _FieldRow(
@@ -311,6 +359,8 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_home_address'.tr(),
                 hint: 'registration_hint_home_address'.tr(),
                 inputType: RegistrationFieldInputType.alphanumeric,
+                controller: _c.homeAddress,
+                required: true,
               ),
             ),
           ]),
@@ -334,13 +384,15 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_mother_name'.tr(),
                 hint: 'registration_hint_parent_name'.tr(),
                 inputType: RegistrationFieldInputType.letters,
-                controller: _motherNameController,
+                controller: _c.motherName,
+                required: true,
               ),
               RegistrationInputField(
                 label: 'registration_label_mother_phone'.tr(),
                 hint: 'registration_hint_phone'.tr(),
                 inputType: RegistrationFieldInputType.digits,
-                controller: _motherPhoneController,
+                controller: _c.motherPhone,
+                required: true,
               ),
             ),
             _FieldRow(
@@ -348,6 +400,8 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_contact_email'.tr(),
                 hint: 'registration_hint_email'.tr(),
                 inputType: RegistrationFieldInputType.email,
+                controller: _c.motherEmail,
+                required: true,
               ),
             ),
             _FieldRow(
@@ -355,11 +409,15 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_occupation'.tr(),
                 hint: 'registration_hint_occupation'.tr(),
                 inputType: RegistrationFieldInputType.letters,
+                controller: _c.motherOccupation,
+                required: true,
               ),
               RegistrationInputField(
                 label: 'registration_label_job_title'.tr(),
                 hint: 'registration_hint_job_title'.tr(),
                 inputType: RegistrationFieldInputType.letters,
+                controller: _c.motherJobTitle,
+                required: true,
               ),
             ),
             _FieldRow(
@@ -367,11 +425,15 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_company_name'.tr(),
                 hint: 'registration_hint_company_name'.tr(),
                 inputType: RegistrationFieldInputType.alphanumeric,
+                controller: _c.motherCompany,
+                required: true,
               ),
               RegistrationInputField(
                 label: 'registration_label_work_phone'.tr(),
                 hint: 'registration_hint_work_phone'.tr(),
                 inputType: RegistrationFieldInputType.digits,
+                controller: _c.motherWorkPhone,
+                required: true,
               ),
             ),
             _FieldRow(
@@ -380,6 +442,8 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 hint: 'registration_hint_workplace_alt'.tr(),
                 inputType: RegistrationFieldInputType.alphanumeric,
                 maxLines: 2,
+                controller: _c.motherAddress,
+                required: true,
               ),
             ),
           ]),
@@ -390,19 +454,30 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
         icon: Icons.male_rounded,
         accentColor: palette.textSecondary,
         children: [
+          Padding(
+            padding: EdgeInsets.only(bottom: spacing.md),
+            child: Text(
+              'registration_father_optional_hint'.tr(),
+              style: TextStyle(
+                fontSize: (12 * context.uiScale).sp,
+                color: palette.textTertiary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
           _fieldRows(context, spacing, [
             _FieldRow(
               RegistrationInputField(
                 label: 'registration_label_father_name'.tr(),
                 hint: 'registration_hint_parent_name'.tr(),
                 inputType: RegistrationFieldInputType.letters,
-                controller: _fatherNameController,
+                controller: _c.fatherName,
               ),
               RegistrationInputField(
                 label: 'registration_label_father_phone'.tr(),
                 hint: 'registration_hint_phone'.tr(),
                 inputType: RegistrationFieldInputType.digits,
-                controller: _fatherPhoneController,
+                controller: _c.fatherPhone,
               ),
             ),
             _FieldRow(
@@ -410,6 +485,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_contact_email'.tr(),
                 hint: 'registration_hint_email'.tr(),
                 inputType: RegistrationFieldInputType.email,
+                controller: _c.fatherEmail,
               ),
             ),
             _FieldRow(
@@ -417,11 +493,13 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_occupation'.tr(),
                 hint: 'registration_hint_occupation'.tr(),
                 inputType: RegistrationFieldInputType.letters,
+                controller: _c.fatherOccupation,
               ),
               RegistrationInputField(
                 label: 'registration_label_job_title'.tr(),
                 hint: 'registration_hint_job_title'.tr(),
                 inputType: RegistrationFieldInputType.letters,
+                controller: _c.fatherJobTitle,
               ),
             ),
             _FieldRow(
@@ -429,11 +507,13 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_company'.tr(),
                 hint: 'registration_hint_company'.tr(),
                 inputType: RegistrationFieldInputType.alphanumeric,
+                controller: _c.fatherCompany,
               ),
               RegistrationInputField(
                 label: 'registration_label_work_phone'.tr(),
                 hint: 'registration_hint_work_phone'.tr(),
                 inputType: RegistrationFieldInputType.digits,
+                controller: _c.fatherWorkPhone,
               ),
             ),
             _FieldRow(
@@ -441,6 +521,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                 label: 'registration_label_address_alt'.tr(),
                 hint: 'registration_hint_workplace'.tr(),
                 inputType: RegistrationFieldInputType.alphanumeric,
+                controller: _c.fatherAddress,
               ),
             ),
           ]),
@@ -449,16 +530,27 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
       EmergencyContactSection(
         children: [
           RegistrationInputField(
-            label: 'registration_label_name_relationship'.tr(),
-            hint: 'registration_hint_name_relationship'.tr(),
+            label: 'registration_label_emergency_name'.tr(),
+            hint: 'registration_hint_emergency_name'.tr(),
             inputType: RegistrationFieldInputType.letters,
-            maxLines: 2,
+            controller: _c.emergencyName,
+            required: true,
+          ),
+          SizedBox(height: spacing.lg),
+          RegistrationInputField(
+            label: 'registration_label_emergency_relationship'.tr(),
+            hint: 'registration_hint_emergency_relationship'.tr(),
+            inputType: RegistrationFieldInputType.letters,
+            controller: _c.emergencyRelationship,
+            required: true,
           ),
           SizedBox(height: spacing.lg),
           RegistrationInputField(
             label: 'registration_label_contact_number'.tr(),
             hint: 'registration_hint_contact_number'.tr(),
             inputType: RegistrationFieldInputType.digits,
+            controller: _c.emergencyPhone,
+            required: true,
           ),
         ],
       ),
@@ -511,7 +603,7 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
             label: 'registration_agreement_signature_label'.tr(),
             hint: 'registration_agreement_signature_hint'.tr(),
             inputType: RegistrationFieldInputType.letters,
-            controller: _signatureController,
+            controller: _c.signature,
             required: true,
           ),
           SizedBox(height: spacing.lg),
@@ -553,21 +645,22 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
     return BlocListener<RegistrationCubit, RegistrationState>(
       listener: (context, state) {
         if (state is RegistrationSuccess) {
-          // Subscribe the new child so they appear in Finance's payments
-          // table and Add Invoice, not just the Sessions roster.
-          context.read<PlanAssignmentsCubit>().assign(state.assignment);
-          AppSnackbar.showSuccess(context, 'registration_success_message'.tr());
+          final name = state.child?.fullName;
+          AppSnackbar.showSuccess(
+            context,
+            name == null
+                ? 'registration_success_message'.tr()
+                : 'registration_success_named'.tr(namedArgs: {'name': name}),
+          );
           _resetForNewChild();
         } else if (state is RegistrationError) {
-          AppSnackbar.showError(context, state.message);
+          // The message is either a translation key or an API detail string;
+          // `.tr()` returns the key unchanged when it isn't a known key.
+          AppSnackbar.showError(context, state.message.tr());
         }
       },
       child: Scaffold(
         backgroundColor: palette.page,
-        // Default keyboard behavior: Scaffold resizes the body so the
-        // focused field stays above the keyboard instead of being covered by
-        // it, and the per-page SingleChildScrollView auto-scrolls the
-        // focused field into view.
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(
@@ -577,15 +670,12 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Step indicator
                 _StepIndicator(
                   labels: stepLabels,
                   currentStep: _currentStep,
                   onStepTapped: _goToStep,
                 ),
                 SizedBox(height: spacing.xxl),
-
-                // 2. Current step content — fills remaining screen, scrolls internally only if needed
                 Expanded(
                   child: Align(
                     alignment: Alignment.topCenter,
@@ -603,9 +693,11 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                         onPageChanged: (i) => setState(() => _currentStep = i),
                         children: [
                           for (var i = 0; i < pages.length; i++)
-                            Form(
-                              key: _formKeys[i],
-                              child: SingleChildScrollView(child: pages[i]),
+                            _KeepAlivePage(
+                              child: Form(
+                                key: _formKeys[i],
+                                child: SingleChildScrollView(child: pages[i]),
+                              ),
                             ),
                         ],
                       ),
@@ -613,10 +705,6 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
                   ),
                 ),
                 SizedBox(height: spacing.xl),
-
-                // 3. Footer navigation — on bigger screens, swiping/tapping a
-                // step dot replaces Back and Next, so only the final Save
-                // action still needs a button down here.
                 Builder(
                   builder: (context) {
                     final isLastStep = _currentStep == _stepCount - 1;
@@ -708,6 +796,80 @@ class _RegistrationPagerState extends State<_RegistrationPager> {
         ),
       ),
     );
+  }
+}
+
+/// Owns one [TextEditingController] per form field. Lives on the pager's
+/// State so values persist while the user steps back and forth.
+class _RegistrationControllers {
+  final childName = TextEditingController();
+  final dob = TextEditingController();
+  final enrolDate = TextEditingController();
+  final nationality = TextEditingController();
+  final religion = TextEditingController();
+  final homeAddress = TextEditingController();
+
+  final motherName = TextEditingController();
+  final motherPhone = TextEditingController();
+  final motherEmail = TextEditingController();
+  final motherOccupation = TextEditingController();
+  final motherJobTitle = TextEditingController();
+  final motherCompany = TextEditingController();
+  final motherWorkPhone = TextEditingController();
+  final motherAddress = TextEditingController();
+
+  final fatherName = TextEditingController();
+  final fatherPhone = TextEditingController();
+  final fatherEmail = TextEditingController();
+  final fatherOccupation = TextEditingController();
+  final fatherJobTitle = TextEditingController();
+  final fatherCompany = TextEditingController();
+  final fatherWorkPhone = TextEditingController();
+  final fatherAddress = TextEditingController();
+
+  final emergencyName = TextEditingController();
+  final emergencyRelationship = TextEditingController();
+  final emergencyPhone = TextEditingController();
+
+  final signature = TextEditingController();
+
+  List<TextEditingController> get _all => [
+        childName, dob, enrolDate, nationality, religion, homeAddress,
+        motherName, motherPhone, motherEmail, motherOccupation, motherJobTitle,
+        motherCompany, motherWorkPhone, motherAddress,
+        fatherName, fatherPhone, fatherEmail, fatherOccupation, fatherJobTitle,
+        fatherCompany, fatherWorkPhone, fatherAddress,
+        emergencyName, emergencyRelationship, emergencyPhone,
+        signature,
+      ];
+
+  void dispose() {
+    for (final c in _all) {
+      c.dispose();
+    }
+  }
+}
+
+/// Keeps a PageView child's element (and every TextFormField in it) alive
+/// while it is off-screen, so half-typed input is never rebuilt away.
+class _KeepAlivePage extends StatefulWidget {
+  const _KeepAlivePage({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_KeepAlivePage> createState() => _KeepAlivePageState();
+}
+
+class _KeepAlivePageState extends State<_KeepAlivePage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
 

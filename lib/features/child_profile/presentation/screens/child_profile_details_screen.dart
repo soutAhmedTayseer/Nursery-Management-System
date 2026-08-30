@@ -5,6 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_fonts.dart';
+import '../../../children/data/repositories/children_repository.dart';
+import '../../../children/presentation/cubit/child_profile_cubit.dart';
+import '../../../children/presentation/widgets/child_manage_column.dart';
+import '../../../../core/di/injection.dart';
 import '../../../sessions/data/models/kid_session.dart';
 import '../../../subscriptions/data/models/subscription_plan.dart';
 import '../../../subscriptions/presentation/cubit/plan_assignments_cubit.dart';
@@ -13,7 +17,6 @@ import '../../../subscriptions/presentation/widgets/financial_dues_tab.dart';
 import '../cubit/attendance_cubit.dart';
 import '../utils/child_profile_export.dart';
 import '../widgets/attendance_log_tab.dart';
-import '../widgets/child_profile_card.dart';
 import '../../../../core/theme/app_palette.dart';
 
 class ChildProfileDetailsScreen extends StatefulWidget {
@@ -41,8 +44,19 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
         ? null
         : context.read<PlansCubit>().findLineItem(assignment.categoryId, assignment.lineItemId);
 
-    return BlocProvider(
-      create: (_) => AttendanceCubit(widget.childData.kid.id, allowedHours: lineItem?.$2.hoursPerDay),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => AttendanceCubit(widget.childData.kid.id,
+              allowedHours: lineItem?.$2.hoursPerDay),
+        ),
+        BlocProvider(
+          create: (_) => ChildProfileCubit(
+            sl<ChildrenRepository>(),
+            widget.childData.kid.id,
+          )..load(),
+        ),
+      ],
       child: Builder(
         builder: (context) => Scaffold(
           backgroundColor: palette.page,
@@ -165,7 +179,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ChildProfileCard(childData: widget.childData),
+          const ChildManageColumn(),
           SizedBox(height: 24.h),
           AttendanceLogTab(kid: widget.childData.kid),
         ],
@@ -174,7 +188,7 @@ class _ChildProfileDetailsScreenState extends State<ChildProfileDetailsScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(flex: 4, child: ChildProfileCard(childData: widget.childData)),
+        const Expanded(flex: 4, child: ChildManageColumn()),
         SizedBox(width: 32.w),
         Expanded(flex: 8, child: AttendanceLogTab(kid: widget.childData.kid)),
       ],

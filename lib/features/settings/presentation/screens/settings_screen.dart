@@ -321,7 +321,7 @@ class _ProfileSectionState extends State<_ProfileSection> {
                   obscureText: true,
                   decoration: InputDecoration(labelText: 'settings_password_new_label'.tr()),
                   validator: (v) =>
-                      (v == null || v.length < 6) ? 'settings_password_too_short'.tr() : null,
+                      (v == null || v.length < 8) ? 'settings_password_too_short'.tr() : null,
                 ),
                 if (errorText != null) ...[
                   SizedBox(height: 12.h),

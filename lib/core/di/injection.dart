@@ -8,7 +8,9 @@ import '../../features/admin_login/presentation/cubit/admin_login_cubit.dart';
 import '../../features/admin_splash/presentation/cubit/splash_cubit.dart';
 import '../../features/auth/data/repositories/api_auth_repository.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
-import '../../features/sessions/data/repositories/fake_sessions_repository.dart';
+import '../../features/children/data/repositories/api_children_repository.dart';
+import '../../features/children/data/repositories/children_repository.dart';
+import '../../features/sessions/data/repositories/api_sessions_repository.dart';
 import '../../features/sessions/data/repositories/sessions_repository.dart';
 import '../../features/sessions/presentation/cubit/sessions_cubit.dart';
 import '../testing/fake_failure_switch.dart';
@@ -30,8 +32,10 @@ Future<void> setupLocator({required String baseUrl}) async {
   sl.registerLazySingleton<FakeFailureSwitch>(() => FakeFailureSwitch());
 
   // --- Repositories (swap these at integration) ---
+  // Sessions roster now reads the live GET /api/children list. Check-in/out
+  // and the QR clock flow stay stubbed until Phase 2 (/api/attendance/*).
   sl.registerLazySingleton<SessionsRepository>(
-    () => FakeSessionsRepository(failureSwitch: sl<FakeFailureSwitch>()),
+    () => ApiSessionsRepository(sl<ChildrenRepository>()),
   );
 
   // --- Auth + account (live) ---
@@ -43,6 +47,9 @@ Future<void> setupLocator({required String baseUrl}) async {
   );
   sl.registerLazySingleton<AccountRepository>(
     () => ApiAccountRepository(sl<ApiClient>()),
+  );
+  sl.registerLazySingleton<ChildrenRepository>(
+    () => ApiChildrenRepository(sl<ApiClient>()),
   );
 
   // --- Cubits ---
