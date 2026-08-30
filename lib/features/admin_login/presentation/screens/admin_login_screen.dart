@@ -9,6 +9,7 @@ import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../account/presentation/cubit/account_cubit.dart';
 import '../cubit/admin_login_cubit.dart';
 import '../widgets/admin_text_field.dart';
 import '../widgets/login_background_decor.dart';
@@ -49,6 +50,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       child: BlocListener<AdminLoginCubit, AdminLoginState>(
         listener: (context, state) {
           if (state is AdminLoginSuccess) {
+            context.read<AccountCubit>().load();
             Navigator.pushReplacementNamed(context, AppRoutes.adminMainLayout);
           } else if (state is AdminLoginError) {
             ScaffoldMessenger.of(context).showSnackBar(

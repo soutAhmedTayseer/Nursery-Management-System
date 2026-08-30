@@ -5,12 +5,16 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:nursery_shared/nursery_shared.dart';
 
+import '../../../../core/l10n/api_error_messages.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
+import '../../../account/data/models/account.dart';
+import '../../../account/presentation/cubit/account_cubit.dart';
 import '../../data/app_settings.dart';
 import '../cubit/app_settings_cubit.dart';
 import '../widgets/settings_section.dart';
@@ -159,87 +163,375 @@ class _AppearanceSection extends StatelessWidget {
   }
 }
 
-class _ProfileSection extends StatelessWidget {
+/// Admin profile, backed by the app-wide `AccountCubit` (live
+/// `GET/PUT /api/account/me` + `PUT /api/account/password`). The profile
+/// photo has no endpoint yet, so it stays a local `AppSettingsCubit`
+/// preference (see the linking open-issues doc).
+class _ProfileSection extends StatefulWidget {
   const _ProfileSection({required this.settings});
 
   final AppSettings settings;
+
+  @override
+  State<_ProfileSection> createState() => _ProfileSectionState();
+}
+
+class _ProfileSectionState extends State<_ProfileSection> {
+  @override
+  void initState() {
+    super.initState();
+    // Usually already loaded by splash/login; covers a cold open straight
+    // into Settings, or a retry after logout reset.
+    final cubit = context.read<AccountCubit>();
+    if (cubit.state is AccountInitial) cubit.load();
+  }
+
+  AppSettings get settings => widget.settings;
 
   Future<void> _pickPhoto(BuildContext context) async {
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
     final path = result?.files.single.path;
     if (path == null || !context.mounted) return;
-    await context.read<AppSettingsCubit>().updateProfile(photoPath: path);
+    await context.read<AppSettingsCubit>().setPhotoPath(path);
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocConsumer<AccountCubit, AccountState>(
+      listenWhen: (_, current) => current is AccountError,
+      listener: (context, state) {
+        if (state is AccountError) {
+          AppSnackbar.showError(context, apiErrorMessage(state.exception));
+        }
+      },
+      builder: (context, state) {
+        return SettingsSection(
+          title: 'settings_profile_title'.tr(),
+          icon: Icons.person_outline,
+          accent: AppColors.gold,
+          children: _children(context, state),
+        );
+      },
+    );
+  }
+
+  List<Widget> _children(BuildContext context, AccountState state) {
+    if (state is AccountLoaded) return _loaded(context, state.account);
+    if (state is AccountError) {
+      return [
+        _StatusRow(
+          message: 'settings_profile_load_error'.tr(),
+          actionLabel: 'settings_profile_retry'.tr(),
+          onAction: () => context.read<AccountCubit>().load(),
+        ),
+      ];
+    }
+    return [_StatusRow(message: 'settings_profile_loading'.tr())];
+  }
+
+  List<Widget> _loaded(BuildContext context, Account account) {
     final palette = context.palette;
     final photo = settings.adminPhotoPath;
-    return SettingsSection(
-      title: 'settings_profile_title'.tr(),
-      icon: Icons.person_outline,
-      accent: AppColors.gold,
-      children: [
-        Row(
-          children: [
-            GestureDetector(
-              onTap: () => _pickPhoto(context),
-              child: CircleAvatar(
-                radius: 32.r,
-                backgroundColor: palette.chip,
-                backgroundImage: photo == null ? null : FileImage(File(photo)),
-                child: photo != null ? null : Icon(Icons.person, size: 30.w, color: palette.textTertiary),
-              ),
+    final cubit = context.read<AccountCubit>();
+    return [
+      Row(
+        children: [
+          GestureDetector(
+            onTap: () => _pickPhoto(context),
+            child: CircleAvatar(
+              radius: 32.r,
+              backgroundColor: palette.chip,
+              backgroundImage: photo == null ? null : FileImage(File(photo)),
+              child: photo != null ? null : Icon(Icons.person, size: 30.w, color: palette.textTertiary),
             ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  account.fullName,
+                  style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: palette.textPrimary),
+                ),
+                Text(
+                  account.userName,
+                  style: TextStyle(fontSize: 12.sp, color: palette.textTertiary),
+                ),
+                SizedBox(height: 6.h),
+                Text(
+                  'settings_profile_photo_hint'.tr(),
+                  style: TextStyle(fontSize: 11.sp, color: palette.textTertiary),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      _ProfileEditForm(account: account),
+      SettingsTile(
+        label: 'settings_profile_username_label'.tr(),
+        child: _ReadOnlyValue(account.userName),
+      ),
+      SettingsTile(
+        label: 'settings_profile_role_label'.tr(),
+        child: _ReadOnlyValue(account.role.isEmpty
+            ? 'settings_profile_not_set'.tr()
+            : account.role),
+      ),
+      SettingsTile(
+        label: 'settings_password_label'.tr(),
+        description: 'settings_password_description'.tr(),
+        child: OutlinedButton.icon(
+          onPressed: () => _openPasswordDialog(context, cubit),
+          icon: Icon(Icons.lock_outline, size: 16.w),
+          label: Text('settings_password_action'.tr()),
+        ),
+      ),
+    ];
+  }
+
+  Future<void> _openPasswordDialog(BuildContext context, AccountCubit cubit) async {
+    final currentCtrl = TextEditingController();
+    final newCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    var submitting = false;
+    String? errorText;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setState) => AlertDialog(
+          title: Text('settings_password_dialog_title'.tr()),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: currentCtrl,
+                  obscureText: true,
+                  decoration: InputDecoration(labelText: 'settings_password_current_label'.tr()),
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? 'settings_password_required'.tr() : null,
+                ),
+                SizedBox(height: 12.h),
+                TextFormField(
+                  controller: newCtrl,
+                  obscureText: true,
+                  decoration: InputDecoration(labelText: 'settings_password_new_label'.tr()),
+                  validator: (v) =>
+                      (v == null || v.length < 6) ? 'settings_password_too_short'.tr() : null,
+                ),
+                if (errorText != null) ...[
+                  SizedBox(height: 12.h),
                   Text(
-                    settings.adminName,
-                    style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: palette.textPrimary),
-                  ),
-                  Text(settings.adminEmail, style: TextStyle(fontSize: 12.sp, color: palette.textTertiary)),
-                  SizedBox(height: 6.h),
-                  Text(
-                    'settings_profile_photo_hint'.tr(),
-                    style: TextStyle(fontSize: 11.sp, color: palette.textTertiary),
+                    errorText!,
+                    style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.error),
                   ),
                 ],
-              ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: submitting ? null : () => Navigator.of(dialogContext).pop(),
+              child: Text('settings_password_cancel'.tr()),
+            ),
+            FilledButton(
+              onPressed: submitting
+                  ? null
+                  : () async {
+                      if (!formKey.currentState!.validate()) return;
+                      setState(() {
+                        submitting = true;
+                        errorText = null;
+                      });
+                      try {
+                        await cubit.changePassword(
+                          currentPassword: currentCtrl.text,
+                          newPassword: newCtrl.text,
+                        );
+                        if (dialogContext.mounted) Navigator.of(dialogContext).pop();
+                        if (context.mounted) {
+                          AppSnackbar.showSuccess(context, 'settings_password_changed'.tr());
+                        }
+                      } on ApiException catch (e) {
+                        setState(() {
+                          submitting = false;
+                          errorText = apiErrorMessage(e);
+                        });
+                      } catch (_) {
+                        setState(() {
+                          submitting = false;
+                          errorText = 'error_generic'.tr();
+                        });
+                      }
+                    },
+              child: Text('settings_password_submit'.tr()),
             ),
           ],
         ),
+      ),
+    );
+
+    currentCtrl.dispose();
+    newCtrl.dispose();
+  }
+}
+
+/// Editable full name + phone with a single Save button that does one
+/// `PUT /api/account/me` for both fields.
+class _ProfileEditForm extends StatefulWidget {
+  const _ProfileEditForm({required this.account});
+
+  final Account account;
+
+  @override
+  State<_ProfileEditForm> createState() => _ProfileEditFormState();
+}
+
+class _ProfileEditFormState extends State<_ProfileEditForm> {
+  late final TextEditingController _name =
+      TextEditingController(text: widget.account.fullName);
+  late final TextEditingController _phone =
+      TextEditingController(text: widget.account.phoneNumber ?? '');
+  bool _saving = false;
+
+  String get _savedName => widget.account.fullName;
+  String get _savedPhone => widget.account.phoneNumber ?? '';
+
+  bool get _dirty =>
+      _name.text.trim() != _savedName || _phone.text.trim() != _savedPhone;
+
+  @override
+  void didUpdateWidget(covariant _ProfileEditForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Re-seed after a successful save (or an external refresh) — but not while
+    // the admin is still editing an unsaved change.
+    if (!_dirty) {
+      if (_name.text != _savedName) _name.text = _savedName;
+      if (_phone.text != _savedPhone) _phone.text = _savedPhone;
+    }
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _phone.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final name = _name.text.trim();
+    if (name.isEmpty) {
+      AppSnackbar.showError(context, 'settings_profile_name_required'.tr());
+      return;
+    }
+    setState(() => _saving = true);
+    await context.read<AccountCubit>().save(
+          fullName: name,
+          phoneNumber: _phone.text.trim(),
+        );
+    if (!mounted) return;
+    setState(() => _saving = false);
+    // save() emits AccountError on failure (surfaced by the section listener);
+    // a matching AccountLoaded means it went through.
+    final state = context.read<AccountCubit>().state;
+    if (state is AccountLoaded && state.account.fullName == name) {
+      AppSnackbar.showSuccess(context, 'settings_profile_saved'.tr());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
         SettingsTile(
           label: 'settings_admin_name_label'.tr(),
           // The audit log stamps this name against every settled invoice,
           // so it needs to identify a person, not say "Admin".
           description: 'settings_admin_name_description'.tr(),
-          child: _InlineTextField(
-            value: settings.adminName,
-            onSubmitted: (value) => context.read<AppSettingsCubit>().updateProfile(name: value),
+          child: TextField(
+            controller: _name,
+            textAlignVertical: TextAlignVertical.center,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+            ),
           ),
         ),
+        Divider(height: 28.h, color: context.palette.divider),
         SettingsTile(
-          label: 'settings_admin_email_label'.tr(),
-          child: _InlineTextField(
-            value: settings.adminEmail,
-            keyboardType: TextInputType.emailAddress,
-            onSubmitted: (value) => context.read<AppSettingsCubit>().updateProfile(email: value),
+          label: 'settings_profile_phone_label'.tr(),
+          child: TextField(
+            controller: _phone,
+            keyboardType: TextInputType.phone,
+            textAlignVertical: TextAlignVertical.center,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+            ),
           ),
         ),
-        SettingsTile(
-          label: 'settings_password_label'.tr(),
-          description: 'settings_password_description'.tr(),
-          child: OutlinedButton.icon(
-            // No password endpoint exists yet, so say so rather than open a
-            // form that cannot save.
-            onPressed: () => AppSnackbar.showSuccess(context, 'settings_password_unavailable'.tr()),
-            icon: Icon(Icons.lock_outline, size: 16.w),
-            label: Text('settings_password_action'.tr()),
+        SizedBox(height: 16.h),
+        Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: FilledButton.icon(
+            onPressed: (!_dirty || _saving) ? null : _save,
+            icon: _saving
+                ? SizedBox(
+                    width: 16.w,
+                    height: 16.w,
+                    child: const CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(Icons.save_outlined, size: 16.w),
+            label: Text('settings_profile_save'.tr()),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _ReadOnlyValue extends StatelessWidget {
+  const _ReadOnlyValue(this.value);
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Text(
+        value,
+        style: TextStyle(fontSize: 13.sp, color: context.palette.textSecondary),
+      ),
+    );
+  }
+}
+
+class _StatusRow extends StatelessWidget {
+  const _StatusRow({required this.message, this.actionLabel, this.onAction});
+
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            message,
+            style: TextStyle(fontSize: 13.sp, color: context.palette.textTertiary),
+          ),
+        ),
+        if (actionLabel != null)
+          TextButton(onPressed: onAction, child: Text(actionLabel!)),
       ],
     );
   }

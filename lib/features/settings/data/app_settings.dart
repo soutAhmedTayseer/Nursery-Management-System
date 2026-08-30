@@ -10,8 +10,6 @@ class AppSettings {
   const AppSettings({
     this.themeMode = ThemeMode.system,
     this.textScale = 1.0,
-    this.adminName = 'Admin',
-    this.adminEmail = 'admin@wildwood.com',
     this.adminPhotoPath,
     this.nurseryName = 'Wildwood Nursery',
     this.capacity = 50,
@@ -29,10 +27,8 @@ class AppSettings {
   /// band rather than left open-ended.
   final double textScale;
 
-  /// Stamped on every audit-log entry, so it has to be a real name once
-  /// more than one person uses the app.
-  final String adminName;
-  final String adminEmail;
+  /// Local-only admin avatar — there is no profile-photo endpoint yet. The
+  /// name, phone and role all come from `AccountCubit` now.
   final String? adminPhotoPath;
 
   final String nurseryName;
@@ -58,8 +54,6 @@ class AppSettings {
   AppSettings copyWith({
     ThemeMode? themeMode,
     double? textScale,
-    String? adminName,
-    String? adminEmail,
     String? adminPhotoPath,
     String? nurseryName,
     int? capacity,
@@ -73,8 +67,6 @@ class AppSettings {
     return AppSettings(
       themeMode: themeMode ?? this.themeMode,
       textScale: textScale ?? this.textScale,
-      adminName: adminName ?? this.adminName,
-      adminEmail: adminEmail ?? this.adminEmail,
       adminPhotoPath: adminPhotoPath ?? this.adminPhotoPath,
       nurseryName: nurseryName ?? this.nurseryName,
       capacity: capacity ?? this.capacity,
@@ -90,8 +82,6 @@ class AppSettings {
   Map<String, Object?> toJson() => {
         'themeMode': themeMode.name,
         'textScale': textScale,
-        'adminName': adminName,
-        'adminEmail': adminEmail,
         'adminPhotoPath': adminPhotoPath,
         'nurseryName': nurseryName,
         'capacity': capacity,
@@ -110,8 +100,6 @@ class AppSettings {
         orElse: () => ThemeMode.system,
       ),
       textScale: (json['textScale'] as num?)?.toDouble() ?? 1.0,
-      adminName: json['adminName'] as String? ?? 'Admin',
-      adminEmail: json['adminEmail'] as String? ?? 'admin@wildwood.com',
       adminPhotoPath: json['adminPhotoPath'] as String?,
       nurseryName: json['nurseryName'] as String? ?? 'Wildwood Nursery',
       capacity: (json['capacity'] as num?)?.toInt() ?? 50,

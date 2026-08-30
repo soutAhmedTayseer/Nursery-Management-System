@@ -5,6 +5,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../cubit/splash_cubit.dart';
 import '../cubit/splash_state.dart';
+import '../../../account/presentation/cubit/account_cubit.dart';
 import '../../../../core/theme/app_palette.dart';
 
 class AdminSplashScreen extends StatefulWidget {
@@ -47,6 +48,9 @@ class _AdminSplashScreenState extends State<AdminSplashScreen> with SingleTicker
           if (state is SplashNavigateToLogin) {
             Navigator.pushReplacementNamed(context, AppRoutes.adminLogin);
           } else if (state is SplashNavigateToLayout) {
+            // The probe already confirmed the session; populate the app-wide
+            // AccountCubit so the layout opens with the identity in hand.
+            context.read<AccountCubit>().load();
             Navigator.pushReplacementNamed(context, AppRoutes.adminMainLayout);
           }
         },

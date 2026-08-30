@@ -8,6 +8,7 @@ import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
+import '../../../account/presentation/cubit/account_cubit.dart';
 import '../../../auth/data/repositories/auth_repository.dart';
 import '../cubit/admin_main_layout_cubit.dart';
 import 'sidebar_item.dart';
@@ -92,8 +93,11 @@ class AdminSidebar extends StatelessWidget {
             ),
           ),
 
+          // Signed-in identity
+          _SidebarIdentity(showFull: showFull),
+          SizedBox(height: 12.h),
+
           // Bottom Actions (Support, Logout)
-          SizedBox(height: 16.h),
           _buildBottomAction(context, Icons.help_outline, 'sidebar_support'.tr(), iconOnly: !showFull),
           SizedBox(height: 12.h),
           _buildBottomAction(context, 
@@ -132,6 +136,68 @@ class AdminSidebar extends StatelessWidget {
   }
 }
 
+class _SidebarIdentity extends StatelessWidget {
+  const _SidebarIdentity({required this.showFull});
+
+  final bool showFull;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AccountCubit>().state;
+    if (state is! AccountLoaded) return const SizedBox.shrink();
+
+    final palette = context.palette;
+    final account = state.account;
+    final trimmedName = account.fullName.trim();
+    final initial = trimmedName.isEmpty ? '?' : trimmedName.substring(0, 1).toUpperCase();
+
+    final avatar = CircleAvatar(
+      radius: 16.r,
+      backgroundColor: AppColors.darkGreen,
+      child: Text(
+        initial,
+        style: TextStyle(color: Colors.white, fontSize: 13.sp, fontWeight: FontWeight.bold),
+      ),
+    );
+
+    if (!showFull) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.h),
+        child: Center(
+          child: Tooltip(message: '${account.fullName} · ${account.role}', child: avatar),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+      child: Row(
+        children: [
+          avatar,
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  account.fullName,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: palette.textPrimary),
+                ),
+                Text(
+                  account.role,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 10.sp, color: palette.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 Future<void> _handleLogout(BuildContext context) async {
   final confirmed = await ConfirmationDialog.show(
     context,
@@ -140,6 +206,7 @@ Future<void> _handleLogout(BuildContext context) async {
     confirmLabel: 'sidebar_logout'.tr(),
   );
   if (!confirmed) return;
+  if (context.mounted) context.read<AccountCubit>().reset();
   try {
     await sl<AuthRepository>().logout();
   } catch (_) {

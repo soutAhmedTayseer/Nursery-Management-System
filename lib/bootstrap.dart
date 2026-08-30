@@ -11,6 +11,7 @@ import 'core/routes/app_router.dart';
 import 'core/routes/app_routes.dart';
 import 'core/testing/demo_seed.dart';
 import 'core/theme/app_theme.dart';
+import 'features/account/presentation/cubit/account_cubit.dart';
 import 'features/dashboard/presentation/cubit/schedule_cubit.dart';
 import 'features/finance/presentation/cubit/audit_log_cubit.dart';
 import 'features/finance/presentation/cubit/finance_cubit.dart';
@@ -85,6 +86,9 @@ class MyApp extends StatelessWidget {
             BlocProvider(create: (_) => FinanceCubit()),
             BlocProvider(create: (_) => AuditLogCubit()),
             BlocProvider(create: (_) => ScheduleCubit()),
+            // App-wide so the sidebar identity, the audit-log author stamp and
+            // the Settings profile screen all read one signed-in account.
+            BlocProvider(create: (_) => sl<AccountCubit>()),
             BlocProvider(create: (_) => settings ?? AppSettingsCubit()),
           ],
           child: BlocBuilder<AppSettingsCubit, AppSettings>(

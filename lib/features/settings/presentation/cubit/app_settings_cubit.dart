@@ -41,8 +41,10 @@ class AppSettingsCubit extends Cubit<AppSettings> {
   Future<void> setTextScale(double scale) =>
       _persist(state.copyWith(textScale: scale.clamp(0.85, 1.3)));
 
-  Future<void> updateProfile({String? name, String? email, String? photoPath}) =>
-      _persist(state.copyWith(adminName: name, adminEmail: email, adminPhotoPath: photoPath));
+  /// Local-only admin avatar. Name/phone live on the server now
+  /// (`AccountCubit`); the photo has no endpoint yet.
+  Future<void> setPhotoPath(String path) =>
+      _persist(state.copyWith(adminPhotoPath: path));
 
   Future<void> updateNursery({
     String? name,

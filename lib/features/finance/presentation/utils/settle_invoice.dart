@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/confirmation_dialog.dart';
+import '../../../account/presentation/cubit/account_cubit.dart';
 import '../../domain/audit_entry.dart';
 import '../cubit/audit_log_cubit.dart';
 import '../cubit/finance_cubit.dart';
@@ -30,10 +31,15 @@ Future<void> settleInvoice(
   );
   if (!confirmed || !context.mounted) return;
 
+  final accountState = context.read<AccountCubit>().state;
+  final actor = accountState is AccountLoaded
+      ? accountState.account.fullName
+      : kCurrentAdminName;
+
   context.read<FinanceCubit>().markPaid(kidId);
   context.read<AuditLogCubit>().record(AuditEntry(
         action: AuditAction.invoiceMarkedPaid,
-        actor: kCurrentAdminName,
+        actor: actor,
         subjectId: kidId,
         subjectName: childName,
         at: DateTime.now(),

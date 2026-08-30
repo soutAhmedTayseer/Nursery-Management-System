@@ -1,6 +1,6 @@
-/// Who the app attributes actions to until real accounts and roles exist.
-/// Every audit entry is stamped with this, so swapping it for the signed-in
-/// user later is a one-line change at the call sites.
+/// Fallback author for an audit entry when the signed-in account hasn't
+/// loaded yet. Call sites read `AccountCubit` first and only fall back to
+/// this.
 const String kCurrentAdminName = 'Admin';
 
 /// What kind of change an [AuditEntry] records. Kept as an enum (rather

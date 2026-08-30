@@ -68,6 +68,11 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   bloc_test: ^10.0.0
   mocktail: ^1.0.4
+  # Test-only. Api*Repository tests stub dio's HttpClientAdapter to reply
+  # with canned bodies without a live server. Feature code goes through
+  # nursery_shared's ApiClient and never touches dio directly (root
+  # AGENTS.md §7).
+  dio: ^5.7.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

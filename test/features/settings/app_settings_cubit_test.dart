@@ -42,15 +42,14 @@ void main() {
   );
 
   blocTest<AppSettingsCubit, AppSettings>(
-    'updating one profile field leaves the others alone',
+    'the local avatar path round-trips through storage',
     build: AppSettingsCubit.new,
-    act: (cubit) async {
-      await cubit.updateProfile(name: 'Layla Hassan');
-      await cubit.updateProfile(email: 'layla@wildwood.com');
-    },
-    verify: (cubit) {
-      expect(cubit.state.adminName, 'Layla Hassan');
-      expect(cubit.state.adminEmail, 'layla@wildwood.com');
+    act: (cubit) => cubit.setPhotoPath('/tmp/admin.png'),
+    verify: (cubit) async {
+      expect(cubit.state.adminPhotoPath, '/tmp/admin.png');
+      final reloaded = AppSettingsCubit();
+      await reloaded.load();
+      expect(reloaded.state.adminPhotoPath, '/tmp/admin.png');
     },
   );
 

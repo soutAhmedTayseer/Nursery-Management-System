@@ -1,10 +1,13 @@
 import 'package:get_it/get_it.dart';
 import 'package:nursery_shared/nursery_shared.dart';
 
+import '../../features/account/data/repositories/account_repository.dart';
+import '../../features/account/data/repositories/api_account_repository.dart';
+import '../../features/account/presentation/cubit/account_cubit.dart';
 import '../../features/admin_login/presentation/cubit/admin_login_cubit.dart';
 import '../../features/admin_splash/presentation/cubit/splash_cubit.dart';
+import '../../features/auth/data/repositories/api_auth_repository.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
-import '../../features/auth/data/repositories/fake_auth_repository.dart';
 import '../../features/sessions/data/repositories/fake_sessions_repository.dart';
 import '../../features/sessions/data/repositories/sessions_repository.dart';
 import '../../features/sessions/presentation/cubit/sessions_cubit.dart';
@@ -31,16 +34,22 @@ Future<void> setupLocator({required String baseUrl}) async {
     () => FakeSessionsRepository(failureSwitch: sl<FakeFailureSwitch>()),
   );
 
-  // --- Auth ---
+  // --- Auth + account (live) ---
   sl.registerLazySingleton<AuthRepository>(
-    () => FakeAuthRepository(
+    () => ApiAuthRepository(
+      client: sl<ApiClient>(),
       tokenStorage: sl<TokenStorage>(),
-      failureSwitch: sl<FakeFailureSwitch>(),
     ),
+  );
+  sl.registerLazySingleton<AccountRepository>(
+    () => ApiAccountRepository(sl<ApiClient>()),
   );
 
   // --- Cubits ---
   sl.registerFactory<SessionsCubit>(() => SessionsCubit(sl()));
   sl.registerFactory<AdminLoginCubit>(() => AdminLoginCubit(sl()));
-  sl.registerFactory<SplashCubit>(() => SplashCubit(sl()));
+  sl.registerFactory<SplashCubit>(
+    () => SplashCubit(sl(), sl(), sl<TokenStorage>()),
+  );
+  sl.registerFactory<AccountCubit>(() => AccountCubit(sl()));
 }
