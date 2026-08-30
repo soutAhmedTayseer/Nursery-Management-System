@@ -1,14 +1,16 @@
 # CLAUDE.md
 
-This repo's actual rules live in the root `AGENTS.md` (`../AGENTS.md` from
-here — the `Nursery Full App` folder that holds this repo, the parent Flutter
-app, `packages/nursery_shared`, and `docs/`). Read it before touching code
+This repository is the `Nursery Full App` monorepo on the
+`backend-integration-with-mobile` branch. The admin app lives at the root, the
+parent Flutter app lives in `mobile/`, and the shared package lives in
+`packages/nursery_shared/`. Read the root `AGENTS.md` when it is available
+before touching code
 here — this file is just the pointer and the app-specific TL;DR.
 
 ## This app
 
 Admin dashboard, desktop-oriented (1440×900 design reference). Depends on
-`../packages/nursery_shared` via a local path dependency for models, the API
+`packages/nursery_shared` via a local path dependency for models, the API
 client, and enums — see root `AGENTS.md` §2 and §7 before adding any
 networking or data-model code here directly.
 

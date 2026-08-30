@@ -568,7 +568,7 @@ packages:
   nursery_shared:
     dependency: "direct main"
     description:
-      path: "../packages/nursery_shared"
+      path: "packages/nursery_shared"
       relative: true
     source: path
     version: "0.0.1"
